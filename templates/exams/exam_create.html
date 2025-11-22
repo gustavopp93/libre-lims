@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Examen - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-gray-800">
+                <a href="{% url 'dashboard' %}">{{ company.business_name }}</a>
+            </h1>
+        </div>
+
+        <nav class="mt-6">
+            <a href="{% url 'sales_list' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i data-lucide="file-plus" class="w-5 h-5 mr-3"></i>
+                <span>Admisión</span>
+            </a>
+
+            <a href="{% url 'exams_list' %}" class="flex items-center px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600">
+                <i data-lucide="clipboard-list" class="w-5 h-5 mr-3"></i>
+                <span>Exámenes</span>
+            </a>
+
+            <a href="{% url 'patients_list' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                <span>Pacientes</span>
+            </a>
+
+            <a href="{% url 'company_settings' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i data-lucide="settings" class="w-5 h-5 mr-3"></i>
+                <span>Configuración</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between px-6 py-4">
+                <h2 class="text-xl font-semibold text-gray-800">Crear Examen</h2>
+
+                <!-- User Menu -->
+                <div class="relative" x-data="{ open: false }">
+                    <button
+                        @click="open = !open"
+                        @click.away="open = false"
+                        class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none"
+                    >
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="hidden md:block">{{ request.user.username }}</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div
+                        x-show="open"
+                        x-transition
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
+                    >
+                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i data-lucide="user-circle" class="w-4 h-4 mr-2"></i>
+                            Perfil
+                        </a>
+                        <hr class="my-1">
+                        <a href="{% url 'logout' %}" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <!-- Back Link -->
+                    <div class="mb-6">
+                        <a href="{% url 'exams_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
+                            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                            Volver a lista de exámenes
+                        </a>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Nuevo Examen</h3>
+
+                    <!-- Form -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                            <p class="font-bold">Por favor corrija los siguientes errores:</p>
+                            <ul class="list-disc list-inside">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="space-y-4">
+                            <!-- Código -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.code.id_for_label }}">
+                                    {{ form.code.label }}
+                                </label>
+                                {{ form.code }}
+                            </div>
+
+                            <!-- Nombre -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.name.id_for_label }}">
+                                    {{ form.name.label }}
+                                </label>
+                                {{ form.name }}
+                            </div>
+
+                            <!-- Precio -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.price.id_for_label }}">
+                                    {{ form.price.label }}
+                                </label>
+                                {{ form.price }}
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex items-center justify-end space-x-4 mt-6">
+                            <a href="{% url 'exams_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                Crear Examen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+</script>
+{% endblock %}

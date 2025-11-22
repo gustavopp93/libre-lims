@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Empresa - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold text-gray-800">
+                <a href="{% url 'dashboard' %}">Sistema de Laboratorio</a>
+            </h1>
+        </div>
+
+        <nav class="mt-6">
+            <a href="{% url 'sales_list' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i data-lucide="file-plus" class="w-5 h-5 mr-3"></i>
+                <span>Admision</span>
+            </a>
+
+            <a href="{% url 'exams_list' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i data-lucide="clipboard-list" class="w-5 h-5 mr-3"></i>
+                <span>Examenes</span>
+            </a>
+
+            <a href="{% url 'patients_list' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                <span>Pacientes</span>
+            </a>
+
+            <a href="{% url 'company_settings' %}" class="flex items-center px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600">
+                <i data-lucide="settings" class="w-5 h-5 mr-3"></i>
+                <span>Configuracion</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Navigation -->
+        <header class="bg-white shadow-sm">
+            <div class="flex items-center justify-between px-6 py-4">
+                <h2 class="text-xl font-semibold text-gray-800">Configurar Empresa</h2>
+
+                <!-- User Menu -->
+                <div class="relative" x-data="{ open: false }">
+                    <button
+                        @click="open = !open"
+                        @click.away="open = false"
+                        class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none"
+                    >
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="hidden md:block">{{ request.user.username }}</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div
+                        x-show="open"
+                        x-transition
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
+                    >
+                        <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i data-lucide="user-circle" class="w-4 h-4 mr-2"></i>
+                            Perfil
+                        </a>
+                        <hr class="my-1">
+                        <a href="{% url 'logout' %}" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                            Cerrar Sesion
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="mb-6">
+                        <div class="flex items-center mb-4">
+                            <i data-lucide="building" class="w-8 h-8 text-blue-600 mr-3"></i>
+                            <h3 class="text-lg font-semibold text-gray-800">Configuracion Inicial de Empresa</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm">
+                            Por favor complete la informacion de su empresa. Esta informacion se utilizara en todos los documentos y tickets.
+                        </p>
+                    </div>
+
+                    <!-- Form -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                            <p class="font-bold">Por favor corrija los siguientes errores:</p>
+                            <ul class="list-disc list-inside">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="space-y-4">
+                            <!-- Razon Social -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.business_name.id_for_label }}">
+                                    {{ form.business_name.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.business_name }}
+                            </div>
+
+                            <!-- RUC -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.document_number.id_for_label }}">
+                                    {{ form.document_number.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.document_number }}
+                                <p class="text-xs text-gray-500 mt-1">Debe tener exactamente 11 caracteres</p>
+                            </div>
+
+                            <!-- Telefono -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.phone_number.id_for_label }}">
+                                    {{ form.phone_number.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.phone_number }}
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.email.id_for_label }}">
+                                    {{ form.email.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.email }}
+                            </div>
+
+                            <!-- Direccion Legal -->
+                            <div>
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.legal_address.id_for_label }}">
+                                    {{ form.legal_address.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.legal_address }}
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex items-center justify-end mt-6">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                                Crear Empresa
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+</script>
+{% endblock %}
