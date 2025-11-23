@@ -39,10 +39,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "patients",
-    "exams",
-    "admissions",
-    "billing",
+    "apps.patients",
+    "apps.exams",
+    "apps.admissions",
+    "apps.billing",
 ]
 
 MIDDLEWARE = [
@@ -53,7 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "billing.middleware.CompanyRequiredMiddleware",
+    "apps.billing.middleware.CompanyRequiredMiddleware",
 ]
 
 ROOT_URLCONF = "libre_lims.urls"
@@ -68,7 +68,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "billing.context_processors.company_processor",
+                "apps.billing.context_processors.company_processor",
             ],
         },
     },

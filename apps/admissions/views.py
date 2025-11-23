@@ -12,8 +12,8 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView, TemplateView
 from weasyprint import HTML
 
-from exams.models import Exam
-from patients.models import Patient
+from apps.exams.models import Exam
+from apps.patients.models import Patient
 
 from .models import Sale, SaleDetail
 

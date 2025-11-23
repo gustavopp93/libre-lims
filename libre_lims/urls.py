@@ -17,21 +17,21 @@ Including another URLconf
 
 from django.urls import include, path
 
-from admissions.views import (
+from apps.admissions.views import (
     CreateTicketView,
     SaleDetailView,
     SalePrintView,
     SalesListView,
     create_sale_api,
 )
-from exams.views import (
+from apps.exams.views import (
     BulkUploadExamsView,
     CreateExamView,
     ExamsListView,
     UpdateExamView,
     search_exams_api,
 )
-from patients.views import (
+from apps.patients.views import (
     CreatePatientView,
     DashboardView,
     LoginView,
@@ -59,5 +59,5 @@ urlpatterns = [
     path("api/patients/search/", search_patient_api, name="api_patient_search"),
     path("api/exams/search/", search_exams_api, name="api_exams_search"),
     path("api/sales/create/", create_sale_api, name="api_sales_create"),
-    path("company/", include("billing.urls")),
+    path("company/", include("apps.billing.urls")),
 ]

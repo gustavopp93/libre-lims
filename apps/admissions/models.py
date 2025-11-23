@@ -1,7 +1,7 @@
 from django.db import models
 
-from exams.models import Exam
-from patients.models import Patient
+from apps.exams.models import Exam
+from apps.patients.models import Patient
 
 
 class Sale(models.Model):
