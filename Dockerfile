@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # PostgreSQL client libraries and headers
     libpq-dev \
     libpq5 \
+    # Healthcheck tool
+    curl \
     # WeasyPrint PDF generation
     libpango-1.0-0 \
     libpangoft2-1.0-0 \
