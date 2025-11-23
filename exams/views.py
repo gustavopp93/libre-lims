@@ -29,7 +29,7 @@ class ExamsListView(LoginRequiredMixin, ListView):
         if name:
             queryset = queryset.filter(name__icontains=name)
 
-        return queryset
+        return queryset.order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

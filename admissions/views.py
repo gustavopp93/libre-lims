@@ -26,7 +26,7 @@ class SalesListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Sale.objects.select_related("patient").prefetch_related("details__exam")
+        return Sale.objects.select_related("patient").prefetch_related("details__exam").order_by("-created_at")
 
 
 class CreateTicketView(LoginRequiredMixin, TemplateView):

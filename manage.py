@@ -5,14 +5,17 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
-
 
 def main():
     """Run administrative tasks."""
-    # Load environment variables from .env file
-    env_path = Path(__file__).resolve().parent / ".env"
-    load_dotenv(dotenv_path=env_path)
+    # Load environment variables from .env file if dotenv is available
+    try:
+        from dotenv import load_dotenv
+
+        env_path = Path(__file__).resolve().parent / ".env"
+        load_dotenv(dotenv_path=env_path)
+    except ImportError:
+        pass
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "libre_lims.settings")
     try:

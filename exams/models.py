@@ -11,7 +11,6 @@ class Exam(models.Model):
     class Meta:
         verbose_name = "Exam"
         verbose_name_plural = "Exams"
-        ordering = ["name"]
 
     def __str__(self):
         if self.code:

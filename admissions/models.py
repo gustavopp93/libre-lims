@@ -19,7 +19,6 @@ class Sale(models.Model):
     class Meta:
         verbose_name = "Sale"
         verbose_name_plural = "Sales"
-        ordering = ["-created_at"]
 
     def __str__(self):
         return f"Sale #{self.id} - {self.patient.first_name} {self.patient.last_name}"

@@ -22,7 +22,6 @@ class CompanyRequiredMiddleware:
         allowed_paths = [
             reverse("company_create"),
             reverse("logout"),
-            "/admin/",
         ]
 
         # Check if current path is in allowed paths
