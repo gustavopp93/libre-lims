@@ -12,88 +12,88 @@
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-            <div class="max-w-3xl mx-auto">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="flex items-center mb-6">
-                        <i data-lucide="building" class="w-8 h-8 text-blue-600 mr-3"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Informacion de la Empresa</h3>
-                    </div>
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center mb-6">
+            <i data-lucide="building" class="w-8 h-8 text-blue-600 mr-3"></i>
+            <h3 class="text-lg font-semibold text-gray-800">Informacion de la Empresa</h3>
+        </div>
 
-                    <!-- Form -->
-                    <form method="post">
-                        {% csrf_token %}
+        <!-- Form -->
+        <form method="post">
+            {% csrf_token %}
 
-                        {% if form.errors %}
-                        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
-                            <p class="font-bold">Por favor corrija los siguientes errores:</p>
-                            <ul class="list-disc list-inside">
-                                {% for field in form %}
-                                    {% for error in field.errors %}
-                                        <li>{{ field.label }}: {{ error }}</li>
-                                    {% endfor %}
-                                {% endfor %}
-                                {% for error in form.non_field_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        {% endif %}
+            {% if form.errors %}
+            <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                <p class="font-bold">Por favor corrija los siguientes errores:</p>
+                <ul class="list-disc list-inside">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
 
-                        <div class="space-y-4">
-                            <!-- Razon Social -->
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.business_name.id_for_label }}">
-                                    {{ form.business_name.label }}
-                                </label>
-                                {{ form.business_name }}
-                            </div>
+            <div class="space-y-4">
+                <!-- Razon Social -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.business_name.id_for_label }}">
+                        {{ form.business_name.label }}
+                    </label>
+                    {{ form.business_name }}
+                </div>
 
-                            <!-- RUC -->
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.document_number.id_for_label }}">
-                                    {{ form.document_number.label }}
-                                </label>
-                                {{ form.document_number }}
-                                <p class="text-xs text-gray-500 mt-1">Debe tener exactamente 11 caracteres</p>
-                            </div>
+                <!-- RUC -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.document_number.id_for_label }}">
+                        {{ form.document_number.label }}
+                    </label>
+                    {{ form.document_number }}
+                    <p class="text-xs text-gray-500 mt-1">Debe tener exactamente 11 caracteres</p>
+                </div>
 
-                            <!-- Telefono -->
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.phone_number.id_for_label }}">
-                                    {{ form.phone_number.label }}
-                                </label>
-                                {{ form.phone_number }}
-                            </div>
+                <!-- Telefono -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.phone_number.id_for_label }}">
+                        {{ form.phone_number.label }}
+                    </label>
+                    {{ form.phone_number }}
+                </div>
 
-                            <!-- Email -->
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.email.id_for_label }}">
-                                    {{ form.email.label }}
-                                </label>
-                                {{ form.email }}
-                            </div>
+                <!-- Email -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.email.id_for_label }}">
+                        {{ form.email.label }}
+                    </label>
+                    {{ form.email }}
+                </div>
 
-                            <!-- Direccion Legal -->
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.legal_address.id_for_label }}">
-                                    {{ form.legal_address.label }}
-                                </label>
-                                {{ form.legal_address }}
-                            </div>
-                        </div>
-
-                        <!-- Buttons -->
-                        <div class="flex items-center justify-end space-x-4 mt-6">
-                            <a href="{% url 'dashboard' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                Cancelar
-                            </a>
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                Guardar Cambios
-                            </button>
-                        </div>
-                    </form>
+                <!-- Direccion Legal -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.legal_address.id_for_label }}">
+                        {{ form.legal_address.label }}
+                    </label>
+                    {{ form.legal_address }}
                 </div>
             </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center justify-end space-x-4 mt-6">
+                <a href="{% url 'dashboard' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Cancelar
+                </a>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
         </main>
     </div>
 </div>

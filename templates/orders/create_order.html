@@ -12,91 +12,91 @@
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-            <div class="max-w-6xl mx-auto">
-                <!-- Back Button -->
-                <div class="mb-4">
-                    <a href="{% url 'orders_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
-                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
-                        Volver a lista de ventas
-                    </a>
-                </div>
+<div class="max-w-6xl mx-auto">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{% url 'orders_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
+            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+            Volver a lista de ventas
+        </a>
+    </div>
 
-                <!-- Search Patient Card -->
-                <div class="bg-white rounded-lg shadow p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Buscar Paciente</h3>
+    <!-- Search Patient Card -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Buscar Paciente</h3>
 
-                    <form id="searchPatientForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Tipo de Documento</label>
-                            <select id="document_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required>
-                                <option value="DNI">DNI</option>
-                                <option value="CE">Carnet de Extranjería</option>
-                                <option value="PASAPORTE">Pasaporte</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Número de Documento</label>
-                            <input type="text" id="document_number" class="shadow border rounded w-full py-2 px-3" required>
-                        </div>
-
-                        <div class="flex items-end">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded w-full">
-                                Buscar
-                            </button>
-                        </div>
-                    </form>
-
-                    <div id="loadingState" class="hidden mt-4 text-center">Buscando...</div>
-                </div>
-
-                <!-- Patient Not Found -->
-                <div id="patientNotFound" class="hidden bg-yellow-50 p-6 rounded-lg mb-6">
-                    <h4 class="font-semibold mb-2">Paciente no encontrado</h4>
-                    <a href="{% url 'patients_create' %}?next={% url 'create_order' %}" class="bg-yellow-600 text-white px-4 py-2 rounded">
-                        Crear Nuevo Paciente
-                    </a>
-                </div>
-
-                <!-- Patient Found -->
-                <div id="patientFound" class="hidden">
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
-                        <h4 class="text-lg font-semibold mb-4">Datos del Paciente</h4>
-                        <div class="grid grid-cols-4 gap-4">
-                            <div><p class="text-sm text-gray-600">Tipo de Documento</p><p class="font-semibold" id="patientDocType"></p></div>
-                            <div><p class="text-sm text-gray-600">Número de Documento</p><p class="font-semibold" id="patientDocNumber"></p></div>
-                            <div><p class="text-sm text-gray-600">Nombres</p><p class="font-semibold" id="patientFirstName"></p></div>
-                            <div><p class="text-sm text-gray-600">Apellidos</p><p class="font-semibold" id="patientLastName"></p></div>
-                        </div>
-                    </div>
-
-                    <!-- Exams Section -->
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
-                        <div class="flex justify-between mb-4">
-                            <h4 class="text-lg font-semibold">Exámenes Solicitados</h4>
-                            <button id="addExamRowBtn" class="bg-green-500 text-white px-4 py-2 rounded">Agregar Examen</button>
-                        </div>
-                        <div id="examsContainer" class="space-y-3"></div>
-                    </div>
-
-                    <!-- Total and Actions -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Observaciones</label>
-                            <textarea id="observations" rows="3" class="shadow border rounded w-full py-2 px-3 text-gray-700" placeholder="Observaciones adicionales..."></textarea>
-                        </div>
-
-                        <div class="flex justify-between items-center">
-                            <div class="text-2xl font-bold text-gray-800">
-                                Total: S/. <span id="totalAmount">0.00</span>
-                            </div>
-                            <button id="createSaleBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded">
-                                Crear Venta
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <form id="searchPatientForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Tipo de Documento</label>
+                <select id="document_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required>
+                    <option value="DNI">DNI</option>
+                    <option value="CE">Carnet de Extranjería</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                </select>
             </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Número de Documento</label>
+                <input type="text" id="document_number" class="shadow border rounded w-full py-2 px-3" required>
+            </div>
+
+            <div class="flex items-end">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded w-full">
+                    Buscar
+                </button>
+            </div>
+        </form>
+
+        <div id="loadingState" class="hidden mt-4 text-center">Buscando...</div>
+    </div>
+
+    <!-- Patient Not Found -->
+    <div id="patientNotFound" class="hidden bg-yellow-50 p-6 rounded-lg mb-6">
+        <h4 class="font-semibold mb-2">Paciente no encontrado</h4>
+        <a href="{% url 'patients_create' %}?next={% url 'create_order' %}" class="bg-yellow-600 text-white px-4 py-2 rounded">
+            Crear Nuevo Paciente
+        </a>
+    </div>
+
+    <!-- Patient Found -->
+    <div id="patientFound" class="hidden">
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h4 class="text-lg font-semibold mb-4">Datos del Paciente</h4>
+            <div class="grid grid-cols-4 gap-4">
+                <div><p class="text-sm text-gray-600">Tipo de Documento</p><p class="font-semibold" id="patientDocType"></p></div>
+                <div><p class="text-sm text-gray-600">Número de Documento</p><p class="font-semibold" id="patientDocNumber"></p></div>
+                <div><p class="text-sm text-gray-600">Nombres</p><p class="font-semibold" id="patientFirstName"></p></div>
+                <div><p class="text-sm text-gray-600">Apellidos</p><p class="font-semibold" id="patientLastName"></p></div>
+            </div>
+        </div>
+
+        <!-- Exams Section -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="flex justify-between mb-4">
+                <h4 class="text-lg font-semibold">Exámenes Solicitados</h4>
+                <button id="addExamRowBtn" class="bg-green-500 text-white px-4 py-2 rounded">Agregar Examen</button>
+            </div>
+            <div id="examsContainer" class="space-y-3"></div>
+        </div>
+
+        <!-- Total and Actions -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Observaciones</label>
+                <textarea id="observations" rows="3" class="shadow border rounded w-full py-2 px-3 text-gray-700" placeholder="Observaciones adicionales..."></textarea>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-gray-800">
+                    Total: S/. <span id="totalAmount">0.00</span>
+                </div>
+                <button id="createSaleBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded">
+                    Crear Venta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
         </main>
     </div>
 </div>

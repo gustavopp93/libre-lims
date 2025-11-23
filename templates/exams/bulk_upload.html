@@ -12,93 +12,93 @@
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-            <div class="max-w-3xl mx-auto">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <!-- Back Link -->
-                    <div class="mb-6">
-                        <a href="{% url 'exams_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
-                            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
-                            Volver a lista de exámenes
-                        </a>
-                    </div>
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+        <!-- Back Link -->
+        <div class="mb-6">
+            <a href="{% url 'exams_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
+                <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                Volver a lista de exámenes
+            </a>
+        </div>
 
-                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Actualizar Exámenes de Forma Masiva</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-6">Actualizar Exámenes de Forma Masiva</h3>
 
-                    <!-- Instrucciones -->
-                    <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700">
-                        <p class="font-bold mb-2">Instrucciones:</p>
-                        <ul class="list-disc list-inside space-y-1 text-sm">
-                            <li>El archivo debe ser un archivo Excel (.xlsx o .xls)</li>
-                            <li>La primera fila debe contener las cabeceras: <strong>code</strong>, <strong>name</strong>, <strong>price</strong></li>
-                            <li>Si el código existe, se actualizará el precio del examen</li>
-                            <li>Si el código no existe, se creará un nuevo examen con el código, nombre y precio proporcionados</li>
-                            <li>Las filas con datos incompletos o inválidos serán omitidas</li>
-                        </ul>
-                    </div>
+        <!-- Instrucciones -->
+        <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700">
+            <p class="font-bold mb-2">Instrucciones:</p>
+            <ul class="list-disc list-inside space-y-1 text-sm">
+                <li>El archivo debe ser un archivo Excel (.xlsx o .xls)</li>
+                <li>La primera fila debe contener las cabeceras: <strong>code</strong>, <strong>name</strong>, <strong>price</strong></li>
+                <li>Si el código existe, se actualizará el precio del examen</li>
+                <li>Si el código no existe, se creará un nuevo examen con el código, nombre y precio proporcionados</li>
+                <li>Las filas con datos incompletos o inválidos serán omitidas</li>
+            </ul>
+        </div>
 
-                    <!-- Ejemplo de formato -->
-                    <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
-                        <p class="font-bold mb-2 text-gray-700">Ejemplo de formato del archivo Excel:</p>
-                        <table class="min-w-full text-sm">
-                            <thead>
-                                <tr class="bg-gray-200">
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-700">code</th>
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-700">name</th>
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-700">price</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white">
-                                <tr class="border-b">
-                                    <td class="px-4 py-2">EXAM001</td>
-                                    <td class="px-4 py-2">Hemograma Completo</td>
-                                    <td class="px-4 py-2">25.00</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="px-4 py-2">EXAM002</td>
-                                    <td class="px-4 py-2">Glucosa en Sangre</td>
-                                    <td class="px-4 py-2">15.50</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-2">EXAM003</td>
-                                    <td class="px-4 py-2">Perfil Lipídico</td>
-                                    <td class="px-4 py-2">35.00</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <!-- Ejemplo de formato -->
+        <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded">
+            <p class="font-bold mb-2 text-gray-700">Ejemplo de formato del archivo Excel:</p>
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="px-4 py-2 text-left font-semibold text-gray-700">code</th>
+                        <th class="px-4 py-2 text-left font-semibold text-gray-700">name</th>
+                        <th class="px-4 py-2 text-left font-semibold text-gray-700">price</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white">
+                    <tr class="border-b">
+                        <td class="px-4 py-2">EXAM001</td>
+                        <td class="px-4 py-2">Hemograma Completo</td>
+                        <td class="px-4 py-2">25.00</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="px-4 py-2">EXAM002</td>
+                        <td class="px-4 py-2">Glucosa en Sangre</td>
+                        <td class="px-4 py-2">15.50</td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2">EXAM003</td>
+                        <td class="px-4 py-2">Perfil Lipídico</td>
+                        <td class="px-4 py-2">35.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-                    <!-- Form -->
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
+        <!-- Form -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
 
-                        <div class="mb-6">
-                            <label class="block text-gray-700 text-sm font-bold mb-2" for="excel_file">
-                                Seleccionar Archivo Excel
-                            </label>
-                            <input
-                                type="file"
-                                name="excel_file"
-                                id="excel_file"
-                                accept=".xlsx,.xls"
-                                required
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
-                            >
-                            <p class="text-gray-600 text-xs mt-2">Solo archivos .xlsx o .xls</p>
-                        </div>
-
-                        <!-- Buttons -->
-                        <div class="flex items-center justify-end space-x-4">
-                            <a href="{% url 'exams_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                Cancelar
-                            </a>
-                            <button type="submit" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                <i data-lucide="upload" class="w-5 h-5 mr-2"></i>
-                                Cargar Archivo
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="excel_file">
+                    Seleccionar Archivo Excel
+                </label>
+                <input
+                    type="file"
+                    name="excel_file"
+                    id="excel_file"
+                    accept=".xlsx,.xls"
+                    required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                >
+                <p class="text-gray-600 text-xs mt-2">Solo archivos .xlsx o .xls</p>
             </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center justify-end space-x-4">
+                <a href="{% url 'exams_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Cancelar
+                </a>
+                <button type="submit" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    <i data-lucide="upload" class="w-5 h-5 mr-2"></i>
+                    Cargar Archivo
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
         </main>
     </div>
 </div>
