@@ -15,60 +15,60 @@ from weasyprint import HTML
 from apps.exams.models import Exam
 from apps.patients.models import Patient
 
-from .models import Sale, SaleDetail
+from .models import Order, OrderDetail
 
 
-class SalesListView(LoginRequiredMixin, ListView):
-    model = Sale
-    template_name = "admissions/sales_list.html"
-    context_object_name = "sales"
+class OrdersListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = "orders/orders_list.html"
+    context_object_name = "orders"
     paginate_by = 20
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Sale.objects.select_related("patient").prefetch_related("details__exam").order_by("-created_at")
+        return Order.objects.select_related("patient").prefetch_related("details__exam").order_by("-created_at")
 
 
-class CreateTicketView(LoginRequiredMixin, TemplateView):
-    template_name = "admissions/create_ticket.html"
+class CreateOrderView(LoginRequiredMixin, TemplateView):
+    template_name = "orders/create_order.html"
     login_url = reverse_lazy("login")
 
 
-class SaleDetailView(LoginRequiredMixin, DetailView):
-    model = Sale
-    template_name = "admissions/sale_detail.html"
-    context_object_name = "sale"
+class OrderDetailView(LoginRequiredMixin, DetailView):
+    model = Order
+    template_name = "orders/order_detail.html"
+    context_object_name = "order"
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Sale.objects.select_related("patient").prefetch_related("details__exam")
+        return Order.objects.select_related("patient").prefetch_related("details__exam")
 
 
-class SalePrintView(LoginRequiredMixin, View):
-    """Vista para generar e imprimir ticket térmico de venta"""
+class OrderPrintView(LoginRequiredMixin, View):
+    """Vista para generar e imprimir ticket de orden"""
 
     login_url = reverse_lazy("login")
 
     def get(self, request, pk):
-        # Obtener la venta con sus relaciones
-        sale = Sale.objects.select_related("patient").prefetch_related("details__exam").get(pk=pk)
+        # Obtener la orden con sus relaciones
+        order = Order.objects.select_related("patient").prefetch_related("details__exam").get(pk=pk)
 
         # Renderizar el template HTML del ticket
-        html_string = render_to_string("admissions/ticket_print.html", {"sale": sale})
+        html_string = render_to_string("orders/order_print.html", {"order": order})
 
         # Generar PDF con WeasyPrint con codificación UTF-8 explícita
         pdf = HTML(string=html_string, encoding="utf-8").write_pdf(presentational_hints=True, optimize_size=("fonts",))
 
         # Devolver el PDF como respuesta
         response = HttpResponse(pdf, content_type="application/pdf; charset=utf-8")
-        response["Content-Disposition"] = f'inline; filename="ticket_{sale.id}.pdf"'
+        response["Content-Disposition"] = f'inline; filename="order_{order.id}.pdf"'
 
         return response
 
 
 @require_POST
-def create_sale_api(request):
-    """API endpoint para crear una venta con sus detalles"""
+def create_order_api(request):
+    """API endpoint para crear una orden con sus detalles"""
     if not request.user.is_authenticated:
         return JsonResponse({"error": "No autenticado"}, status=401)
 
@@ -122,18 +122,18 @@ def create_sale_api(request):
 
         validated_details.append({"exam": exam, "price": price_decimal})
 
-    # Crear la venta y sus detalles en una transacción
+    # Crear la orden y sus detalles en una transacción
     try:
         with transaction.atomic():
-            sale = Sale.objects.create(patient=patient, observations=observations)
+            order = Order.objects.create(patient=patient, observations=observations)
 
             for detail in validated_details:
-                SaleDetail.objects.create(sale=sale, exam=detail["exam"], price=detail["price"])
+                OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
 
         # Agregar mensaje de éxito a la sesión
-        messages.success(request, f"Venta #{sale.id} creada exitosamente")
+        messages.success(request, f"Orden #{order.id} creada exitosamente")
 
-        return JsonResponse({"success": True, "sale_id": sale.id, "message": "Venta creada exitosamente"}, status=201)
+        return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
 
     except Exception as e:
-        return JsonResponse({"error": f"Error al crear la venta: {str(e)}"}, status=500)
+        return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)
