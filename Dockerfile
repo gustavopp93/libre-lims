@@ -7,8 +7,16 @@ ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
-# Install system dependencies (only for WeasyPrint PDF generation)
+# Install build dependencies and system libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Build tools for compiling Python packages from source
+    gcc \
+    g++ \
+    build-essential \
+    # PostgreSQL client libraries and headers
+    libpq-dev \
+    libpq5 \
+    # WeasyPrint PDF generation
     libpango-1.0-0 \
     libpangoft2-1.0-0 \
     libgdk-pixbuf-2.0-0 \
