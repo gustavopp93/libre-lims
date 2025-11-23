@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, ListView, TemplateView
 from weasyprint import HTML
 
+from apps.billing.models import Company
 from apps.exams.models import Exam
 from apps.patients.models import Patient
 
@@ -53,8 +54,11 @@ class OrderPrintView(LoginRequiredMixin, View):
         # Obtener la orden con sus relaciones
         order = Order.objects.select_related("patient").prefetch_related("details__exam").get(pk=pk)
 
+        # Obtener la información de la compañía
+        company = Company.objects.first()
+
         # Renderizar el template HTML del ticket
-        html_string = render_to_string("orders/order_print.html", {"order": order})
+        html_string = render_to_string("orders/order_print.html", {"order": order, "company": company})
 
         # Generar PDF con WeasyPrint con codificación UTF-8 explícita
         pdf = HTML(string=html_string, encoding="utf-8").write_pdf(presentational_hints=True, optimize_size=("fonts",))
