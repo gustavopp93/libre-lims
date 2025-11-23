@@ -4,7 +4,7 @@ Aplicación Django para gestión de pacientes.
 
 ## Requisitos
 
-- Python 3.12+
+- Python 3.11
 - PostgreSQL
 - uv (gestor de paquetes)
 
@@ -42,39 +42,3 @@ uv run python manage.py createsuperuser
 ```bash
 uv run python manage.py runserver
 ```
-
-## Características
-
-- **App Patients**: Gestión de pacientes con modelo Patient
-  - Tipo de documento: DNI, CE, Pasaporte
-  - Número de documento
-  - Nombres y apellidos
-
-- **Login**: Vista de inicio de sesión con FormView
-  - URL: `/login/`
-  - Utiliza Tailwind CSS para estilos
-  - Integración con HTMX
-
-- **UI**:
-  - Tailwind CSS (CDN)
-  - HTMX (CDN)
-
-## Estructura
-
-```
-libre-lims/
-   libre_lims/          # Configuración del proyecto
-   patients/         # App de pacientes
-      models.py    # Modelo Patient
-      views.py     # LoginView (FormView)
-      forms.py     # LoginForm
-      admin.py     # Admin de Patient
-   templates/       # Templates globales
-       base.html    # Template base con Tailwind y HTMX
-       login.html   # Template de login
-```
-
-## URLs
-
-- `/admin/` - Panel de administración de Django
-- `/login/` - Página de inicio de sesión
