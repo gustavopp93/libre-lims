@@ -49,5 +49,5 @@ USER appuser
 # Expose port
 EXPOSE 8000
 
-# Run gunicorn
-CMD ["gunicorn", "--config", "gunicorn.conf.py", "libre_lims.wsgi:application"]
+# Run gunicorn with uv
+CMD ["uv", "run", "gunicorn", "--config", "gunicorn.conf.py", "libre_lims.wsgi:application"]
