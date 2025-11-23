@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.http import JsonResponse
 from django.urls import include, path
 
 from apps.exams.views import (
@@ -41,7 +42,13 @@ from apps.patients.views import (
     search_patient_api,
 )
 
+
+def health_check(request):
+    return JsonResponse({"status": "ok"})
+
+
 urlpatterns = [
+    path("health/", health_check, name="health_check"),
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("", DashboardView.as_view(), name="dashboard"),
