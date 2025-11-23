@@ -13,7 +13,7 @@
         </div>
 
         <nav class="mt-6">
-            <a href="{% url 'sales_list' %}" class="flex items-center px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600">
+            <a href="{% url 'orders_list' %}" class="flex items-center px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600">
                 <i data-lucide="file-plus" class="w-5 h-5 mr-3"></i>
                 <span>Admisión</span>
             </a>
@@ -71,7 +71,7 @@
             <div class="max-w-7xl mx-auto">
                 <!-- Action Button -->
                 <div class="mb-6 flex justify-end">
-                    <a href="{% url 'create_ticket' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded flex items-center">
+                    <a href="{% url 'create_order' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded flex items-center">
                         <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
                         Crear Ticket
                     </a>
@@ -92,22 +92,22 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            {% for sale in sales %}
+                            {% for order in orders %}
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ sale.id }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ sale.patient.first_name }} {{ sale.patient.last_name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ sale.patient.document_type }} {{ sale.patient.document_number }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ order.id }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.patient.first_name }} {{ order.patient.last_name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.patient.document_type }} {{ order.patient.document_number }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">
                                     <ul class="list-disc list-inside">
-                                        {% for detail in sale.details.all %}
+                                        {% for detail in order.details.all %}
                                         <li>{{ detail.exam.name }} - S/. {{ detail.price }}</li>
                                         {% endfor %}
                                     </ul>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/. {{ sale.total }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ sale.created_at|date:"d/m/Y H:i" }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/. {{ order.total }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.created_at|date:"d/m/Y H:i" }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <a href="{% url 'sale_detail' sale.pk %}" class="text-blue-600 hover:text-blue-900">
+                                    <a href="{% url 'order_detail' order.pk %}" class="text-blue-600 hover:text-blue-900">
                                         <i data-lucide="eye" class="w-4 h-4 inline"></i>
                                         Ver Detalle
                                     </a>

@@ -13,7 +13,7 @@
         </div>
 
         <nav class="mt-6">
-            <a href="{% url 'sales_list' %}" class="flex items-center px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600">
+            <a href="{% url 'orders_list' %}" class="flex items-center px-6 py-3 bg-blue-50 text-blue-600 border-r-4 border-blue-600">
                 <i data-lucide="file-plus" class="w-5 h-5 mr-3"></i>
                 <span>Admisión</span>
             </a>
@@ -71,7 +71,7 @@
             <div class="max-w-6xl mx-auto">
                 <!-- Back Button -->
                 <div class="mb-4">
-                    <a href="{% url 'sales_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
+                    <a href="{% url 'orders_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
                         <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
                         Volver a lista de ventas
                     </a>
@@ -109,7 +109,7 @@
                 <!-- Patient Not Found -->
                 <div id="patientNotFound" class="hidden bg-yellow-50 p-6 rounded-lg mb-6">
                     <h4 class="font-semibold mb-2">Paciente no encontrado</h4>
-                    <a href="{% url 'patients_create' %}?next={% url 'create_ticket' %}" class="bg-yellow-600 text-white px-4 py-2 rounded">
+                    <a href="{% url 'patients_create' %}?next={% url 'create_order' %}" class="bg-yellow-600 text-white px-4 py-2 rounded">
                         Crear Nuevo Paciente
                     </a>
                 </div>
@@ -261,7 +261,7 @@
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
                              document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
 
-            const response = await fetch('/api/sales/create/', {
+            const response = await fetch('/api/orders/create/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -278,7 +278,7 @@
 
             if (response.ok && data.success) {
                 // Redirigir al detalle de la venta (el mensaje se mostrará ahí)
-                window.location.href = '/admission/' + data.sale_id + '/';
+                window.location.href = '/orders/' + data.order_id + '/';
             } else {
                 alert('Error: ' + (data.error || 'No se pudo crear la venta'));
             }

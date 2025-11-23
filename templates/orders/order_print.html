@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket #{{ sale.id }}</title>
+    <title>Ticket #{{ order.id }}</title>
     <style>
         @page {
             size: 80mm auto;
@@ -129,15 +129,15 @@
     <div class="section">
         <div class="info-row">
             <span class="bold">Ticket:</span>
-            <span>#{{ sale.id }}</span>
+            <span>#{{ order.id }}</span>
         </div>
         <div class="info-row">
             <span class="bold">Fecha:</span>
-            <span>{{ sale.created_at|date:"d/m/Y H:i" }}</span>
+            <span>{{ order.created_at|date:"d/m/Y H:i" }}</span>
         </div>
         <div class="info-row">
             <span class="bold">Estado:</span>
-            <span>{{ sale.get_status_display }}</span>
+            <span>{{ order.get_status_display }}</span>
         </div>
     </div>
 
@@ -147,11 +147,11 @@
     <div class="section">
         <div class="section-title">PACIENTE:</div>
         <div class="info-row">
-            <span>{{ sale.patient.get_document_type_display }}:</span>
-            <span>{{ sale.patient.document_number }}</span>
+            <span>{{ order.patient.get_document_type_display }}:</span>
+            <span>{{ order.patient.document_number }}</span>
         </div>
         <div class="small-text">
-            {{ sale.patient.last_name }}, {{ sale.patient.first_name }}
+            {{ order.patient.last_name }}, {{ order.patient.first_name }}
         </div>
     </div>
 
@@ -160,7 +160,7 @@
     <!-- Examenes -->
     <div class="section">
         <div class="section-title">EXAMENES:</div>
-        {% for detail in sale.details.all %}
+        {% for detail in order.details.all %}
         <div class="exam-item">
             <div class="exam-name">{{ detail.exam.name }}</div>
             <div class="exam-price">S/. {{ detail.price }}</div>
@@ -173,7 +173,7 @@
     <div class="total-section">
         <div class="total-row">
             <span>TOTAL:</span>
-            <span>S/. {{ sale.total }}</span>
+            <span>S/. {{ order.total }}</span>
         </div>
     </div>
 
@@ -182,7 +182,7 @@
     <!-- Footer -->
     <div class="footer">
         <p class="bold">Gracias por su preferencia</p>
-        <p class="small-text" style="margin-top: 3mm;">{{ sale.created_at|date:"d/m/Y H:i:s" }}</p>
+        <p class="small-text" style="margin-top: 3mm;">{{ order.created_at|date:"d/m/Y H:i:s" }}</p>
     </div>
 </body>
 </html>
