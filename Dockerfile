@@ -7,15 +7,12 @@ ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
 
-# Install system dependencies
+# Install system dependencies (only for WeasyPrint PDF generation)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 \
     libpangoft2-1.0-0 \
-    libgdk-pixbuf2.0-0 \
-    libffi-dev \
+    libgdk-pixbuf-2.0-0 \
     shared-mime-info \
-    libpq-dev \
-    # Cleanup
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv in a separate location to avoid conflicts with .venv
