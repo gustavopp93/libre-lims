@@ -1,15 +1,33 @@
 from django.db import models
 
 
+class LeadSource(models.Model):
+    """Canal por el cual el cliente llegó al laboratorio"""
+
+    name = models.CharField(max_length=100, unique=True, verbose_name="Nombre")
+    description = models.TextField(blank=True, verbose_name="Descripción")
+    is_active = models.BooleanField(default=True, verbose_name="Activo")
+    order = models.PositiveIntegerField(default=0, help_text="Orden de visualización")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Canal de Adquisición"
+        verbose_name_plural = "Canales de Adquisición"
+
+    def __str__(self):
+        return self.name
+
+
 class Patient(models.Model):
     class DocumentType(models.TextChoices):
         DNI = "DNI", "DNI"
         CE = "CE", "Carnet de Extranjería"
         PASAPORTE = "PASAPORTE", "Pasaporte"
 
-    class Gender(models.TextChoices):
-        MALE = "MALE", "Hombre"
-        FEMALE = "FEMALE", "Mujer"
+    class Sex(models.TextChoices):
+        MALE = "MALE", "Masculino"
+        FEMALE = "FEMALE", "Femenino"
 
     document_type = models.CharField(
         max_length=20,
@@ -20,11 +38,19 @@ class Patient(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     birthdate = models.DateField()
-    gender = models.CharField(
+    sex = models.CharField(
         max_length=10,
-        choices=Gender.choices,
+        choices=Sex.choices,
     )
     phone = models.CharField(max_length=20)
+    lead_source = models.ForeignKey(
+        LeadSource,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="¿Cómo nos conoció?",
+        help_text="Canal por el cual el cliente llegó por primera vez",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

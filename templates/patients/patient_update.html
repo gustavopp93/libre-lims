@@ -100,13 +100,24 @@
                     <p class="text-gray-500 text-xs mt-1">Este campo no se puede editar</p>
                 </div>
 
-                <!-- Género (readonly) -->
+                <!-- Sexo (readonly) -->
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Género
+                        Sexo
                     </label>
                     <div class="bg-gray-100 border border-gray-300 rounded w-full py-2 px-3 text-gray-600">
-                        {{ patient.get_gender_display }}
+                        {{ patient.get_sex_display }}
+                    </div>
+                    <p class="text-gray-500 text-xs mt-1">Este campo no se puede editar</p>
+                </div>
+
+                <!-- ¿Cómo nos conoció? (readonly) -->
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        ¿Cómo nos conoció?
+                    </label>
+                    <div class="bg-gray-100 border border-gray-300 rounded w-full py-2 px-3 text-gray-600">
+                        {{ patient.lead_source.name|default:"No especificado" }}
                     </div>
                     <p class="text-gray-500 text-xs mt-1">Este campo no se puede editar</p>
                 </div>

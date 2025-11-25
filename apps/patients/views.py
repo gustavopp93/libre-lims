@@ -6,8 +6,8 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, ListView, RedirectView, TemplateView, UpdateView
 
-from .forms import LoginForm, PatientForm, PatientUpdateForm
-from .models import Patient
+from .forms import LeadSourceForm, LoginForm, PatientForm, PatientUpdateForm
+from .models import LeadSource, Patient
 
 
 class LoginView(FormView):
@@ -141,3 +141,39 @@ def search_patient_api(request):
         )
     except Patient.DoesNotExist:
         return JsonResponse({"found": False, "message": "Paciente no encontrado"})
+
+
+class LeadSourceListView(LoginRequiredMixin, ListView):
+    model = LeadSource
+    template_name = "patients/lead_source_list.html"
+    context_object_name = "lead_sources"
+    paginate_by = 20
+    login_url = reverse_lazy("login")
+
+    def get_queryset(self):
+        return LeadSource.objects.all().order_by("order", "name")
+
+
+class CreateLeadSourceView(LoginRequiredMixin, CreateView):
+    model = LeadSource
+    form_class = LeadSourceForm
+    template_name = "patients/lead_source_create.html"
+    success_url = reverse_lazy("lead_sources_list")
+    login_url = reverse_lazy("login")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Canal de adquisición creado exitosamente")
+        return super().form_valid(form)
+
+
+class UpdateLeadSourceView(LoginRequiredMixin, UpdateView):
+    model = LeadSource
+    form_class = LeadSourceForm
+    template_name = "patients/lead_source_update.html"
+    success_url = reverse_lazy("lead_sources_list")
+    login_url = reverse_lazy("login")
+    context_object_name = "lead_source"
+
+    def form_valid(self, form):
+        messages.success(self.request, "Canal de adquisición actualizado exitosamente")
+        return super().form_valid(form)
