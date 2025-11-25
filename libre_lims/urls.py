@@ -33,11 +33,14 @@ from apps.orders.views import (
     create_order_api,
 )
 from apps.patients.views import (
+    CreateLeadSourceView,
     CreatePatientView,
     DashboardView,
+    LeadSourceListView,
     LoginView,
     LogoutView,
     PatientsListView,
+    UpdateLeadSourceView,
     UpdatePatientView,
     search_patient_api,
 )
@@ -59,6 +62,9 @@ urlpatterns = [
     path("patients/", PatientsListView.as_view(), name="patients_list"),
     path("patients/create/", CreatePatientView.as_view(), name="patients_create"),
     path("patients/<int:pk>/update/", UpdatePatientView.as_view(), name="patients_update"),
+    path("lead-sources/", LeadSourceListView.as_view(), name="lead_sources_list"),
+    path("lead-sources/create/", CreateLeadSourceView.as_view(), name="lead_sources_create"),
+    path("lead-sources/<int:pk>/update/", UpdateLeadSourceView.as_view(), name="lead_sources_update"),
     path("exams/", ExamsListView.as_view(), name="exams_list"),
     path("exams/create/", CreateExamView.as_view(), name="exams_create"),
     path("exams/<int:pk>/update/", UpdateExamView.as_view(), name="exams_update"),

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Patient
+from .models import LeadSource, Patient
 
 
 class PatientUpdateForm(forms.ModelForm):
@@ -43,9 +43,23 @@ class LoginForm(forms.Form):
 
 
 class PatientForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ordenar lead_source por order y name
+        self.fields["lead_source"].queryset = LeadSource.objects.filter(is_active=True).order_by("order", "name")
+
     class Meta:
         model = Patient
-        fields = ["document_type", "document_number", "first_name", "last_name", "birthdate", "gender", "phone"]
+        fields = [
+            "document_type",
+            "document_number",
+            "first_name",
+            "last_name",
+            "birthdate",
+            "sex",
+            "phone",
+            "lead_source",
+        ]
         widgets = {
             "document_type": forms.Select(
                 attrs={
@@ -76,7 +90,7 @@ class PatientForm(forms.ModelForm):
                     "type": "date",
                 }
             ),
-            "gender": forms.Select(
+            "sex": forms.Select(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                 }
@@ -87,6 +101,11 @@ class PatientForm(forms.ModelForm):
                     "placeholder": "Número de teléfono",
                 }
             ),
+            "lead_source": forms.Select(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                }
+            ),
         }
         labels = {
             "document_type": "Tipo de Documento",
@@ -94,6 +113,45 @@ class PatientForm(forms.ModelForm):
             "first_name": "Nombres",
             "last_name": "Apellidos",
             "birthdate": "Fecha de Nacimiento",
-            "gender": "Género",
+            "sex": "Sexo",
             "phone": "Teléfono",
+            "lead_source": "¿Cómo nos conoció?",
+        }
+
+
+class LeadSourceForm(forms.ModelForm):
+    class Meta:
+        model = LeadSource
+        fields = ["name", "description", "is_active", "order"]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "Nombre del canal",
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "Descripción (opcional)",
+                    "rows": 3,
+                }
+            ),
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "form-checkbox h-5 w-5 text-blue-600",
+                }
+            ),
+            "order": forms.NumberInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "Orden de visualización",
+                }
+            ),
+        }
+        labels = {
+            "name": "Nombre",
+            "description": "Descripción",
+            "is_active": "Activo",
+            "order": "Orden",
         }

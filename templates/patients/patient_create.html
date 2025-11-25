@@ -92,20 +92,28 @@
                     {{ form.birthdate }}
                 </div>
 
-                <!-- Género -->
+                <!-- Sexo -->
                 <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.gender.id_for_label }}">
-                        {{ form.gender.label }}
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.sex.id_for_label }}">
+                        {{ form.sex.label }}
                     </label>
-                    {{ form.gender }}
+                    {{ form.sex }}
                 </div>
 
                 <!-- Teléfono -->
-                <div class="md:col-span-2">
+                <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.phone.id_for_label }}">
                         {{ form.phone.label }}
                     </label>
                     {{ form.phone }}
+                </div>
+
+                <!-- ¿Cómo nos conoció? -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.lead_source.id_for_label }}">
+                        {{ form.lead_source.label }}
+                    </label>
+                    {{ form.lead_source }}
                 </div>
             </div>
 
