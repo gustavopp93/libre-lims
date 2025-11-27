@@ -42,7 +42,7 @@ class Patient(models.Model):
         max_length=10,
         choices=Sex.choices,
     )
-    phone = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=20)
     lead_source = models.ForeignKey(
         LeadSource,
         on_delete=models.SET_NULL,

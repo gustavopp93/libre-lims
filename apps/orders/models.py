@@ -11,6 +11,22 @@ class Order(models.Model):
         CANCELLED = "cancelled", "Cancelada"
 
     patient = models.ForeignKey(Patient, on_delete=models.PROTECT, related_name="orders")
+    referral = models.ForeignKey(
+        "referrals.Referral",
+        on_delete=models.PROTECT,
+        related_name="orders",
+        null=True,
+        blank=True,
+        verbose_name="Referral",
+    )
+    coupon = models.ForeignKey(
+        "pricing.Coupon",
+        on_delete=models.PROTECT,
+        related_name="orders",
+        null=True,
+        blank=True,
+        verbose_name="Coupon",
+    )
     observations = models.TextField(blank=True, default="")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -59,6 +59,8 @@ INSTALLED_APPS = [
     "apps.exams",
     "apps.orders",
     "apps.billing",
+    "apps.pricing",
+    "apps.referrals",
 ]
 
 MIDDLEWARE = [

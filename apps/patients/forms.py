@@ -6,9 +6,9 @@ from .models import LeadSource, Patient
 class PatientUpdateForm(forms.ModelForm):
     class Meta:
         model = Patient
-        fields = ["phone"]
+        fields = ["phone_number"]
         widgets = {
-            "phone": forms.TextInput(
+            "phone_number": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                     "placeholder": "Número de teléfono",
@@ -16,7 +16,7 @@ class PatientUpdateForm(forms.ModelForm):
             ),
         }
         labels = {
-            "phone": "Teléfono",
+            "phone_number": "Teléfono",
         }
 
 
@@ -57,7 +57,7 @@ class PatientForm(forms.ModelForm):
             "last_name",
             "birthdate",
             "sex",
-            "phone",
+            "phone_number",
             "lead_source",
         ]
         widgets = {
@@ -95,7 +95,7 @@ class PatientForm(forms.ModelForm):
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                 }
             ),
-            "phone": forms.TextInput(
+            "phone_number": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                     "placeholder": "Número de teléfono",
@@ -114,7 +114,7 @@ class PatientForm(forms.ModelForm):
             "last_name": "Apellidos",
             "birthdate": "Fecha de Nacimiento",
             "sex": "Sexo",
-            "phone": "Teléfono",
+            "phone_number": "Teléfono",
             "lead_source": "¿Cómo nos conoció?",
         }
 
