@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ("last_name", models.CharField(max_length=100)),
                 ("birthdate", models.DateField()),
                 ("sex", models.CharField(choices=[("MALE", "Masculino"), ("FEMALE", "Femenino")], max_length=10)),
-                ("phone", models.CharField(max_length=20)),
+                ("phone_number", models.CharField(max_length=20)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
