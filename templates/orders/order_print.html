@@ -124,55 +124,55 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <h1>{{ company.business_name|upper }}</h1>
-        <p>LABORATORIO CLINICO</p>
-        <p>{{ company.legal_address|upper }}</p>
-        <p>RUC: {{ company.document_number }}</p>
-        <p>TELEFONO: {{ company.phone_number }}</p>
-    </div>
+<!-- Header -->
+<div class="header">
+    <h1>{{ company.business_name|upper }}</h1>
+    <p>LABORATORIO CLINICO</p>
+    <p>{{ company.legal_address|upper }}</p>
+    <p>RUC: {{ company.document_number }}</p>
+    <p>TELEFONO: {{ company.phone_number }}</p>
+</div>
 
-    <!-- Patient Information -->
-    <div class="patient-section">
-        <div class="patient-row">
-            <span class="label">NOMBRE:</span>
-            <span>{{ order.patient.last_name|upper }} {{ order.patient.first_name|upper }}</span>
-        </div>
+<!-- Patient Information -->
+<div class="patient-section">
+    <div class="patient-row">
+        <span class="label">NOMBRE:</span>
+        <span>{{ order.patient.last_name|upper }} {{ order.patient.first_name|upper }}</span>
     </div>
+</div>
 
-    <div class="patient-section">
-        <div class="patient-row">
-            <span class="label">DOC. IDENTIDAD:</span>
-            <span>{{ order.patient.document_number }}</span>
-        </div>
+<div class="patient-section">
+    <div class="patient-row">
+        <span class="label">DOC. IDENTIDAD:</span>
+        <span>{{ order.patient.document_number }}</span>
     </div>
+</div>
 
-    <div class="patient-section">
-        <div class="datetime">
-            <span class="label">FECHA Y HORA:</span>
-            <span>{{ order.created_at|date:"d/m/Y H:i" }}</span>
-        </div>
+<div class="patient-section">
+    <div class="datetime">
+        <span class="label">FECHA Y HORA:</span>
+        <span>{{ order.created_at|date:"d/m/Y H:i" }}</span>
     </div>
+</div>
 
-    <!-- Table -->
-    <div class="table-header">
-        <span>DESCRIPCION</span>
-        <span>PRECIO</span>
-    </div>
+<!-- Table -->
+<div class="table-header">
+    <span>DESCRIPCION</span>
+    <span>PRECIO</span>
+</div>
 
-    {% for detail in order.details.all %}
+{% for detail in order.details.all %}
     <div class="exam-row">
         <div class="exam-description">{{ detail.exam.name|upper }}</div>
         <div class="exam-price">S/. {{ detail.price }}</div>
     </div>
-    {% endfor %}
+{% endfor %}
 
-    <div class="separator-line"></div>
+<div class="separator-line"></div>
 
-    <!-- Footer -->
-    <div class="footer">
-        <p>GRACIAS POR SU VISITA</p>
-    </div>
+<!-- Footer -->
+<div class="footer">
+    <p>GRACIAS POR SU VISITA</p>
+</div>
 </body>
 </html>

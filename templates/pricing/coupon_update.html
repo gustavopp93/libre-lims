@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Cupón - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+    <div class="flex h-screen bg-gray-100">
+        {% include 'includes/sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            {% include 'includes/header.html' with page_title="Editar Cupón" %}
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                {% include 'includes/breadcrumbs.html' %}
+                <div class="max-w-2xl mx-auto">
+                    <!-- Form Card -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Información del Cupón</h3>
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="code">
+                                    Código <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="code"
+                                    name="code"
+                                    value="{{ coupon.code }}"
+                                    required
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500 uppercase"
+                                    placeholder="Ej: DESCUENTO20, PROMO2024"
+                                >
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="price_list">
+                                    Tarifario <span class="text-red-500">*</span>
+                                </label>
+                                <select
+                                    id="price_list"
+                                    name="price_list"
+                                    required
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                >
+                                    <option value="">Seleccione un tarifario</option>
+                                    {% for price_list in price_lists %}
+                                        <option value="{{ price_list.pk }}" {% if price_list.pk == coupon.price_list.pk %}selected{% endif %}>
+                                            {{ price_list.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="expiration_date">
+                                    Fecha de Expiración (Opcional)
+                                </label>
+                                <input
+                                    type="date"
+                                    id="expiration_date"
+                                    name="expiration_date"
+                                    value="{{ coupon.expiration_date|date:'Y-m-d' }}"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                >
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="is_active"
+                                        name="is_active"
+                                        {% if coupon.is_active %}checked{% endif %}
+                                        class="form-checkbox h-5 w-5 text-blue-600"
+                                    >
+                                    <span class="ml-2 text-gray-700 font-medium">Activo</span>
+                                </label>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <a href="{% url 'coupon_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                                    Actualizar Cupón
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+{% endblock %}

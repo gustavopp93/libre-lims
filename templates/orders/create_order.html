@@ -12,232 +12,234 @@
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-<div class="max-w-6xl mx-auto">
-    <!-- Back Button -->
-    <div class="mb-4">
-        <a href="{% url 'orders_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
-            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
-            Volver a lista de ventas
-        </a>
-    </div>
-
-    <!-- Search Patient Card -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Buscar Paciente</h3>
-
-        <form id="searchPatientForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Tipo de Documento</label>
-                <select id="document_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required>
-                    <option value="DNI">DNI</option>
-                    <option value="CE">Carnet de Extranjería</option>
-                    <option value="PASAPORTE">Pasaporte</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Número de Documento</label>
-                <input type="text" id="document_number" class="shadow border rounded w-full py-2 px-3" required>
-            </div>
-
-            <div class="flex items-end">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded w-full">
-                    Buscar
-                </button>
-            </div>
-        </form>
-
-        <div id="loadingState" class="hidden mt-4 text-center">Buscando...</div>
-    </div>
-
-    <!-- Patient Not Found -->
-    <div id="patientNotFound" class="hidden bg-yellow-50 p-6 rounded-lg mb-6">
-        <h4 class="font-semibold mb-2">Paciente no encontrado</h4>
-        <a href="{% url 'patients_create' %}?next={% url 'create_order' %}" class="bg-yellow-600 text-white px-4 py-2 rounded">
-            Crear Nuevo Paciente
-        </a>
-    </div>
-
-    <!-- Patient Found -->
-    <div id="patientFound" class="hidden">
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h4 class="text-lg font-semibold mb-4">Datos del Paciente</h4>
-            <div class="grid grid-cols-4 gap-4">
-                <div><p class="text-sm text-gray-600">Tipo de Documento</p><p class="font-semibold" id="patientDocType"></p></div>
-                <div><p class="text-sm text-gray-600">Número de Documento</p><p class="font-semibold" id="patientDocNumber"></p></div>
-                <div><p class="text-sm text-gray-600">Nombres</p><p class="font-semibold" id="patientFirstName"></p></div>
-                <div><p class="text-sm text-gray-600">Apellidos</p><p class="font-semibold" id="patientLastName"></p></div>
-            </div>
-        </div>
-
-        <!-- Exams Section -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <div class="flex justify-between mb-4">
-                <h4 class="text-lg font-semibold">Exámenes Solicitados</h4>
-                <button id="addExamRowBtn" class="bg-green-500 text-white px-4 py-2 rounded">Agregar Examen</button>
-            </div>
-            <div id="examsContainer" class="space-y-3"></div>
-        </div>
-
-        <!-- Total and Actions -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Observaciones</label>
-                <textarea id="observations" rows="3" class="shadow border rounded w-full py-2 px-3 text-gray-700" placeholder="Observaciones adicionales..."></textarea>
-            </div>
-
-            <div class="flex justify-between items-center">
-                <div class="text-2xl font-bold text-gray-800">
-                    Total: S/. <span id="totalAmount">0.00</span>
+            <div class="max-w-6xl mx-auto">
+                <!-- Back Button -->
+                <div class="mb-4">
+                    <a href="{% url 'orders_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                        Volver a lista de ventas
+                    </a>
                 </div>
-                <button id="createSaleBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded">
-                    Crear Venta
-                </button>
+
+                <!-- Search Patient Card -->
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Buscar Paciente</h3>
+
+                    <form id="searchPatientForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Tipo de Documento</label>
+                            <select id="document_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required>
+                                <option value="DNI">DNI</option>
+                                <option value="CE">Carnet de Extranjería</option>
+                                <option value="PASAPORTE">Pasaporte</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Número de Documento</label>
+                            <input type="text" id="document_number" class="shadow border rounded w-full py-2 px-3" required>
+                        </div>
+
+                        <div class="flex items-end">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded w-full">
+                                Buscar
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="loadingState" class="hidden mt-4 text-center">Buscando...</div>
+                </div>
+
+                <!-- Patient Not Found -->
+                <div id="patientNotFound" class="hidden bg-yellow-50 p-6 rounded-lg mb-6">
+                    <h4 class="font-semibold mb-2">Paciente no encontrado</h4>
+                    <a href="{% url 'patients_create' %}?next={% url 'create_order' %}" class="bg-yellow-600 text-white px-4 py-2 rounded">
+                        Crear Nuevo Paciente
+                    </a>
+                </div>
+
+                <!-- Patient Found -->
+                <div id="patientFound" class="hidden">
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h4 class="text-lg font-semibold mb-4">Datos del Paciente</h4>
+                        <div class="grid grid-cols-4 gap-4">
+                            <div><p class="text-sm text-gray-600">Tipo de Documento</p><p class="font-semibold" id="patientDocType"></p></div>
+                            <div><p class="text-sm text-gray-600">Número de Documento</p><p class="font-semibold" id="patientDocNumber"></p></div>
+                            <div><p class="text-sm text-gray-600">Nombres</p><p class="font-semibold" id="patientFirstName"></p></div>
+                            <div><p class="text-sm text-gray-600">Apellidos</p><p class="font-semibold" id="patientLastName"></p></div>
+                        </div>
+                    </div>
+
+                    <!-- Exams Section -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <div class="flex justify-between mb-4">
+                            <h4 class="text-lg font-semibold">Exámenes Solicitados</h4>
+                            <button id="addExamRowBtn" class="bg-green-500 text-white px-4 py-2 rounded">Agregar Examen</button>
+                        </div>
+                        <div id="examsContainer" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Total and Actions -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Observaciones</label>
+                            <textarea id="observations" rows="3" class="shadow border rounded w-full py-2 px-3 text-gray-700" placeholder="Observaciones adicionales..."></textarea>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <div class="text-2xl font-bold text-gray-800">
+                                Total: S/. <span id="totalAmount">0.00</span>
+                            </div>
+                            <button id="createSaleBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded">
+                                Crear Venta
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</div>
         </main>
     </div>
 </div>
+{% endblock %}
 
-<script>
-    lucide.createIcons();
-    let examRowCount = 0;
-    let tomSelectInstances = {};
-    let currentPatientId = null;
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        let examRowCount = 0;
+        let tomSelectInstances = {};
+        let currentPatientId = null;
 
-    document.getElementById('searchPatientForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const documentType = document.getElementById('document_type').value;
-        const documentNumber = document.getElementById('document_number').value;
+        document.getElementById('searchPatientForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const documentType = document.getElementById('document_type').value;
+            const documentNumber = document.getElementById('document_number').value;
 
-        document.getElementById('patientNotFound').classList.add('hidden');
-        document.getElementById('patientFound').classList.add('hidden');
-        document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('patientNotFound').classList.add('hidden');
+            document.getElementById('patientFound').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
 
-        try {
-            const response = await fetch('/api/patients/search/?document_type=' + documentType + '&document_number=' + documentNumber);
-            const data = await response.json();
-            document.getElementById('loadingState').classList.add('hidden');
+            try {
+                const response = await fetch('/api/patients/search/?document_type=' + documentType + '&document_number=' + documentNumber);
+                const data = await response.json();
+                document.getElementById('loadingState').classList.add('hidden');
 
-            if (data.found) {
-                currentPatientId = data.patient.id;
-                document.getElementById('patientDocType').textContent = data.patient.document_type;
-                document.getElementById('patientDocNumber').textContent = data.patient.document_number;
-                document.getElementById('patientFirstName').textContent = data.patient.first_name;
-                document.getElementById('patientLastName').textContent = data.patient.last_name;
-                document.getElementById('patientFound').classList.remove('hidden');
+                if (data.found) {
+                    currentPatientId = data.patient.id;
+                    document.getElementById('patientDocType').textContent = data.patient.document_type;
+                    document.getElementById('patientDocNumber').textContent = data.patient.document_number;
+                    document.getElementById('patientFirstName').textContent = data.patient.first_name;
+                    document.getElementById('patientLastName').textContent = data.patient.last_name;
+                    document.getElementById('patientFound').classList.remove('hidden');
 
-                // Limpiar exámenes anteriores
-                document.getElementById('examsContainer').innerHTML = '';
-                document.getElementById('observations').value = '';
-                Object.values(tomSelectInstances).forEach(instance => instance.destroy());
-                tomSelectInstances = {};
-                examRowCount = 0;
-                updateTotal();
-                addExamRow();
-            } else {
-                document.getElementById('patientNotFound').classList.remove('hidden');
+                    // Limpiar exámenes anteriores
+                    document.getElementById('examsContainer').innerHTML = '';
+                    document.getElementById('observations').value = '';
+                    Object.values(tomSelectInstances).forEach(instance => instance.destroy());
+                    tomSelectInstances = {};
+                    examRowCount = 0;
+                    updateTotal();
+                    addExamRow();
+                } else {
+                    document.getElementById('patientNotFound').classList.remove('hidden');
+                }
+                lucide.createIcons();
+            } catch (error) {
+                document.getElementById('loadingState').classList.add('hidden');
+                alert('Error al buscar paciente');
             }
-            lucide.createIcons();
-        } catch (error) {
-            document.getElementById('loadingState').classList.add('hidden');
-            alert('Error al buscar paciente');
-        }
-    });
-
-    document.getElementById('addExamRowBtn').addEventListener('click', addExamRow);
-
-    document.getElementById('createSaleBtn').addEventListener('click', async function() {
-        if (!currentPatientId) {
-            alert('Debe buscar y seleccionar un paciente');
-            return;
-        }
-
-        // Recolectar detalles de exámenes
-        const examDetails = [];
-        let hasErrors = false;
-
-        Object.keys(tomSelectInstances).forEach(rowId => {
-            const examId = tomSelectInstances[rowId].getValue();
-            const priceInput = document.getElementById('examPrice' + rowId);
-            const price = priceInput.value;
-
-            if (!examId) {
-                alert('Debe seleccionar un examen en todas las filas');
-                hasErrors = true;
-                return;
-            }
-
-            if (!price || parseFloat(price) <= 0) {
-                alert('Todos los precios deben ser mayores a 0');
-                hasErrors = true;
-                return;
-            }
-
-            // Validar que tenga máximo 2 decimales
-            const priceStr = price.toString();
-            const decimalPart = priceStr.split('.')[1];
-            if (decimalPart && decimalPart.length > 2) {
-                alert('Los precios deben tener máximo 2 decimales');
-                hasErrors = true;
-                return;
-            }
-
-            examDetails.push({
-                exam_id: parseInt(examId),
-                price: parseFloat(price).toFixed(2)
-            });
         });
 
-        if (hasErrors) return;
+        document.getElementById('addExamRowBtn').addEventListener('click', addExamRow);
 
-        if (examDetails.length === 0) {
-            alert('Debe agregar al menos un examen');
-            return;
-        }
+        document.getElementById('createSaleBtn').addEventListener('click', async function() {
+            if (!currentPatientId) {
+                alert('Debe buscar y seleccionar un paciente');
+                return;
+            }
 
-        const observations = document.getElementById('observations').value;
+            // Recolectar detalles de exámenes
+            const examDetails = [];
+            let hasErrors = false;
 
-        // Crear venta vía AJAX
-        try {
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
-                             document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+            Object.keys(tomSelectInstances).forEach(rowId => {
+                const examId = tomSelectInstances[rowId].getValue();
+                const priceInput = document.getElementById('examPrice' + rowId);
+                const price = priceInput.value;
 
-            const response = await fetch('/api/orders/create/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: JSON.stringify({
-                    patient_id: currentPatientId,
-                    observations: observations,
-                    exam_details: examDetails
-                })
+                if (!examId) {
+                    alert('Debe seleccionar un examen en todas las filas');
+                    hasErrors = true;
+                    return;
+                }
+
+                if (!price || parseFloat(price) <= 0) {
+                    alert('Todos los precios deben ser mayores a 0');
+                    hasErrors = true;
+                    return;
+                }
+
+                // Validar que tenga máximo 2 decimales
+                const priceStr = price.toString();
+                const decimalPart = priceStr.split('.')[1];
+                if (decimalPart && decimalPart.length > 2) {
+                    alert('Los precios deben tener máximo 2 decimales');
+                    hasErrors = true;
+                    return;
+                }
+
+                examDetails.push({
+                    exam_id: parseInt(examId),
+                    price: parseFloat(price).toFixed(2)
+                });
             });
 
-            const data = await response.json();
+            if (hasErrors) return;
 
-            if (response.ok && data.success) {
-                // Redirigir al detalle de la venta (el mensaje se mostrará ahí)
-                window.location.href = '/orders/' + data.order_id + '/';
-            } else {
-                alert('Error: ' + (data.error || 'No se pudo crear la venta'));
+            if (examDetails.length === 0) {
+                alert('Debe agregar al menos un examen');
+                return;
             }
-        } catch (error) {
-            alert('Error al crear la venta: ' + error.message);
-        }
-    });
 
-    function addExamRow() {
-        const rowId = examRowCount++;
-        const row = document.createElement('div');
-        row.className = 'grid grid-cols-12 gap-4';
-        row.id = 'examRow' + rowId;
+            const observations = document.getElementById('observations').value;
 
-        row.innerHTML = `
+            // Crear venta vía AJAX
+            try {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                    document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+
+                const response = await fetch('/api/orders/create/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        patient_id: currentPatientId,
+                        observations: observations,
+                        exam_details: examDetails
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Redirigir al detalle de la venta (el mensaje se mostrará ahí)
+                    window.location.href = '/orders/' + data.order_id + '/';
+                } else {
+                    alert('Error: ' + (data.error || 'No se pudo crear la venta'));
+                }
+            } catch (error) {
+                alert('Error al crear la venta: ' + error.message);
+            }
+        });
+
+        function addExamRow() {
+            const rowId = examRowCount++;
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-12 gap-4';
+            row.id = 'examRow' + rowId;
+
+            row.innerHTML = `
             <div class="col-span-6">
                 <label class="block text-sm font-bold mb-2">Examen</label>
                 <select id="examSelect${rowId}" class="w-full" placeholder="Buscar examen..."></select>
@@ -251,98 +253,98 @@
             </div>
         `;
 
-        document.getElementById('examsContainer').appendChild(row);
-        lucide.createIcons();
-        setupTomSelect(rowId);
-    }
+            document.getElementById('examsContainer').appendChild(row);
+            lucide.createIcons();
+            setupTomSelect(rowId);
+        }
 
-    function setupTomSelect(rowId) {
-        const selectElement = document.getElementById('examSelect' + rowId);
-        const priceInput = document.getElementById('examPrice' + rowId);
+        function setupTomSelect(rowId) {
+            const selectElement = document.getElementById('examSelect' + rowId);
+            const priceInput = document.getElementById('examPrice' + rowId);
 
-        // Event listener para actualizar total cuando cambia el precio
-        priceInput.addEventListener('input', function() {
-            // Validar que solo tenga números y máximo 2 decimales
-            let value = this.value;
+            // Event listener para actualizar total cuando cambia el precio
+            priceInput.addEventListener('input', function() {
+                // Validar que solo tenga números y máximo 2 decimales
+                let value = this.value;
 
-            // Permitir solo números y un punto decimal
-            value = value.replace(/[^\d.]/g, '');
+                // Permitir solo números y un punto decimal
+                value = value.replace(/[^\d.]/g, '');
 
-            // Asegurar solo un punto decimal
-            const parts = value.split('.');
-            if (parts.length > 2) {
-                value = parts[0] + '.' + parts.slice(1).join('');
-            }
+                // Asegurar solo un punto decimal
+                const parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
 
-            // Limitar a 2 decimales
-            if (parts[1] && parts[1].length > 2) {
-                value = parts[0] + '.' + parts[1].substring(0, 2);
-            }
+                // Limitar a 2 decimales
+                if (parts[1] && parts[1].length > 2) {
+                    value = parts[0] + '.' + parts[1].substring(0, 2);
+                }
 
-            this.value = value;
-            updateTotal();
-        });
+                this.value = value;
+                updateTotal();
+            });
 
-        tomSelectInstances[rowId] = new TomSelect(selectElement, {
-            valueField: 'id',
-            labelField: 'name',
-            searchField: 'name',
-            placeholder: 'Buscar examen...',
-            load: function(query, callback) {
-                if (!query.length || query.length < 2) return callback();
+            tomSelectInstances[rowId] = new TomSelect(selectElement, {
+                valueField: 'id',
+                labelField: 'name',
+                searchField: 'name',
+                placeholder: 'Buscar examen...',
+                load: function(query, callback) {
+                    if (!query.length || query.length < 2) return callback();
 
-                fetch('/api/exams/search/?name=' + encodeURIComponent(query))
-                    .then(response => response.json())
-                    .then(data => {
-                        callback(data.exams || []);
-                    })
-                    .catch(() => {
-                        callback();
-                    });
-            },
-            render: {
-                option: function(item, escape) {
-                    return `<div>
+                    fetch('/api/exams/search/?name=' + encodeURIComponent(query))
+                        .then(response => response.json())
+                        .then(data => {
+                            callback(data.exams || []);
+                        })
+                        .catch(() => {
+                            callback();
+                        });
+                },
+                render: {
+                    option: function(item, escape) {
+                        return `<div>
                         <div class="font-semibold">${escape(item.name)}</div>
                         <div class="text-sm text-gray-600">S/. ${escape(item.price)}</div>
                     </div>`;
+                    },
+                    item: function(item, escape) {
+                        return `<div>${escape(item.name)}</div>`;
+                    }
                 },
-                item: function(item, escape) {
-                    return `<div>${escape(item.name)}</div>`;
-                }
-            },
-            onChange: function(value) {
-                if (value) {
-                    const selectedOption = this.options[value];
-                    if (selectedOption) {
-                        priceInput.value = parseFloat(selectedOption.price).toFixed(2);
-                        updateTotal();
+                onChange: function(value) {
+                    if (value) {
+                        const selectedOption = this.options[value];
+                        if (selectedOption) {
+                            priceInput.value = parseFloat(selectedOption.price).toFixed(2);
+                            updateTotal();
+                        }
                     }
                 }
-            }
-        });
-    }
-
-    function removeExamRow(rowId) {
-        const row = document.getElementById('examRow' + rowId);
-        if (row) {
-            if (tomSelectInstances[rowId]) {
-                tomSelectInstances[rowId].destroy();
-                delete tomSelectInstances[rowId];
-            }
-            row.remove();
-            updateTotal();
+            });
         }
-    }
 
-    function updateTotal() {
-        let total = 0;
-        Object.keys(tomSelectInstances).forEach(rowId => {
-            const priceInput = document.getElementById('examPrice' + rowId);
-            const price = parseFloat(priceInput.value) || 0;
-            total += price;
-        });
-        document.getElementById('totalAmount').textContent = total.toFixed(2);
-    }
-</script>
+        function removeExamRow(rowId) {
+            const row = document.getElementById('examRow' + rowId);
+            if (row) {
+                if (tomSelectInstances[rowId]) {
+                    tomSelectInstances[rowId].destroy();
+                    delete tomSelectInstances[rowId];
+                }
+                row.remove();
+                updateTotal();
+            }
+        }
+
+        function updateTotal() {
+            let total = 0;
+            Object.keys(tomSelectInstances).forEach(rowId => {
+                const priceInput = document.getElementById('examPrice' + rowId);
+                const price = parseFloat(priceInput.value) || 0;
+                total += price;
+            });
+            document.getElementById('totalAmount').textContent = total.toFixed(2);
+        }
+    </script>
 {% endblock %}

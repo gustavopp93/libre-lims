@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Tarifarios - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+    <div class="flex h-screen bg-gray-100">
+        {% include 'includes/sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            {% include 'includes/header.html' with page_title="Tarifarios" %}
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                {% include 'includes/breadcrumbs.html' %}
+                <div class="bg-white rounded-lg shadow">
+                    <!-- Header with Create Button -->
+                    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-800">Lista de Tarifarios</h3>
+                        <a href="{% url 'price_list_create' %}" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                            Crear Tarifario
+                        </a>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Nombre
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Estado
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Fecha Creación
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for price_list in price_lists %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ price_list.name }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {% if price_list.is_active %}
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                    Activo
+                                                </span>
+                                            {% else %}
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                    Inactivo
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ price_list.created_at|date:"d/m/Y H:i" }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <div class="flex space-x-3">
+                                                <a href="{% url 'price_list_detail' price_list.pk %}" class="text-purple-600 hover:text-purple-900">
+                                                    <i data-lucide="eye" class="w-4 h-4 inline"></i>
+                                                    Ver Detalle
+                                                </a>
+                                                <a href="{% url 'price_list_update' price_list.pk %}" class="text-blue-600 hover:text-blue-900">
+                                                    <i data-lucide="edit" class="w-4 h-4 inline"></i>
+                                                    Editar
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                                            No hay tarifarios registrados
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% include 'includes/pagination.html' %}
+                </div>
+            </main>
+        </div>
+    </div>
+{% endblock %}

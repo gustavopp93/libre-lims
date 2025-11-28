@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Referido - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+    <div class="flex h-screen bg-gray-100">
+        {% include 'includes/sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            {% include 'includes/header.html' with page_title="Editar Referido" %}
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                {% include 'includes/breadcrumbs.html' %}
+                <div class="max-w-2xl mx-auto">
+                    <!-- Form Card -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Información del Referido</h3>
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="business_name">
+                                    Nombre del Negocio <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="business_name"
+                                    name="business_name"
+                                    value="{{ referral.business_name }}"
+                                    required
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                    placeholder="Ej: Clinica ABC, Laboratorio XYZ"
+                                >
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="document_number">
+                                    RUC <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="document_number"
+                                    name="document_number"
+                                    value="{{ referral.document_number }}"
+                                    required
+                                    maxlength="11"
+                                    pattern="[0-9]{11}"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                    placeholder="20123456789"
+                                >
+                                <p class="text-gray-600 text-xs mt-1">Debe tener exactamente 11 dígitos</p>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="phone_number">
+                                    Teléfono
+                                </label>
+                                <input
+                                    type="text"
+                                    id="phone_number"
+                                    name="phone_number"
+                                    value="{{ referral.phone_number }}"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                    placeholder="987654321"
+                                >
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value="{{ referral.email }}"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                    placeholder="contacto@empresa.com"
+                                >
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="address">
+                                    Dirección
+                                </label>
+                                <textarea
+                                    id="address"
+                                    name="address"
+                                    rows="3"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                    placeholder="Av. Principal 123, Lima"
+                                >{{ referral.address }}</textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="price_list">
+                                    Tarifario <span class="text-red-500">*</span>
+                                </label>
+                                <select
+                                    id="price_list"
+                                    name="price_list"
+                                    required
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                >
+                                    <option value="">Seleccione un tarifario</option>
+                                    {% for price_list in price_lists %}
+                                        <option value="{{ price_list.pk }}" {% if price_list.pk == referral.price_list.pk %}selected{% endif %}>
+                                            {{ price_list.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="is_active"
+                                        name="is_active"
+                                        {% if referral.is_active %}checked{% endif %}
+                                        class="form-checkbox h-5 w-5 text-blue-600"
+                                    >
+                                    <span class="ml-2 text-gray-700 font-medium">Activo</span>
+                                </label>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <a href="{% url 'referral_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                                    Actualizar Referido
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+{% endblock %}
