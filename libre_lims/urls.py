@@ -73,4 +73,5 @@ urlpatterns = [
     path("api/exams/search/", search_exams_api, name="api_exams_search"),
     path("api/orders/create/", create_order_api, name="api_orders_create"),
     path("company/", include("apps.billing.urls")),
+    path("pricing/", include("apps.pricing.urls")),
 ]

@@ -71,6 +71,9 @@ class PatientsListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["document_type"] = self.request.GET.get("document_type", "")
         context["document_number"] = self.request.GET.get("document_number", "")
+        context["breadcrumbs"] = [
+            {"name": "Pacientes", "url": None},
+        ]
         return context
 
 
@@ -89,6 +92,10 @@ class CreatePatientView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["next_url"] = self.request.GET.get("next", "")
+        context["breadcrumbs"] = [
+            {"name": "Pacientes", "url": reverse_lazy("patients_list")},
+            {"name": "Crear Paciente", "url": None},
+        ]
         return context
 
     def form_valid(self, form):
@@ -103,6 +110,14 @@ class UpdatePatientView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("patients_list")
     login_url = reverse_lazy("login")
     context_object_name = "patient"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Pacientes", "url": reverse_lazy("patients_list")},
+            {"name": f"Editar: {self.object.first_name} {self.object.last_name}", "url": None},
+        ]
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, "Paciente actualizado exitosamente")
@@ -153,6 +168,13 @@ class LeadSourceListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return LeadSource.objects.all().order_by("order", "name")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Canales de Adquisición", "url": None},
+        ]
+        return context
+
 
 class CreateLeadSourceView(LoginRequiredMixin, CreateView):
     model = LeadSource
@@ -160,6 +182,14 @@ class CreateLeadSourceView(LoginRequiredMixin, CreateView):
     template_name = "patients/lead_source_create.html"
     success_url = reverse_lazy("lead_sources_list")
     login_url = reverse_lazy("login")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Canales de Adquisición", "url": reverse_lazy("lead_sources_list")},
+            {"name": "Crear Canal", "url": None},
+        ]
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, "Canal de adquisición creado exitosamente")
@@ -173,6 +203,14 @@ class UpdateLeadSourceView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("lead_sources_list")
     login_url = reverse_lazy("login")
     context_object_name = "lead_source"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Canales de Adquisición", "url": reverse_lazy("lead_sources_list")},
+            {"name": f"Editar: {self.object.name}", "url": None},
+        ]
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, "Canal de adquisición actualizado exitosamente")

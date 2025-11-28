@@ -3,160 +3,155 @@
 {% block title %}Detalle de Venta - {{ company.business_name }}{% endblock %}
 
 {% block content %}
-<div class="flex h-screen bg-gray-100">
-    {% include 'includes/sidebar.html' %}
+    <div class="flex h-screen bg-gray-100">
+        {% include 'includes/sidebar.html' %}
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        {% include 'includes/header.html' with page_title="Detalle de Venta #"|add:order.id|stringformat:"s" %}
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            {% include 'includes/header.html' with page_title="Detalle de Venta #"|add:order.id|stringformat:"s" %}
 
-        <!-- Main Content Area -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-<div class="max-w-4xl mx-auto">
-    <!-- Back Link -->
-    <div class="mb-6">
-        <a href="{% url 'orders_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
-            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
-            Volver a lista de ventas
-        </a>
-    </div>
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                <div class="max-w-4xl mx-auto">
+                    <!-- Back Link -->
+                    <div class="mb-6">
+                        <a href="{% url 'orders_list' %}" class="flex items-center text-blue-600 hover:text-blue-800">
+                            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                            Volver a lista de ventas
+                        </a>
+                    </div>
 
-    <!-- Información del Paciente -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <i data-lucide="user" class="w-5 h-5 mr-2 text-blue-600"></i>
-            Información del Paciente
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-gray-600 text-sm font-medium mb-1">Tipo de Documento</label>
-                <p class="text-gray-900 font-semibold">{{ order.patient.get_document_type_display }}</p>
-            </div>
-            <div>
-                <label class="block text-gray-600 text-sm font-medium mb-1">Número de Documento</label>
-                <p class="text-gray-900 font-semibold">{{ order.patient.document_number }}</p>
-            </div>
-            <div>
-                <label class="block text-gray-600 text-sm font-medium mb-1">Nombres</label>
-                <p class="text-gray-900 font-semibold">{{ order.patient.first_name }}</p>
-            </div>
-            <div>
-                <label class="block text-gray-600 text-sm font-medium mb-1">Apellidos</label>
-                <p class="text-gray-900 font-semibold">{{ order.patient.last_name }}</p>
-            </div>
-        </div>
-    </div>
+                    <!-- Información del Paciente -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="user" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            Información del Paciente
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Tipo de Documento</label>
+                                <p class="text-gray-900 font-semibold">{{ order.patient.get_document_type_display }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Número de Documento</label>
+                                <p class="text-gray-900 font-semibold">{{ order.patient.document_number }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Nombres</label>
+                                <p class="text-gray-900 font-semibold">{{ order.patient.first_name }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Apellidos</label>
+                                <p class="text-gray-900 font-semibold">{{ order.patient.last_name }}</p>
+                            </div>
+                        </div>
+                    </div>
 
-    <!-- Información de la Venta -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <i data-lucide="file-text" class="w-5 h-5 mr-2 text-blue-600"></i>
-            Información de la Venta
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-gray-600 text-sm font-medium mb-1">Número de Venta</label>
-                <p class="text-gray-900 font-semibold">#{{ order.id }}</p>
-            </div>
-            <div>
-                <label class="block text-gray-600 text-sm font-medium mb-1">Estado</label>
-                <p class="text-gray-900 font-semibold">
-                    {% if sale.status == 'pending' %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                    <!-- Información de la Venta -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="file-text" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            Información de la Venta
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Número de Venta</label>
+                                <p class="text-gray-900 font-semibold">#{{ order.id }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Estado</label>
+                                <p class="text-gray-900 font-semibold">
+                                    {% if sale.status == 'pending' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                             <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
                             {{ order.get_status_display }}
                         </span>
-                    {% elif sale.status == 'completed' %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    {% elif sale.status == 'completed' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                             <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
                             {{ order.get_status_display }}
                         </span>
-                    {% elif sale.status == 'cancelled' %}
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                    {% elif sale.status == 'cancelled' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                             <i data-lucide="x-circle" class="w-4 h-4 mr-1"></i>
                             {{ order.get_status_display }}
                         </span>
-                    {% endif %}
-                </p>
-            </div>
-            <div>
-                <label class="block text-gray-600 text-sm font-medium mb-1">Fecha de Registro</label>
-                <p class="text-gray-900 font-semibold">{{ order.created_at|date:"d/m/Y H:i" }}</p>
-            </div>
-            <div>
-                <label class="block text-gray-600 text-sm font-medium mb-1">Última Actualización</label>
-                <p class="text-gray-900 font-semibold">{{ order.updated_at|date:"d/m/Y H:i" }}</p>
-            </div>
-            {% if sale.observations %}
-            <div class="md:col-span-2">
-                <label class="block text-gray-600 text-sm font-medium mb-1">Observaciones</label>
-                <p class="text-gray-900 bg-gray-50 p-3 rounded border border-gray-200">{{ order.observations }}</p>
-            </div>
-            {% endif %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Fecha de Registro</label>
+                                <p class="text-gray-900 font-semibold">{{ order.created_at|date:"d/m/Y H:i" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Última Actualización</label>
+                                <p class="text-gray-900 font-semibold">{{ order.updated_at|date:"d/m/Y H:i" }}</p>
+                            </div>
+                            {% if sale.observations %}
+                                <div class="md:col-span-2">
+                                    <label class="block text-gray-600 text-sm font-medium mb-1">Observaciones</label>
+                                    <p class="text-gray-900 bg-gray-50 p-3 rounded border border-gray-200">{{ order.observations }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Exámenes -->
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="clipboard-list" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            Exámenes
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Examen
+                                    </th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Precio
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                {% for detail in order.details.all %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 text-sm text-gray-900">
+                                            {{ detail.exam.name }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-900 text-right font-semibold">
+                                            S/. {{ detail.price }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                                <tfoot class="bg-gray-50">
+                                <tr>
+                                    <td class="px-6 py-4 text-sm font-bold text-gray-900 text-right">
+                                        TOTAL
+                                    </td>
+                                    <td class="px-6 py-4 text-lg font-bold text-blue-600 text-right">
+                                        S/. {{ order.total }}
+                                    </td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="flex justify-end space-x-4">
+                        <a href="{% url 'orders_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                            Volver
+                        </a>
+                        <a href="{% url 'order_print' order.pk %}" target="_blank" class="flex items-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                            <i data-lucide="printer" class="w-5 h-5 mr-2"></i>
+                            Generar Ticket
+                        </a>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
-
-    <!-- Exámenes -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <i data-lucide="clipboard-list" class="w-5 h-5 mr-2 text-blue-600"></i>
-            Exámenes
-        </h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Examen
-                        </th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Precio
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for detail in order.details.all %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 text-sm text-gray-900">
-                            {{ detail.exam.name }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 text-right font-semibold">
-                            S/. {{ detail.price }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot class="bg-gray-50">
-                    <tr>
-                        <td class="px-6 py-4 text-sm font-bold text-gray-900 text-right">
-                            TOTAL
-                        </td>
-                        <td class="px-6 py-4 text-lg font-bold text-blue-600 text-right">
-                            S/. {{ order.total }}
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </div>
-
-    <!-- Acciones -->
-    <div class="flex justify-end space-x-4">
-        <a href="{% url 'orders_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
-            Volver
-        </a>
-        <a href="{% url 'order_print' order.pk %}" target="_blank" class="flex items-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
-            <i data-lucide="printer" class="w-5 h-5 mr-2"></i>
-            Generar Ticket
-        </a>
-    </div>
-</div>
-        </main>
-    </div>
-</div>
-
-<script>
-    // Initialize Lucide icons
-    lucide.createIcons();
-</script>
 {% endblock %}

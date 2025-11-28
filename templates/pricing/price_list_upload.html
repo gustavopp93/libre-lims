@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Subir Tarifario - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+    <div class="flex h-screen bg-gray-100">
+        {% include 'includes/sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            {% include 'includes/header.html' with page_title="Subir Tarifario" %}
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                {% include 'includes/breadcrumbs.html' %}
+                <div class="max-w-3xl mx-auto">
+                    <!-- Info Card -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="info" class="h-5 w-5 text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">Tarifario: {{ price_list.name }}</h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <p>Antes de subir tu archivo, puedes descargar la plantilla base con todos los exámenes disponibles.</p>
+                                </div>
+                                <div class="mt-4">
+                                    <a href="{% url 'price_list_download_template' price_list.pk %}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                        <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                                        Descargar Plantilla Base
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Form Card -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Subir Archivo de Tarifario</h3>
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="mb-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="file">
+                                    Archivo Excel (.xlsx) <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="file"
+                                    id="file"
+                                    name="file"
+                                    accept=".xlsx"
+                                    required
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                >
+                                <p class="text-gray-600 text-xs mt-2">
+                                    El archivo debe contener las columnas: Código, Nombre del Examen, Precio
+                                </p>
+                            </div>
+
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="alert-triangle" class="h-5 w-5 text-yellow-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-yellow-800">Importante</h3>
+                                        <div class="mt-2 text-sm text-yellow-700">
+                                            <ul class="list-disc list-inside space-y-1">
+                                                <li>El sistema buscará los exámenes por su código</li>
+                                                <li>Si el examen no existe, se omitirá esa fila</li>
+                                                <li>Los precios existentes serán actualizados</li>
+                                                <li>Los nuevos exámenes serán agregados al tarifario</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <a href="{% url 'price_list_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline flex items-center">
+                                    <i data-lucide="upload" class="w-5 h-5 mr-2"></i>
+                                    Subir Tarifario
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+{% endblock %}

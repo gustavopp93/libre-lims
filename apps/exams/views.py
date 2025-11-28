@@ -34,6 +34,9 @@ class ExamsListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["name"] = self.request.GET.get("name", "")
+        context["breadcrumbs"] = [
+            {"name": "Exámenes", "url": None},
+        ]
         return context
 
 
@@ -43,6 +46,14 @@ class CreateExamView(LoginRequiredMixin, CreateView):
     template_name = "exams/exam_create.html"
     success_url = reverse_lazy("exams_list")
     login_url = reverse_lazy("login")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Exámenes", "url": reverse_lazy("exams_list")},
+            {"name": "Crear Examen", "url": None},
+        ]
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, "Examen creado exitosamente")
@@ -56,6 +67,14 @@ class UpdateExamView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("exams_list")
     login_url = reverse_lazy("login")
     context_object_name = "exam"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Exámenes", "url": reverse_lazy("exams_list")},
+            {"name": f"Editar: {self.object.name}", "url": None},
+        ]
+        return context
 
     def form_valid(self, form):
         messages.success(self.request, "Examen actualizado exitosamente")
@@ -95,7 +114,13 @@ class BulkUploadExamsView(LoginRequiredMixin, View):
     def get(self, request):
         from django.shortcuts import render
 
-        return render(request, self.template_name)
+        context = {
+            "breadcrumbs": [
+                {"name": "Exámenes", "url": reverse_lazy("exams_list")},
+                {"name": "Carga Masiva", "url": None},
+            ],
+        }
+        return render(request, self.template_name, context)
 
     def post(self, request):
         # Validar que se haya enviado un archivo
