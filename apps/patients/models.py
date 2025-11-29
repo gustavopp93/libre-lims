@@ -1,15 +1,15 @@
 from django.db import models
 
+from apps.core.models import TimeStampedModel
 
-class LeadSource(models.Model):
+
+class LeadSource(TimeStampedModel):
     """Canal por el cual el cliente llegó al laboratorio"""
 
     name = models.CharField(max_length=100, unique=True, verbose_name="Nombre")
     description = models.TextField(blank=True, verbose_name="Descripción")
     is_active = models.BooleanField(default=True, verbose_name="Activo")
     order = models.PositiveIntegerField(default=0, help_text="Orden de visualización")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Canal de Adquisición"
@@ -19,7 +19,7 @@ class LeadSource(models.Model):
         return self.name
 
 
-class Patient(models.Model):
+class Patient(TimeStampedModel):
     class DocumentType(models.TextChoices):
         DNI = "DNI", "DNI"
         CE = "CE", "Carnet de Extranjería"
@@ -51,8 +51,6 @@ class Patient(models.Model):
         verbose_name="¿Cómo nos conoció?",
         help_text="Canal por el cual el cliente llegó por primera vez",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Patient"

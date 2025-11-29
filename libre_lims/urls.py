@@ -27,10 +27,13 @@ from apps.exams.views import (
 )
 from apps.orders.views import (
     CreateOrderView,
+    CreateReferralOrderView,
     OrderDetailView,
     OrderPrintView,
     OrdersListView,
     create_order_api,
+    create_referral_order_api,
+    search_referrals_api,
 )
 from apps.patients.views import (
     CreateLeadSourceView,
@@ -57,6 +60,7 @@ urlpatterns = [
     path("", DashboardView.as_view(), name="dashboard"),
     path("orders/", OrdersListView.as_view(), name="orders_list"),
     path("orders/create/", CreateOrderView.as_view(), name="create_order"),
+    path("orders/referral/create/", CreateReferralOrderView.as_view(), name="create_referral_order"),
     path("orders/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
     path("orders/<int:pk>/print/", OrderPrintView.as_view(), name="order_print"),
     path("patients/", PatientsListView.as_view(), name="patients_list"),
@@ -72,6 +76,8 @@ urlpatterns = [
     path("api/patients/search/", search_patient_api, name="api_patient_search"),
     path("api/exams/search/", search_exams_api, name="api_exams_search"),
     path("api/orders/create/", create_order_api, name="api_orders_create"),
+    path("api/orders/referral/create/", create_referral_order_api, name="api_referral_orders_create"),
+    path("api/referrals/search/", search_referrals_api, name="api_referrals_search"),
     path("company/", include("apps.billing.urls")),
     path("pricing/", include("apps.pricing.urls")),
 ]

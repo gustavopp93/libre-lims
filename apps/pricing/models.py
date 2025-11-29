@@ -1,14 +1,13 @@
 from django.db import models
 
+from apps.core.models import TimeStampedModel
 from apps.exams.models import Exam
 
 
-class PriceList(models.Model):
+class PriceList(TimeStampedModel):
     name = models.CharField(max_length=200, verbose_name="Name")
     description = models.TextField(blank=True, verbose_name="Description")
     is_active = models.BooleanField(default=True, verbose_name="Active")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
     class Meta:
         verbose_name = "Price List"
@@ -32,7 +31,7 @@ class PriceListItem(models.Model):
         return f"{self.price_list.name} - {self.exam.name}: S/. {self.price}"
 
 
-class Coupon(models.Model):
+class Coupon(TimeStampedModel):
     code = models.CharField(max_length=50, unique=True, verbose_name="Code")
     price_list = models.ForeignKey(
         PriceList,
@@ -42,8 +41,6 @@ class Coupon(models.Model):
     )
     expiration_date = models.DateField(null=True, blank=True, verbose_name="Expiration Date")
     is_active = models.BooleanField(default=True, verbose_name="Active")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
     class Meta:
         verbose_name = "Coupon"

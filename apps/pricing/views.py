@@ -1,14 +1,21 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
+from django.views.decorators.http import require_GET
 from django.views.generic import CreateView, ListView, UpdateView
 
 from apps.exams.models import Exam
 from apps.pricing.models import Coupon, PriceList, PriceListItem
 from apps.referrals.models import Referral
+
+from .services import PricingService
+
+logger = logging.getLogger(__name__)
 
 
 # PriceList Views
@@ -275,6 +282,7 @@ class PriceListUploadView(LoginRequiredMixin, View):
             )
 
         except Exception as e:
+            logger.exception("Error al procesar el archivo de tarifario")
             messages.error(request, f"Error al procesar el archivo: {str(e)}")
 
         return redirect("price_list_list")
@@ -407,3 +415,82 @@ class ReferralUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, f"Referido '{form.instance.business_name}' actualizado exitosamente")
         return super().form_valid(form)
+
+
+# API Endpoints
+def get_exam_price_api(request):
+    """
+    API endpoint para obtener el precio de un examen considerando cupón, tarifario del referido o precio base.
+
+    Query params:
+        - exam_id: ID del examen (requerido)
+        - referral_id: ID del referido (opcional)
+        - coupon_code: Código del cupón (opcional)
+
+    Returns:
+        JSON con:
+            - price: precio del examen
+            - source: 'coupon', 'price_list' o 'base'
+            - price_list_id: ID del tarifario (si aplica)
+            - coupon_code: código del cupón (si aplica)
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "No autenticado"}, status=401)
+
+    exam_id = request.GET.get("exam_id")
+    referral_id = request.GET.get("referral_id")
+    coupon_code = request.GET.get("coupon_code", "").strip()
+
+    if not exam_id:
+        return JsonResponse({"error": "exam_id es requerido"}, status=400)
+
+    try:
+        # Convertir a int
+        exam_id = int(exam_id)
+        referral_id = int(referral_id) if referral_id else None
+
+        # Usar el servicio para obtener el precio
+        result = PricingService.get_exam_price(exam_id, referral_id, coupon_code or None)
+
+        return JsonResponse(result)
+
+    except ValueError:
+        return JsonResponse({"error": "IDs inválidos"}, status=400)
+    except Exam.DoesNotExist:
+        return JsonResponse({"error": "Examen no encontrado"}, status=404)
+    except Referral.DoesNotExist:
+        return JsonResponse({"error": "Referido no encontrado"}, status=404)
+    except Exception as e:
+        logger.exception("Error al obtener precio del examen")
+        return JsonResponse({"error": f"Error al obtener precio: {str(e)}"}, status=500)
+
+
+@require_GET
+def validate_coupon_api(request):
+    """
+    API endpoint para validar un código de cupón.
+
+    Query params:
+        - coupon_code: Código del cupón (requerido)
+
+    Returns:
+        JSON con:
+            - valid: True/False
+            - coupon: datos del cupón (si es válido)
+            - error: mensaje de error (si no es válido)
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "No autenticado"}, status=401)
+
+    coupon_code = request.GET.get("coupon_code", "").strip()
+
+    if not coupon_code:
+        return JsonResponse({"error": "Código de cupón requerido"}, status=400)
+
+    try:
+        result = PricingService.validate_coupon(coupon_code)
+        return JsonResponse(result)
+
+    except Exception as e:
+        logger.exception("Error al validar cupón")
+        return JsonResponse({"error": f"Error al validar cupón: {str(e)}"}, status=500)
