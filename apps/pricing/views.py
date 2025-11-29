@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
@@ -12,6 +14,8 @@ from apps.pricing.models import Coupon, PriceList, PriceListItem
 from apps.referrals.models import Referral
 
 from .services import PricingService
+
+logger = logging.getLogger(__name__)
 
 
 # PriceList Views
@@ -278,6 +282,7 @@ class PriceListUploadView(LoginRequiredMixin, View):
             )
 
         except Exception as e:
+            logger.exception("Error al procesar el archivo de tarifario")
             messages.error(request, f"Error al procesar el archivo: {str(e)}")
 
         return redirect("price_list_list")
@@ -456,6 +461,7 @@ def get_exam_price_api(request):
     except Referral.DoesNotExist:
         return JsonResponse({"error": "Referido no encontrado"}, status=404)
     except Exception as e:
+        logger.exception("Error al obtener precio del examen")
         return JsonResponse({"error": f"Error al obtener precio: {str(e)}"}, status=500)
 
 
@@ -486,4 +492,5 @@ def validate_coupon_api(request):
         return JsonResponse(result)
 
     except Exception as e:
+        logger.exception("Error al validar cupón")
         return JsonResponse({"error": f"Error al validar cupón: {str(e)}"}, status=500)

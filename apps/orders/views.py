@@ -1,4 +1,5 @@
 import json
+import logging
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -18,6 +19,8 @@ from apps.patients.models import Patient
 from apps.referrals.models import Referral
 
 from .models import Order, OrderDetail
+
+logger = logging.getLogger(__name__)
 
 
 class OrdersListView(LoginRequiredMixin, ListView):
@@ -162,6 +165,7 @@ def create_order_api(request):
         return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
 
     except Exception as e:
+        logger.exception("Error al crear la orden")
         return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)
 
 
@@ -273,4 +277,5 @@ def create_referral_order_api(request):
         return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
 
     except Exception as e:
+        logger.exception("Error al crear la orden de referido")
         return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)

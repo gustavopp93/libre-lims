@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -12,6 +13,8 @@ from openpyxl import load_workbook
 
 from .forms import ExamForm, ExamUpdateForm
 from .models import Exam
+
+logger = logging.getLogger(__name__)
 
 
 class ExamsListView(LoginRequiredMixin, ListView):
@@ -203,5 +206,6 @@ class BulkUploadExamsView(LoginRequiredMixin, View):
             return redirect("exams_list")
 
         except Exception as e:
+            logger.exception("Error al procesar el archivo de exámenes")
             messages.error(request, f"Error al procesar el archivo: {str(e)}")
             return redirect("bulk_upload_exams")
