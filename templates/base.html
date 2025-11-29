@@ -4,12 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ company.business_name }}{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS - Using CDN (development only, replace with compiled CSS for production) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        // Suppress Tailwind CDN warning in console
+        tailwind.config = {
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+    <!-- Shepherd.js for onboarding tours -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@11.2.0/dist/css/shepherd.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/shepherd.js@11.2.0/dist/js/shepherd.min.js"></script>
 </head>
 <body class="bg-gray-100">
     <div class="min-h-screen">

@@ -1,50 +1,58 @@
 <!-- Sidebar -->
-<aside class="w-64 bg-white shadow-md">
+<aside class="w-64 bg-white shadow-md relative">
     <div class="p-6">
         <h1 class="text-2xl font-bold text-gray-800">
             <a href="{% url 'dashboard' %}">{{ company.business_name }}</a>
         </h1>
     </div>
 
-    <nav class="mt-6">
-        <a href="{% url 'orders_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'orders_list' or request.resolver_match.url_name == 'create_order' or request.resolver_match.url_name == 'create_referral_order' or request.resolver_match.url_name == 'order_detail' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+    <nav id="sidebar-nav" class="mt-6">
+        <a id="nav-orders" href="{% url 'orders_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'orders_list' or request.resolver_match.url_name == 'create_order' or request.resolver_match.url_name == 'create_referral_order' or request.resolver_match.url_name == 'order_detail' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="file-plus" class="w-5 h-5 mr-3"></i>
             <span>Admisión</span>
         </a>
 
-        <a href="{% url 'exams_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'exams_list' or request.resolver_match.url_name == 'exam_create' or request.resolver_match.url_name == 'exam_update' or request.resolver_match.url_name == 'bulk_upload' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+        <a id="nav-exams" href="{% url 'exams_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'exams_list' or request.resolver_match.url_name == 'exam_create' or request.resolver_match.url_name == 'exam_update' or request.resolver_match.url_name == 'bulk_upload' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="clipboard-list" class="w-5 h-5 mr-3"></i>
             <span>Exámenes</span>
         </a>
 
-        <a href="{% url 'patients_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'patients_list' or request.resolver_match.url_name == 'patients_create' or request.resolver_match.url_name == 'patients_update' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+        <a id="nav-patients" href="{% url 'patients_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'patients_list' or request.resolver_match.url_name == 'patients_create' or request.resolver_match.url_name == 'patients_update' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="users" class="w-5 h-5 mr-3"></i>
             <span>Pacientes</span>
         </a>
 
-        <a href="{% url 'lead_sources_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'lead_sources_list' or request.resolver_match.url_name == 'lead_sources_create' or request.resolver_match.url_name == 'lead_sources_update' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+        <a id="nav-lead-sources" href="{% url 'lead_sources_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'lead_sources_list' or request.resolver_match.url_name == 'lead_sources_create' or request.resolver_match.url_name == 'lead_sources_update' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="megaphone" class="w-5 h-5 mr-3"></i>
             <span>Canales de Adquisición</span>
         </a>
 
-        <a href="{% url 'price_list_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'price_list_list' or request.resolver_match.url_name == 'price_list_create' or request.resolver_match.url_name == 'price_list_update' or request.resolver_match.url_name == 'price_list_upload' or request.resolver_match.url_name == 'price_list_detail' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+        <a id="nav-price-lists" href="{% url 'price_list_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'price_list_list' or request.resolver_match.url_name == 'price_list_create' or request.resolver_match.url_name == 'price_list_update' or request.resolver_match.url_name == 'price_list_upload' or request.resolver_match.url_name == 'price_list_detail' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="tag" class="w-5 h-5 mr-3"></i>
             <span>Tarifarios</span>
         </a>
 
-        <a href="{% url 'coupon_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'coupon_list' or request.resolver_match.url_name == 'coupon_create' or request.resolver_match.url_name == 'coupon_update' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+        <a id="nav-coupons" href="{% url 'coupon_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'coupon_list' or request.resolver_match.url_name == 'coupon_create' or request.resolver_match.url_name == 'coupon_update' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="ticket" class="w-5 h-5 mr-3"></i>
             <span>Cupones</span>
         </a>
 
-        <a href="{% url 'referral_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'referral_list' or request.resolver_match.url_name == 'referral_create' or request.resolver_match.url_name == 'referral_update' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+        <a id="nav-referrals" href="{% url 'referral_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'referral_list' or request.resolver_match.url_name == 'referral_create' or request.resolver_match.url_name == 'referral_update' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="handshake" class="w-5 h-5 mr-3"></i>
             <span>Referidos</span>
         </a>
 
-        <a href="{% url 'company_settings' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'company_settings' or request.resolver_match.url_name == 'company_create' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+        <a id="nav-settings" href="{% url 'company_settings' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'company_settings' or request.resolver_match.url_name == 'company_create' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="settings" class="w-5 h-5 mr-3"></i>
             <span>Configuración</span>
         </a>
     </nav>
+
+    <!-- Help Button -->
+    <div class="absolute bottom-0 w-64 p-6 border-t border-gray-200">
+        <button id="helpButton" class="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors">
+            <i data-lucide="help-circle" class="w-5 h-5 mr-3"></i>
+            <span>Ayuda / Tour</span>
+        </button>
+    </div>
 </aside>
