@@ -1,4 +1,4 @@
-from .models import Company
+from apps.billing.models import Company
 
 
 def company_processor(request):

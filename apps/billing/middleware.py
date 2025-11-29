@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from .models import Company
+from apps.billing.models import Company
 
 
 class CompanyRequiredMiddleware:

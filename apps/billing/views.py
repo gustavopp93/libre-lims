@@ -4,8 +4,8 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 
-from .forms import CompanyForm
-from .models import Company
+from apps.billing.forms import CompanyForm
+from apps.billing.models import Company
 
 
 class CompanySettingsView(LoginRequiredMixin, UpdateView):

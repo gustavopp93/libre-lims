@@ -11,8 +11,8 @@ from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
 from openpyxl import load_workbook
 
-from .forms import ExamForm, ExamUpdateForm
-from .models import Exam
+from apps.exams.forms import ExamForm, ExamUpdateForm
+from apps.exams.models import Exam
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Company
+from apps.billing.models import Company
 
 
 class CompanyForm(forms.ModelForm):

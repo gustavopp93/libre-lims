@@ -11,9 +11,8 @@ from django.views.generic import CreateView, ListView, UpdateView
 
 from apps.exams.models import Exam
 from apps.pricing.models import Coupon, PriceList, PriceListItem
+from apps.pricing.services import PricingService
 from apps.referrals.models import Referral
-
-from .services import PricingService
 
 logger = logging.getLogger(__name__)
 
