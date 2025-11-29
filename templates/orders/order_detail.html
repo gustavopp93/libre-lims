@@ -61,17 +61,17 @@
                             <div>
                                 <label class="block text-gray-600 text-sm font-medium mb-1">Estado</label>
                                 <p class="text-gray-900 font-semibold">
-                                    {% if sale.status == 'pending' %}
+                                    {% if order.status == 'pending' %}
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
                             <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
                             {{ order.get_status_display }}
                         </span>
-                                    {% elif sale.status == 'completed' %}
+                                    {% elif order.status == 'completed' %}
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                             <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
                             {{ order.get_status_display }}
                         </span>
-                                    {% elif sale.status == 'cancelled' %}
+                                    {% elif order.status == 'cancelled' %}
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                             <i data-lucide="x-circle" class="w-4 h-4 mr-1"></i>
                             {{ order.get_status_display }}
@@ -87,7 +87,7 @@
                                 <label class="block text-gray-600 text-sm font-medium mb-1">Última Actualización</label>
                                 <p class="text-gray-900 font-semibold">{{ order.updated_at|date:"d/m/Y H:i" }}</p>
                             </div>
-                            {% if sale.observations %}
+                            {% if order.observations %}
                                 <div class="md:col-span-2">
                                     <label class="block text-gray-600 text-sm font-medium mb-1">Observaciones</label>
                                     <p class="text-gray-900 bg-gray-50 p-3 rounded border border-gray-200">{{ order.observations }}</p>
@@ -147,7 +147,7 @@
                         </a>
                         <a href="{% url 'order_print' order.pk %}" target="_blank" class="flex items-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
                             <i data-lucide="printer" class="w-5 h-5 mr-2"></i>
-                            Generar Ticket
+                            Imprimir Orden
                         </a>
                     </div>
                 </div>

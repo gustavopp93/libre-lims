@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import models
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView, ListView, RedirectView, TemplateView, UpdateView
@@ -130,10 +131,37 @@ class AdmissionView(LoginRequiredMixin, TemplateView):
 
 
 def search_patient_api(request):
-    """API endpoint para buscar pacientes por tipo y número de documento"""
+    """API endpoint para buscar pacientes por tipo y número de documento o por query general"""
     if not request.user.is_authenticated:
         return JsonResponse({"error": "No autenticado"}, status=401)
 
+    # Búsqueda nueva por query (nombre, apellido, documento)
+    query = request.GET.get("query", "").strip()
+    if query:
+        if len(query) < 2:
+            return JsonResponse({"patients": []})
+
+        # Buscar por nombre, apellido o documento
+        patients = Patient.objects.filter(
+            models.Q(first_name__icontains=query)
+            | models.Q(last_name__icontains=query)
+            | models.Q(document_number__icontains=query)
+        )[:10]
+
+        patients_data = [
+            {
+                "id": patient.id,
+                "first_name": patient.first_name,
+                "last_name": patient.last_name,
+                "document_type": patient.document_type,
+                "document_number": patient.document_number,
+            }
+            for patient in patients
+        ]
+
+        return JsonResponse({"patients": patients_data})
+
+    # Búsqueda antigua por tipo y número de documento (para compatibilidad)
     document_type = request.GET.get("document_type")
     document_number = request.GET.get("document_number")
 

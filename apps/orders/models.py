@@ -1,10 +1,11 @@
 from django.db import models
 
+from apps.core.models import TimeStampedModel
 from apps.exams.models import Exam
 from apps.patients.models import Patient
 
 
-class Order(models.Model):
+class Order(TimeStampedModel):
     class Status(models.TextChoices):
         PENDING = "pending", "Pendiente"
         COMPLETED = "completed", "Completada"
@@ -29,8 +30,6 @@ class Order(models.Model):
     )
     observations = models.TextField(blank=True, default="")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Order"

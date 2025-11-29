@@ -97,7 +97,6 @@ def search_exams_api(request):
         {
             "id": exam.id,
             "name": exam.name,
-            "price": str(exam.price),
         }
         for exam in exams
     ]

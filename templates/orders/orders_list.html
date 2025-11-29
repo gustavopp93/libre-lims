@@ -13,11 +13,15 @@
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
 <div class="max-w-7xl mx-auto">
-    <!-- Action Button -->
-    <div class="mb-6 flex justify-end">
+    <!-- Action Buttons -->
+    <div class="mb-6 flex justify-end space-x-3">
+        <a href="{% url 'create_referral_order' %}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded flex items-center">
+            <i data-lucide="truck" class="w-5 h-5 mr-2"></i>
+            Orden de Referido
+        </a>
         <a href="{% url 'create_order' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded flex items-center">
             <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
-            Crear Ticket
+            Crear Orden
         </a>
     </div>
 

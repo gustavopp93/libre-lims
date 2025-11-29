@@ -1,8 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from apps.core.models import TimeStampedModel
 
-class Company(models.Model):
+
+class Company(TimeStampedModel):
     """Model to store company information. Only one company should exist."""
 
     business_name = models.CharField(max_length=200, verbose_name="Razon Social")
@@ -10,8 +12,6 @@ class Company(models.Model):
     phone_number = models.CharField(max_length=20, verbose_name="Telefono")
     email = models.EmailField(verbose_name="Correo Electronico")
     legal_address = models.TextField(verbose_name="Direccion Legal")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creacion")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Fecha de Actualizacion")
 
     class Meta:
         verbose_name = "Empresa"

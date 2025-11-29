@@ -3,7 +3,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
+from django.db import models, transaction
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -15,6 +15,7 @@ from weasyprint import HTML
 from apps.billing.models import Company
 from apps.exams.models import Exam
 from apps.patients.models import Patient
+from apps.referrals.models import Referral
 
 from .models import Order, OrderDetail
 
@@ -32,6 +33,11 @@ class OrdersListView(LoginRequiredMixin, ListView):
 
 class CreateOrderView(LoginRequiredMixin, TemplateView):
     template_name = "orders/create_order.html"
+    login_url = reverse_lazy("login")
+
+
+class CreateReferralOrderView(LoginRequiredMixin, TemplateView):
+    template_name = "orders/referral_order_create.html"
     login_url = reverse_lazy("login")
 
 
@@ -83,6 +89,7 @@ def create_order_api(request):
 
     # Validar datos requeridos
     patient_id = data.get("patient_id")
+    coupon_code = data.get("coupon_code", "").strip()
     observations = data.get("observations", "")
     exam_details = data.get("exam_details", [])
 
@@ -97,6 +104,21 @@ def create_order_api(request):
         patient = Patient.objects.get(id=patient_id)
     except Patient.DoesNotExist:
         return JsonResponse({"error": "Paciente no encontrado"}, status=404)
+
+    # Validar cupón si se proporcionó
+    coupon = None
+    if coupon_code:
+        from apps.pricing.services import PricingService
+
+        validation_result = PricingService.validate_coupon(coupon_code)
+
+        if not validation_result["valid"]:
+            return JsonResponse({"error": validation_result["error"]}, status=400)
+
+        # Si el cupón es válido, obtenerlo de la base de datos
+        from apps.pricing.models import Coupon
+
+        coupon = Coupon.objects.get(code=coupon_code.upper(), is_active=True)
 
     # Validar exam_details
     validated_details = []
@@ -129,13 +151,166 @@ def create_order_api(request):
     # Crear la orden y sus detalles en una transacción
     try:
         with transaction.atomic():
-            order = Order.objects.create(patient=patient, observations=observations)
+            order = Order.objects.create(patient=patient, coupon=coupon, observations=observations)
 
             for detail in validated_details:
                 OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
 
         # Agregar mensaje de éxito a la sesión
         messages.success(request, f"Orden #{order.id} creada exitosamente")
+
+        return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
+
+    except Exception as e:
+        return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)
+
+
+def search_referrals_api(request):
+    """API endpoint para buscar referidos"""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "No autenticado"}, status=401)
+
+    query = request.GET.get("query", "").strip()
+
+    if len(query) < 2:
+        return JsonResponse({"referrals": []})
+
+    # Buscar por nombre de negocio o RUC
+    referrals = Referral.objects.filter(is_active=True).filter(
+        models.Q(business_name__icontains=query) | models.Q(document_number__icontains=query)
+    )[:10]
+
+    referrals_data = [
+        {
+            "id": ref.id,
+            "business_name": ref.business_name,
+            "document_number": ref.document_number,
+            "price_list_id": ref.price_list_id,
+            "price_list_name": ref.price_list.name,
+        }
+        for ref in referrals
+    ]
+
+    return JsonResponse({"referrals": referrals_data})
+
+
+def get_referral_patients_api(request):
+    """API endpoint para obtener pacientes de un referido específico"""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "No autenticado"}, status=401)
+
+    referral_id = request.GET.get("referral_id")
+    query = request.GET.get("query", "").strip()
+
+    if not referral_id:
+        return JsonResponse({"error": "ID de referido requerido"}, status=400)
+
+    # Verificar que el referido existe
+    try:
+        Referral.objects.get(id=referral_id, is_active=True)
+    except Referral.DoesNotExist:
+        return JsonResponse({"error": "Referido no encontrado"}, status=404)
+
+    # Buscar pacientes
+    patients_query = Patient.objects.all()
+
+    if query and len(query) >= 2:
+        patients_query = patients_query.filter(
+            models.Q(first_name__icontains=query)
+            | models.Q(last_name__icontains=query)
+            | models.Q(document_number__icontains=query)
+        )
+
+    patients = patients_query[:10]
+
+    patients_data = [
+        {
+            "id": patient.id,
+            "first_name": patient.first_name,
+            "last_name": patient.last_name,
+            "document_type": patient.document_type,
+            "document_number": patient.document_number,
+        }
+        for patient in patients
+    ]
+
+    return JsonResponse({"patients": patients_data})
+
+
+@require_POST
+def create_referral_order_api(request):
+    """API endpoint para crear una orden de referido con sus detalles"""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "No autenticado"}, status=401)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON inválido"}, status=400)
+
+    # Validar datos requeridos
+    referral_id = data.get("referral_id")
+    patient_id = data.get("patient_id")
+    observations = data.get("observations", "")
+    exam_details = data.get("exam_details", [])
+
+    if not referral_id:
+        return JsonResponse({"error": "El referido es requerido"}, status=400)
+
+    if not patient_id:
+        return JsonResponse({"error": "El paciente es requerido"}, status=400)
+
+    if not exam_details or len(exam_details) == 0:
+        return JsonResponse({"error": "Debe agregar al menos un examen"}, status=400)
+
+    # Validar que el referido existe y está activo
+    try:
+        referral = Referral.objects.get(id=referral_id, is_active=True)
+    except Referral.DoesNotExist:
+        return JsonResponse({"error": "Referido no encontrado o inactivo"}, status=404)
+
+    # Validar que el paciente existe
+    try:
+        patient = Patient.objects.get(id=patient_id)
+    except Patient.DoesNotExist:
+        return JsonResponse({"error": "Paciente no encontrado"}, status=404)
+
+    # Validar exam_details
+    validated_details = []
+    for detail in exam_details:
+        exam_id = detail.get("exam_id")
+        price = detail.get("price")
+
+        if not exam_id or price is None:
+            return JsonResponse({"error": "Cada examen debe tener id y precio"}, status=400)
+
+        # Validar que el examen existe
+        try:
+            exam = Exam.objects.get(id=exam_id)
+        except Exam.DoesNotExist:
+            return JsonResponse({"error": f"Examen con ID {exam_id} no encontrado"}, status=404)
+
+        # Validar que el precio es un decimal válido
+        try:
+            price_decimal = Decimal(str(price))
+            if price_decimal < 0:
+                return JsonResponse({"error": "El precio no puede ser negativo"}, status=400)
+            if price_decimal.as_tuple().exponent < -2:
+                return JsonResponse({"error": "El precio debe tener máximo 2 decimales"}, status=400)
+        except (InvalidOperation, ValueError):
+            return JsonResponse({"error": "Precio inválido"}, status=400)
+
+        validated_details.append({"exam": exam, "price": price_decimal})
+
+    # Crear la orden y sus detalles en una transacción
+    try:
+        with transaction.atomic():
+            order = Order.objects.create(patient=patient, referral=referral, observations=observations)
+
+            for detail in validated_details:
+                OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
+
+        messages.success(request, f"Orden de referido #{order.id} creada exitosamente")
 
         return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
 

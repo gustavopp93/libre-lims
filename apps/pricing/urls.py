@@ -23,4 +23,7 @@ urlpatterns = [
     path("referrals/", views.ReferralListView.as_view(), name="referral_list"),
     path("referrals/create/", views.ReferralCreateView.as_view(), name="referral_create"),
     path("referrals/<int:pk>/update/", views.ReferralUpdateView.as_view(), name="referral_update"),
+    # API Endpoints
+    path("api/exam-price/", views.get_exam_price_api, name="api_get_exam_price"),
+    path("api/validate-coupon/", views.validate_coupon_api, name="api_validate_coupon"),
 ]
