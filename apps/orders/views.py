@@ -8,7 +8,7 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView, ListView, TemplateView
 from weasyprint import HTML
 
@@ -165,6 +165,7 @@ def create_order_api(request):
         return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)
 
 
+@require_GET
 def search_referrals_api(request):
     """API endpoint para buscar referidos"""
     if not request.user.is_authenticated:
@@ -194,6 +195,7 @@ def search_referrals_api(request):
     return JsonResponse({"referrals": referrals_data})
 
 
+@require_GET
 def get_referral_patients_api(request):
     """API endpoint para obtener pacientes de un referido específico"""
     if not request.user.is_authenticated:

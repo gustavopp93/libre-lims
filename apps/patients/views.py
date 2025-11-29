@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
 from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_GET
 from django.views.generic import CreateView, FormView, ListView, RedirectView, TemplateView, UpdateView
 
 from .forms import LeadSourceForm, LoginForm, PatientForm, PatientUpdateForm
@@ -130,6 +131,7 @@ class AdmissionView(LoginRequiredMixin, TemplateView):
     login_url = reverse_lazy("login")
 
 
+@require_GET
 def search_patient_api(request):
     """API endpoint para buscar pacientes por tipo y número de documento o por query general"""
     if not request.user.is_authenticated:
