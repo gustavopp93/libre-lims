@@ -195,50 +195,6 @@ def search_referrals_api(request):
     return JsonResponse({"referrals": referrals_data})
 
 
-@require_GET
-def get_referral_patients_api(request):
-    """API endpoint para obtener pacientes de un referido específico"""
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "No autenticado"}, status=401)
-
-    referral_id = request.GET.get("referral_id")
-    query = request.GET.get("query", "").strip()
-
-    if not referral_id:
-        return JsonResponse({"error": "ID de referido requerido"}, status=400)
-
-    # Verificar que el referido existe
-    try:
-        Referral.objects.get(id=referral_id, is_active=True)
-    except Referral.DoesNotExist:
-        return JsonResponse({"error": "Referido no encontrado"}, status=404)
-
-    # Buscar pacientes
-    patients_query = Patient.objects.all()
-
-    if query and len(query) >= 2:
-        patients_query = patients_query.filter(
-            models.Q(first_name__icontains=query)
-            | models.Q(last_name__icontains=query)
-            | models.Q(document_number__icontains=query)
-        )
-
-    patients = patients_query[:10]
-
-    patients_data = [
-        {
-            "id": patient.id,
-            "first_name": patient.first_name,
-            "last_name": patient.last_name,
-            "document_type": patient.document_type,
-            "document_number": patient.document_number,
-        }
-        for patient in patients
-    ]
-
-    return JsonResponse({"patients": patients_data})
-
-
 @require_POST
 def create_referral_order_api(request):
     """API endpoint para crear una orden de referido con sus detalles"""

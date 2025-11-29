@@ -33,7 +33,6 @@ from apps.orders.views import (
     OrdersListView,
     create_order_api,
     create_referral_order_api,
-    get_referral_patients_api,
     search_referrals_api,
 )
 from apps.patients.views import (
@@ -79,7 +78,6 @@ urlpatterns = [
     path("api/orders/create/", create_order_api, name="api_orders_create"),
     path("api/orders/referral/create/", create_referral_order_api, name="api_referral_orders_create"),
     path("api/referrals/search/", search_referrals_api, name="api_referrals_search"),
-    path("api/referrals/patients/", get_referral_patients_api, name="api_referral_patients"),
     path("company/", include("apps.billing.urls")),
     path("pricing/", include("apps.pricing.urls")),
 ]
