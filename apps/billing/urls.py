@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import CompanyCreateView, CompanySettingsView
+from apps.billing.views import CompanyCreateView, CompanySettingsView
 
 urlpatterns = [
     path("settings/", CompanySettingsView.as_view(), name="company_settings"),

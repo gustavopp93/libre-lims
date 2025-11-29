@@ -8,8 +8,8 @@ from django.urls import reverse_lazy
 from django.views.decorators.http import require_GET
 from django.views.generic import CreateView, FormView, ListView, RedirectView, TemplateView, UpdateView
 
-from .forms import LeadSourceForm, LoginForm, PatientForm, PatientUpdateForm
-from .models import LeadSource, Patient
+from apps.patients.forms import LeadSourceForm, LoginForm, PatientForm, PatientUpdateForm
+from apps.patients.models import LeadSource, Patient
 
 
 class LoginView(FormView):

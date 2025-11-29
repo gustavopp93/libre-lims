@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import LeadSource, Patient
+from apps.patients.models import LeadSource, Patient
 
 
 class PatientUpdateForm(forms.ModelForm):

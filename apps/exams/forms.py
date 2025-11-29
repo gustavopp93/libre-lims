@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Exam
+from apps.exams.models import Exam
 
 
 class ExamUpdateForm(forms.ModelForm):

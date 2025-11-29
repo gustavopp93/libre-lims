@@ -15,10 +15,9 @@ from weasyprint import HTML
 
 from apps.billing.models import Company
 from apps.exams.models import Exam
+from apps.orders.models import Order, OrderDetail
 from apps.patients.models import Patient
 from apps.referrals.models import Referral
-
-from .models import Order, OrderDetail
 
 logger = logging.getLogger(__name__)
 

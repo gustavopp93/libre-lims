@@ -1,9 +1,8 @@
 from django.utils import timezone
 
 from apps.exams.models import Exam
+from apps.pricing.models import Coupon, PriceListItem
 from apps.referrals.models import Referral
-
-from .models import Coupon, PriceListItem
 
 
 class PricingService:
