@@ -22,7 +22,7 @@
                 </div>
 
                 <!-- Search Patient Card -->
-                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <div id="tour-patient-search" class="bg-white rounded-lg shadow p-6 mb-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Buscar Paciente</h3>
 
                     <div class="grid grid-cols-1 gap-4">
@@ -56,7 +56,7 @@
                     </div>
 
                     <!-- Coupon Section -->
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <div id="tour-coupon" class="bg-white rounded-lg shadow p-6 mb-6">
                         <h4 class="text-lg font-semibold mb-4">Cupón de Descuento (Opcional)</h4>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-8">
@@ -96,7 +96,7 @@
                     </div>
 
                     <!-- Exams Section -->
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <div id="tour-exams" class="bg-white rounded-lg shadow p-6 mb-6">
                         <div class="flex justify-between mb-4">
                             <h4 class="text-lg font-semibold">Exámenes Solicitados</h4>
                             <button id="addExamRowBtn" class="bg-green-500 text-white px-4 py-2 rounded">Agregar Examen</button>
@@ -105,7 +105,7 @@
                     </div>
 
                     <!-- Total and Actions -->
-                    <div class="bg-white rounded-lg shadow p-6">
+                    <div id="tour-total" class="bg-white rounded-lg shadow p-6">
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Observaciones</label>
                             <textarea id="observations" rows="3" class="shadow border rounded w-full py-2 px-3 text-gray-700" placeholder="Observaciones adicionales..."></textarea>
@@ -501,6 +501,159 @@
                 }
             }
             updateTotal();
+        }
+
+        // Create Order Tour Configuration
+        const createOrderTour = new Shepherd.Tour({
+            useModalOverlay: true,
+            defaultStepOptions: {
+                cancelIcon: {
+                    enabled: true
+                },
+                classes: 'shadow-lg',
+                scrollTo: { behavior: 'smooth', block: 'center' }
+            }
+        });
+
+        createOrderTour.addStep({
+            id: 'patient-search',
+            text: 'Comienza buscando al paciente por nombre, apellido o número de documento. Si el paciente no existe, puedes crearlo usando el botón "Crear Nuevo Paciente".',
+            title: 'Paso 1: Buscar Paciente',
+            attachTo: {
+                element: '#tour-patient-search',
+                on: 'bottom'
+            },
+            buttons: [
+                {
+                    text: 'Siguiente',
+                    action: createOrderTour.next
+                }
+            ]
+        });
+
+        createOrderTour.addStep({
+            id: 'coupon',
+            text: 'Si el paciente tiene un cupón de descuento, ingrésalo aquí. El sistema validará el cupón y aplicará automáticamente el tarifario especial.',
+            title: 'Paso 2: Cupón de Descuento (Opcional)',
+            attachTo: {
+                element: '#tour-coupon',
+                on: 'bottom'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: createOrderTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: createOrderTour.next
+                }
+            ]
+        });
+
+        createOrderTour.addStep({
+            id: 'exams',
+            text: 'Agrega los exámenes solicitados haciendo clic en "Agregar Examen". Los precios se calculan automáticamente según el tarifario del cupón (si aplica) o el precio base.',
+            title: 'Paso 3: Agregar Exámenes',
+            attachTo: {
+                element: '#tour-exams',
+                on: 'bottom'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: createOrderTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: createOrderTour.next
+                }
+            ]
+        });
+
+        createOrderTour.addStep({
+            id: 'add-exam-btn',
+            text: 'Usa este botón para agregar más exámenes a la orden. Puedes agregar tantos exámenes como necesites.',
+            title: 'Botón Agregar Examen',
+            attachTo: {
+                element: '#addExamRowBtn',
+                on: 'left'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: createOrderTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: createOrderTour.next
+                }
+            ]
+        });
+
+        createOrderTour.addStep({
+            id: 'total',
+            text: 'Aquí verás el total de la orden y podrás agregar observaciones adicionales. Cuando esté listo, haz clic en "Crear Orden" para finalizar.',
+            title: 'Paso 4: Total y Crear Orden',
+            attachTo: {
+                element: '#tour-total',
+                on: 'top'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: createOrderTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: createOrderTour.next
+                }
+            ]
+        });
+
+        createOrderTour.addStep({
+            id: 'help',
+            text: 'Si necesitas ver este tour de nuevo, siempre puedes hacer clic en el botón de ayuda en el menú lateral.',
+            title: '¿Necesitas ayuda?',
+            attachTo: {
+                element: '#helpButton',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: createOrderTour.back
+                },
+                {
+                    text: 'Finalizar',
+                    action: createOrderTour.complete
+                }
+            ]
+        });
+
+        // Check if user has seen the create order tour
+        const hasSeenCreateOrderTour = localStorage.getItem('hasSeenCreateOrderTour');
+
+        // Auto-start tour for first-time users
+        if (!hasSeenCreateOrderTour) {
+            setTimeout(() => {
+                createOrderTour.start();
+                localStorage.setItem('hasSeenCreateOrderTour', 'true');
+            }, 800);
+        }
+
+        // Help button to restart tour
+        const helpButton = document.getElementById('helpButton');
+        if (helpButton) {
+            // Remove any existing listeners
+            const newButton = helpButton.cloneNode(true);
+            helpButton.parentNode.replaceChild(newButton, helpButton);
+
+            // Add new listener
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                createOrderTour.start();
+            });
         }
     </script>
 {% endblock %}

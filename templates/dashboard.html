@@ -12,9 +12,9 @@
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="dashboard-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Card Example -->
-                <div class="bg-white rounded-lg shadow p-6">
+                <div id="stat-patients" class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-blue-100 text-blue-500">
                             <i data-lucide="users" class="w-8 h-8"></i>
@@ -53,4 +53,222 @@
         </main>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        // Dashboard Tour Configuration
+        const dashboardTour = new Shepherd.Tour({
+            useModalOverlay: true,
+            defaultStepOptions: {
+                cancelIcon: {
+                    enabled: true
+                },
+                classes: 'shadow-lg',
+                scrollTo: { behavior: 'smooth', block: 'center' }
+            }
+        });
+
+        dashboardTour.addStep({
+            id: 'welcome',
+            text: 'Te guiaremos por las funcionalidades principales del sistema. Este es el menú de navegación donde encontrarás todas las secciones.',
+            title: '¡Bienvenido a Libre LIMS!',
+            attachTo: {
+                element: '#sidebar-nav',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Siguiente',
+                    action: dashboardTour.next
+                }
+            ]
+        });
+
+        dashboardTour.addStep({
+            id: 'orders',
+            text: 'Aquí puedes crear nuevas órdenes de exámenes y ver el historial completo de todas las admisiones.',
+            title: 'Admisión / Órdenes',
+            attachTo: {
+                element: '#nav-orders',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: dashboardTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: dashboardTour.next
+                }
+            ]
+        });
+
+        dashboardTour.addStep({
+            id: 'patients',
+            text: 'Administra tu base de datos de pacientes. Puedes crear nuevos pacientes, buscar y editar su información.',
+            title: 'Gestión de Pacientes',
+            attachTo: {
+                element: '#nav-patients',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: dashboardTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: dashboardTour.next
+                }
+            ]
+        });
+
+        dashboardTour.addStep({
+            id: 'exams',
+            text: 'Aquí encontrarás todos los exámenes disponibles en tu laboratorio con sus precios base.',
+            title: 'Catálogo de Exámenes',
+            attachTo: {
+                element: '#nav-exams',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: dashboardTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: dashboardTour.next
+                }
+            ]
+        });
+
+        dashboardTour.addStep({
+            id: 'price-lists',
+            text: 'Define diferentes tarifarios para referidos y empresas con precios personalizados.',
+            title: 'Tarifarios',
+            attachTo: {
+                element: '#nav-price-lists',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: dashboardTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: dashboardTour.next
+                }
+            ]
+        });
+
+        dashboardTour.addStep({
+            id: 'coupons',
+            text: 'Crea y gestiona cupones de descuento con tarifarios especiales.',
+            title: 'Cupones de Descuento',
+            attachTo: {
+                element: '#nav-coupons',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: dashboardTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: dashboardTour.next
+                }
+            ]
+        });
+
+        dashboardTour.addStep({
+            id: 'referrals',
+            text: 'Administra empresas y referidos que tienen tarifarios especiales.',
+            title: 'Referidos / Empresas',
+            attachTo: {
+                element: '#nav-referrals',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: dashboardTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: dashboardTour.next
+                }
+            ]
+        });
+
+        dashboardTour.addStep({
+            id: 'settings',
+            text: 'Configura los datos de tu laboratorio y empresa.',
+            title: 'Configuración',
+            attachTo: {
+                element: '#nav-settings',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: dashboardTour.back
+                },
+                {
+                    text: 'Siguiente',
+                    action: dashboardTour.next
+                }
+            ]
+        });
+
+        dashboardTour.addStep({
+            id: 'help',
+            text: '¿Necesitas ver este tour de nuevo? Haz clic en este botón en cualquier momento para repetir la guía.',
+            title: 'Botón de Ayuda',
+            attachTo: {
+                element: '#helpButton',
+                on: 'right'
+            },
+            buttons: [
+                {
+                    text: 'Anterior',
+                    action: dashboardTour.back
+                },
+                {
+                    text: 'Finalizar',
+                    action: dashboardTour.complete
+                }
+            ]
+        });
+
+        // Check if user is new or hasn't seen the tour
+        const hasSeenDashboardTour = localStorage.getItem('hasSeenDashboardTour');
+
+        // Auto-start tour for new users
+        if (!hasSeenDashboardTour) {
+            setTimeout(() => {
+                dashboardTour.start();
+                localStorage.setItem('hasSeenDashboardTour', 'true');
+            }, 500);
+        }
+
+        // Help button to restart tour
+        const helpButton = document.getElementById('helpButton');
+        if (helpButton) {
+            // Remove any existing listeners
+            const newButton = helpButton.cloneNode(true);
+            helpButton.parentNode.replaceChild(newButton, helpButton);
+
+            // Add new listener
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                dashboardTour.start();
+            });
+        }
+    </script>
 {% endblock %}
