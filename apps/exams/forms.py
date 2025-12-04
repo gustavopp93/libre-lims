@@ -6,12 +6,17 @@ from apps.exams.models import Exam
 class ExamUpdateForm(forms.ModelForm):
     class Meta:
         model = Exam
-        fields = ["name", "price"]
+        fields = ["name", "category", "price"]
         widgets = {
             "name": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                     "placeholder": "Nombre del examen",
+                }
+            ),
+            "category": forms.Select(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                 }
             ),
             "price": forms.NumberInput(
@@ -24,6 +29,7 @@ class ExamUpdateForm(forms.ModelForm):
         }
         labels = {
             "name": "Nombre del Examen",
+            "category": "Categoría",
             "price": "Precio",
         }
 
@@ -31,7 +37,7 @@ class ExamUpdateForm(forms.ModelForm):
 class ExamForm(forms.ModelForm):
     class Meta:
         model = Exam
-        fields = ["code", "name", "price"]
+        fields = ["code", "name", "category", "price"]
         widgets = {
             "code": forms.TextInput(
                 attrs={
@@ -45,6 +51,11 @@ class ExamForm(forms.ModelForm):
                     "placeholder": "Nombre del examen",
                 }
             ),
+            "category": forms.Select(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                }
+            ),
             "price": forms.NumberInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
@@ -56,5 +67,6 @@ class ExamForm(forms.ModelForm):
         labels = {
             "code": "Código del Examen",
             "name": "Nombre del Examen",
+            "category": "Categoría",
             "price": "Precio",
         }
