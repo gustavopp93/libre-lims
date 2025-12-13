@@ -78,6 +78,31 @@ class OrderPrintView(LoginRequiredMixin, View):
         return response
 
 
+class OrderResultsFormView(LoginRequiredMixin, View):
+    """Vista para generar formulario de resultados en A4 para completar a mano"""
+
+    login_url = reverse_lazy("login")
+
+    def get(self, request, pk):
+        # Obtener la orden con sus relaciones
+        order = Order.objects.select_related("patient").prefetch_related("details__exam").get(pk=pk)
+
+        # Obtener la información de la compañía
+        company = Company.objects.first()
+
+        # Renderizar el template HTML del formulario
+        html_string = render_to_string("orders/order_results_form.html", {"order": order, "company": company})
+
+        # Generar PDF con WeasyPrint
+        pdf = HTML(string=html_string, encoding="utf-8").write_pdf(presentational_hints=True, optimize_size=("fonts",))
+
+        # Devolver el PDF como respuesta
+        response = HttpResponse(pdf, content_type="application/pdf; charset=utf-8")
+        response["Content-Disposition"] = f'inline; filename="resultados_orden_{order.id}.pdf"'
+
+        return response
+
+
 @require_POST
 def create_order_api(request):
     """API endpoint para crear una orden con sus detalles"""
