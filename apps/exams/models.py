@@ -32,39 +32,6 @@ class Provider(TimeStampedModel):
         return self.name
 
 
-class Methodology(TimeStampedModel):
-    """Metodología para realizar exámenes"""
-
-    name = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    exam = models.ForeignKey(
-        "Exam",
-        on_delete=models.CASCADE,
-        related_name="methodologies",
-        null=True,
-        blank=True,
-        help_text="Examen al que pertenece esta metodología",
-    )
-    provider = models.ForeignKey(
-        Provider,
-        on_delete=models.SET_NULL,
-        related_name="methodologies",
-        null=True,
-        blank=True,
-        help_text="Proveedor externo si el examen se terceriza",
-    )
-
-    class Meta:
-        verbose_name = "Methodology"
-        verbose_name_plural = "Methodologies"
-        unique_together = ["name", "exam"]
-
-    def __str__(self):
-        if self.provider:
-            return f"{self.name} - {self.provider.name}"
-        return self.name
-
-
 class Exam(TimeStampedModel):
     code = models.CharField(max_length=50, unique=True, null=True, blank=True)
     name = models.CharField(max_length=200)

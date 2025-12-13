@@ -111,41 +111,4 @@ class Migration(migrations.Migration):
                 to="exams.exam",
             ),
         ),
-        migrations.CreateModel(
-            name="Methodology",
-            fields=[
-                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("created_at", models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creacion")),
-                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="Fecha de Actualizacion")),
-                ("name", models.CharField(max_length=200)),
-                ("description", models.TextField(blank=True)),
-                (
-                    "exam",
-                    models.ForeignKey(
-                        blank=True,
-                        help_text="Examen al que pertenece esta metodología",
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="methodologies",
-                        to="exams.exam",
-                    ),
-                ),
-                (
-                    "provider",
-                    models.ForeignKey(
-                        blank=True,
-                        help_text="Proveedor externo si el examen se terceriza",
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="methodologies",
-                        to="exams.provider",
-                    ),
-                ),
-            ],
-            options={
-                "verbose_name": "Methodology",
-                "verbose_name_plural": "Methodologies",
-                "unique_together": {("name", "exam")},
-            },
-        ),
     ]
