@@ -73,8 +73,6 @@ class Exam(TimeStampedModel):
         ExamCategory,
         on_delete=models.PROTECT,
         related_name="exams",
-        null=True,
-        blank=True,
     )
 
     # Campo para identificar si es un panel/perfil con componentes
