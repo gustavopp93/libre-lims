@@ -19,9 +19,11 @@ from django.http import JsonResponse
 from django.urls import include, path
 
 from apps.exams.views import (
-    BulkUploadExamsView,
+    CreateExamCategoryView,
     CreateExamView,
+    ExamCategoriesListView,
     ExamsListView,
+    UpdateExamCategoryView,
     UpdateExamView,
     search_exams_api,
 )
@@ -72,7 +74,9 @@ urlpatterns = [
     path("exams/", ExamsListView.as_view(), name="exams_list"),
     path("exams/create/", CreateExamView.as_view(), name="exams_create"),
     path("exams/<int:pk>/update/", UpdateExamView.as_view(), name="exams_update"),
-    path("exams/bulk-upload/", BulkUploadExamsView.as_view(), name="bulk_upload_exams"),
+    path("exam-categories/", ExamCategoriesListView.as_view(), name="exam_categories_list"),
+    path("exam-categories/create/", CreateExamCategoryView.as_view(), name="exam_categories_create"),
+    path("exam-categories/<int:pk>/update/", UpdateExamCategoryView.as_view(), name="exam_categories_update"),
     path("api/patients/search/", search_patient_api, name="api_patient_search"),
     path("api/exams/search/", search_exams_api, name="api_exams_search"),
     path("api/orders/create/", create_order_api, name="api_orders_create"),

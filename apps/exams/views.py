@@ -1,20 +1,18 @@
-import logging
-from decimal import Decimal, InvalidOperation
-
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import JsonResponse
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
-from openpyxl import load_workbook
 
-from apps.exams.forms import ExamForm, ExamUpdateForm
-from apps.exams.models import Exam
-
-logger = logging.getLogger(__name__)
+from apps.exams.forms import (
+    ExamCategoryForm,
+    ExamCategoryUpdateForm,
+    ExamComponentFormSet,
+    ExamForm,
+    ExamUpdateForm,
+)
+from apps.exams.models import Exam, ExamCategory
 
 
 class ExamsListView(LoginRequiredMixin, ListView):
@@ -56,9 +54,38 @@ class CreateExamView(LoginRequiredMixin, CreateView):
             {"name": "Exámenes", "url": reverse_lazy("exams_list")},
             {"name": "Crear Examen", "url": None},
         ]
+        if self.request.POST:
+            context["component_formset"] = ExamComponentFormSet(self.request.POST)
+        else:
+            context["component_formset"] = ExamComponentFormSet()
         return context
 
     def form_valid(self, form):
+        context = self.get_context_data()
+        component_formset = context["component_formset"]
+
+        with transaction.atomic():
+            # Generar código automáticamente
+            last_exam = Exam.objects.order_by("-code").first()
+            if last_exam and last_exam.code and last_exam.code.startswith("EX"):
+                try:
+                    last_number = int(last_exam.code[2:])
+                    new_number = last_number + 1
+                except ValueError:
+                    new_number = 1
+            else:
+                new_number = 1
+
+            form.instance.code = f"EX{new_number:05d}"
+
+            self.object = form.save()
+
+            if component_formset.is_valid():
+                component_formset.instance = self.object
+                component_formset.save()
+            else:
+                return self.form_invalid(form)
+
         messages.success(self.request, "Examen creado exitosamente")
         return super().form_valid(form)
 
@@ -77,9 +104,25 @@ class UpdateExamView(LoginRequiredMixin, UpdateView):
             {"name": "Exámenes", "url": reverse_lazy("exams_list")},
             {"name": f"Editar: {self.object.name}", "url": None},
         ]
+        if self.request.POST:
+            context["component_formset"] = ExamComponentFormSet(self.request.POST, instance=self.object)
+        else:
+            context["component_formset"] = ExamComponentFormSet(instance=self.object)
         return context
 
     def form_valid(self, form):
+        context = self.get_context_data()
+        component_formset = context["component_formset"]
+
+        with transaction.atomic():
+            self.object = form.save()
+
+            if component_formset.is_valid():
+                component_formset.instance = self.object
+                component_formset.save()
+            else:
+                return self.form_invalid(form)
+
         messages.success(self.request, "Examen actualizado exitosamente")
         return super().form_valid(form)
 
@@ -107,105 +150,84 @@ def search_exams_api(request):
     return JsonResponse({"exams": exams_data})
 
 
-class BulkUploadExamsView(LoginRequiredMixin, View):
-    """Vista para carga masiva de exámenes desde archivo Excel"""
+# ==================== EXAM CATEGORIES ====================
 
+
+class ExamCategoriesListView(LoginRequiredMixin, ListView):
+    model = ExamCategory
+    template_name = "exams/category_list.html"
+    context_object_name = "categories"
+    paginate_by = 20
     login_url = reverse_lazy("login")
-    template_name = "exams/bulk_upload.html"
 
-    def get(self, request):
-        from django.shortcuts import render
+    def get_queryset(self):
+        queryset = super().get_queryset()
 
-        context = {
-            "breadcrumbs": [
-                {"name": "Exámenes", "url": reverse_lazy("exams_list")},
-                {"name": "Carga Masiva", "url": None},
-            ],
-        }
-        return render(request, self.template_name, context)
+        # Filtrar por nombre
+        name = self.request.GET.get("name")
+        if name:
+            queryset = queryset.filter(name__icontains=name)
 
-    def post(self, request):
-        # Validar que se haya enviado un archivo
-        if "excel_file" not in request.FILES:
-            messages.error(request, "No se ha seleccionado ningún archivo")
-            return redirect("bulk_upload_exams")
+        return queryset.order_by("name")
 
-        excel_file = request.FILES["excel_file"]
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["name"] = self.request.GET.get("name", "")
+        context["breadcrumbs"] = [
+            {"name": "Categorías de Exámenes", "url": None},
+        ]
+        return context
 
-        # Validar que sea un archivo Excel
-        if not excel_file.name.endswith((".xlsx", ".xls")):
-            messages.error(request, "El archivo debe ser un archivo Excel (.xlsx o .xls)")
-            return redirect("bulk_upload_exams")
 
-        try:
-            # Cargar el archivo Excel
-            workbook = load_workbook(excel_file)
-            sheet = workbook.active
+class CreateExamCategoryView(LoginRequiredMixin, CreateView):
+    model = ExamCategory
+    form_class = ExamCategoryForm
+    template_name = "exams/category_create.html"
+    success_url = reverse_lazy("exam_categories_list")
+    login_url = reverse_lazy("login")
 
-            # Contadores
-            updated_count = 0
-            created_count = 0
-            errors = []
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Categorías de Exámenes", "url": reverse_lazy("exam_categories_list")},
+            {"name": "Crear Categoría", "url": None},
+        ]
+        return context
 
-            # Procesar las filas (empezando desde la fila 2, ya que la 1 es la cabecera)
-            with transaction.atomic():
-                for row_num, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
-                    # Validar que la fila tenga al menos 3 columnas
-                    if not row or len(row) < 3:
-                        continue
+    def form_valid(self, form):
+        # Generar código automáticamente
+        last_category = ExamCategory.objects.order_by("-code").first()
+        if last_category and last_category.code.startswith("CA"):
+            try:
+                last_number = int(last_category.code[2:])
+                new_number = last_number + 1
+            except ValueError:
+                new_number = 1
+        else:
+            new_number = 1
 
-                    code = row[0]
-                    name = row[1]
-                    price = row[2]
+        form.instance.code = f"CA{new_number:03d}"
 
-                    # Validar que code y name no estén vacíos
-                    if not code or not name:
-                        errors.append(f"Fila {row_num}: Código o nombre vacío")
-                        continue
+        messages.success(self.request, "Categoría creada exitosamente")
+        return super().form_valid(form)
 
-                    # Convertir code a string
-                    code = str(code).strip()
-                    name = str(name).strip()
 
-                    # Validar y convertir el precio
-                    try:
-                        price_decimal = Decimal(str(price))
-                        if price_decimal < 0:
-                            errors.append(f"Fila {row_num}: El precio no puede ser negativo")
-                            continue
-                    except (InvalidOperation, ValueError, TypeError):
-                        errors.append(f"Fila {row_num}: Precio inválido '{price}'")
-                        continue
+class UpdateExamCategoryView(LoginRequiredMixin, UpdateView):
+    model = ExamCategory
+    form_class = ExamCategoryUpdateForm
+    template_name = "exams/category_update.html"
+    success_url = reverse_lazy("exam_categories_list")
+    login_url = reverse_lazy("login")
+    context_object_name = "category"
 
-                    # Buscar si el examen existe por código
-                    try:
-                        exam = Exam.objects.get(code=code)
-                        # Actualizar el precio
-                        exam.price = price_decimal
-                        exam.save()
-                        updated_count += 1
-                    except Exam.DoesNotExist:
-                        # Crear nuevo examen
-                        Exam.objects.create(code=code, name=name, price=price_decimal)
-                        created_count += 1
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Categorías de Exámenes", "url": reverse_lazy("exam_categories_list")},
+            {"name": f"Editar: {self.object.name}", "url": None},
+        ]
+        return context
 
-            # Mostrar mensajes de resultado
-            if created_count > 0:
-                messages.success(request, f"Se crearon {created_count} exámenes")
-            if updated_count > 0:
-                messages.success(request, f"Se actualizaron {updated_count} exámenes")
-            if errors:
-                for error in errors[:10]:  # Mostrar solo los primeros 10 errores
-                    messages.warning(request, error)
-                if len(errors) > 10:
-                    messages.warning(request, f"Y {len(errors) - 10} errores más...")
-
-            if created_count == 0 and updated_count == 0:
-                messages.warning(request, "No se procesó ningún examen")
-
-            return redirect("exams_list")
-
-        except Exception as e:
-            logger.exception("Error al procesar el archivo de exámenes")
-            messages.error(request, f"Error al procesar el archivo: {str(e)}")
-            return redirect("bulk_upload_exams")
+    def form_valid(self, form):
+        messages.success(self.request, "Categoría actualizada exitosamente")
+        return super().form_valid(form)

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Crear Canal de Adquisición - {{ company.business_name }}{% endblock %}
+{% block title %}Crear Categoría - {{ company.business_name }}{% endblock %}
 
 {% block content %}
 <div class="flex h-screen bg-gray-100">
@@ -8,14 +8,14 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col overflow-hidden">
-        {% include 'includes/header.html' with page_title="Crear Canal de Adquisición" %}
+        {% include 'includes/header.html' with page_title="Crear Categoría" %}
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
             {% include 'includes/breadcrumbs.html' %}
 <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-6">Nuevo Canal de Adquisición</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-6">Nueva Categoría de Examen</h3>
 
         <!-- Form -->
         <form method="post">
@@ -38,6 +38,14 @@
             {% endif %}
 
             <div class="space-y-4">
+                <!-- Código - Generado Automáticamente -->
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded">
+                    <p class="text-sm text-blue-700">
+                        <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+                        El código de la categoría se generará automáticamente (formato: CA001, CA002, etc.)
+                    </p>
+                </div>
+
                 <!-- Nombre -->
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.name.id_for_label }}">
@@ -45,31 +53,15 @@
                     </label>
                     {{ form.name }}
                 </div>
-
-                <!-- Descripción -->
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.description.id_for_label }}">
-                        {{ form.description.label }}
-                    </label>
-                    {{ form.description }}
-                </div>
-
-                <!-- Activo -->
-                <div class="flex items-center">
-                    {{ form.is_active }}
-                    <label class="ml-2 text-gray-700 text-sm font-bold" for="{{ form.is_active.id_for_label }}">
-                        {{ form.is_active.label }}
-                    </label>
-                </div>
             </div>
 
             <!-- Buttons -->
             <div class="flex items-center justify-end space-x-4 mt-6">
-                <a href="{% url 'lead_sources_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <a href="{% url 'exam_categories_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                     Cancelar
                 </a>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Crear Canal
+                    Crear Categoría
                 </button>
             </div>
         </form>

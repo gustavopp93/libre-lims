@@ -196,7 +196,7 @@ class LeadSourceListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return LeadSource.objects.all().order_by("order", "name")
+        return LeadSource.objects.all().order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

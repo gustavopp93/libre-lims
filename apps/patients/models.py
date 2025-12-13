@@ -9,7 +9,6 @@ class LeadSource(TimeStampedModel):
     name = models.CharField(max_length=100, unique=True, verbose_name="Nombre")
     description = models.TextField(blank=True, verbose_name="Descripción")
     is_active = models.BooleanField(default=True, verbose_name="Activo")
-    order = models.PositiveIntegerField(default=0, help_text="Orden de visualización")
 
     class Meta:
         verbose_name = "Canal de Adquisición"
@@ -43,6 +42,7 @@ class Patient(TimeStampedModel):
         choices=Sex.choices,
     )
     phone_number = models.CharField(max_length=20)
+    email = models.EmailField(max_length=254, blank=True, null=True)
     lead_source = models.ForeignKey(
         LeadSource,
         on_delete=models.SET_NULL,
