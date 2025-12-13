@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Categoría - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        {% include 'includes/header.html' with page_title="Crear Categoría" %}
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            {% include 'includes/breadcrumbs.html' %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-6">Nueva Categoría de Examen</h3>
+
+        <!-- Form -->
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                <p class="font-bold">Por favor corrija los siguientes errores:</p>
+                <ul class="list-disc list-inside">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                <!-- Código - Generado Automáticamente -->
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded">
+                    <p class="text-sm text-blue-700">
+                        <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+                        El código de la categoría se generará automáticamente (formato: CA001, CA002, etc.)
+                    </p>
+                </div>
+
+                <!-- Nombre -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.name.id_for_label }}">
+                        {{ form.name.label }}
+                    </label>
+                    {{ form.name }}
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center justify-end space-x-4 mt-6">
+                <a href="{% url 'exam_categories_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Cancelar
+                </a>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Crear Categoría
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+        </main>
+    </div>
+</div>
+{% endblock %}

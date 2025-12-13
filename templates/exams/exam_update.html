@@ -13,15 +13,15 @@
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
             {% include 'includes/breadcrumbs.html' %}
-<div class="max-w-2xl mx-auto">
+<div class="max-w-4xl mx-auto" x-data="{ hasComponents: {{ form.has_components.value|default:'false'|lower }} }">
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-6">Editar Examen</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-6">Editar Examen: {{ exam.name }}</h3>
 
         <!-- Form -->
         <form method="post">
             {% csrf_token %}
 
-            {% if form.errors %}
+            {% if form.errors or component_formset.errors %}
             <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
                 <p class="font-bold">Por favor corrija los siguientes errores:</p>
                 <ul class="list-disc list-inside">
@@ -32,6 +32,11 @@
                     {% endfor %}
                     {% for error in form.non_field_errors %}
                         <li>{{ error }}</li>
+                    {% endfor %}
+                    {% for formset_form in component_formset %}
+                        {% for error in formset_form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
                     {% endfor %}
                 </ul>
             </div>
@@ -57,6 +62,14 @@
                     {{ form.name }}
                 </div>
 
+                <!-- Categoría -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.category.id_for_label }}">
+                        {{ form.category.label }}
+                    </label>
+                    {{ form.category }}
+                </div>
+
                 <!-- Precio (editable) -->
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.price.id_for_label }}">
@@ -65,26 +78,53 @@
                     {{ form.price }}
                 </div>
 
-                <!-- Fecha de Creación (readonly) -->
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Fecha de Creación
+                <!-- Has Components -->
+                <div class="flex items-center">
+                    {{ form.has_components }}
+                    <label class="ml-2 text-gray-700 text-sm font-bold" for="{{ form.has_components.id_for_label }}">
+                        {{ form.has_components.label }}
                     </label>
-                    <div class="bg-gray-100 border border-gray-300 rounded w-full py-2 px-3 text-gray-600">
-                        {{ exam.created_at|date:"d/m/Y H:i" }}
-                    </div>
-                    <p class="text-gray-500 text-xs mt-1">Este campo no se puede editar</p>
                 </div>
 
-                <!-- Última Actualización (readonly) -->
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Última Actualización
-                    </label>
-                    <div class="bg-gray-100 border border-gray-300 rounded w-full py-2 px-3 text-gray-600">
-                        {{ exam.updated_at|date:"d/m/Y H:i" }}
+                <!-- Components Section -->
+                <div x-show="hasComponents" x-transition class="border-t pt-4 mt-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-md font-semibold text-gray-700">Componentes del Examen</h4>
+                        <button type="button" id="add-component" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                            Agregar Componente
+                        </button>
                     </div>
-                    <p class="text-gray-500 text-xs mt-1">Este campo no se puede editar</p>
+
+                    {{ component_formset.management_form }}
+
+                    <div id="component-forms" class="space-y-4">
+                        {% for form in component_formset %}
+                        <div class="component-form p-4 bg-gray-50 rounded border" data-formset-form>
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-8">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                                        Examen Componente
+                                    </label>
+                                    {{ form.component_exam }}
+                                </div>
+                                <div class="col-span-3">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                                        Orden
+                                    </label>
+                                    {{ form.order }}
+                                </div>
+                                <div class="col-span-1 flex items-end">
+                                    <button type="button" class="remove-component text-red-600 hover:text-red-800">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </button>
+                                    {{ form.DELETE }}
+                                </div>
+                            </div>
+                            {{ form.id }}
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
 
@@ -103,4 +143,114 @@
         </main>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addButton = document.getElementById('add-component');
+    const formsContainer = document.getElementById('component-forms');
+
+    if (!addButton || !formsContainer) return;
+
+    // Función para actualizar los índices del formset
+    function updateFormIndices() {
+        const forms = formsContainer.querySelectorAll('[data-formset-form]');
+        const totalForms = document.getElementById('id_component_items-TOTAL_FORMS');
+
+        forms.forEach((form, index) => {
+            // Actualizar todos los inputs, selects y labels con el nuevo índice
+            form.querySelectorAll('input, select, label').forEach(element => {
+                ['name', 'id', 'for'].forEach(attr => {
+                    if (element.hasAttribute(attr)) {
+                        const value = element.getAttribute(attr);
+                        element.setAttribute(attr, value.replace(/component_items-\d+-/, `component_items-${index}-`));
+                    }
+                });
+            });
+        });
+
+        if (totalForms) {
+            totalForms.value = forms.length;
+        }
+    }
+
+    // Agregar nuevo componente
+    addButton.addEventListener('click', function() {
+        const forms = formsContainer.querySelectorAll('[data-formset-form]');
+        const totalForms = document.getElementById('id_component_items-TOTAL_FORMS');
+        const newIndex = forms.length;
+
+        // Clonar el primer formulario como template
+        const templateForm = forms[0].cloneNode(true);
+
+        // Limpiar valores
+        templateForm.querySelectorAll('input:not([type="hidden"]), select').forEach(element => {
+            if (element.type === 'checkbox') {
+                element.checked = false;
+            } else if (element.id && element.id.includes('DELETE')) {
+                element.checked = false;
+            } else {
+                element.value = '';
+            }
+        });
+
+        // Actualizar índices en el nuevo formulario
+        templateForm.querySelectorAll('input, select, label').forEach(element => {
+            ['name', 'id', 'for'].forEach(attr => {
+                if (element.hasAttribute(attr)) {
+                    const value = element.getAttribute(attr);
+                    element.setAttribute(attr, value.replace(/component_items-\d+-/, `component_items-${newIndex}-`));
+                }
+            });
+        });
+
+        // Agregar al contenedor
+        formsContainer.appendChild(templateForm);
+
+        // Actualizar contador de formularios
+        if (totalForms) {
+            totalForms.value = newIndex + 1;
+        }
+
+        // Re-inicializar iconos de Lucide
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        // Agregar event listener al botón de eliminar
+        const removeButton = templateForm.querySelector('.remove-component');
+        if (removeButton) {
+            removeButton.addEventListener('click', function() {
+                removeComponent(templateForm);
+            });
+        }
+    });
+
+    // Función para eliminar componente
+    function removeComponent(form) {
+        const deleteInput = form.querySelector('input[name*="DELETE"]');
+        if (deleteInput) {
+            // Si el formulario ya existe en la base de datos, marcarlo para eliminar
+            const idInput = form.querySelector('input[name*="-id"]');
+            if (idInput && idInput.value) {
+                deleteInput.checked = true;
+                form.style.display = 'none';
+            } else {
+                // Si es nuevo, simplemente removerlo
+                form.remove();
+                updateFormIndices();
+            }
+        }
+    }
+
+    // Agregar event listeners a los botones de eliminar existentes
+    document.querySelectorAll('.remove-component').forEach(button => {
+        button.addEventListener('click', function() {
+            const form = this.closest('[data-formset-form]');
+            if (form) {
+                removeComponent(form);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

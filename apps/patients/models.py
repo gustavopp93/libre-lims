@@ -43,6 +43,7 @@ class Patient(TimeStampedModel):
         choices=Sex.choices,
     )
     phone_number = models.CharField(max_length=20)
+    email = models.EmailField(max_length=254, blank=True, null=True)
     lead_source = models.ForeignKey(
         LeadSource,
         on_delete=models.SET_NULL,

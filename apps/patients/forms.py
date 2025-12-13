@@ -6,7 +6,7 @@ from apps.patients.models import LeadSource, Patient
 class PatientUpdateForm(forms.ModelForm):
     class Meta:
         model = Patient
-        fields = ["phone_number"]
+        fields = ["phone_number", "email"]
         widgets = {
             "phone_number": forms.TextInput(
                 attrs={
@@ -14,9 +14,16 @@ class PatientUpdateForm(forms.ModelForm):
                     "placeholder": "Número de teléfono",
                 }
             ),
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "correo@ejemplo.com",
+                }
+            ),
         }
         labels = {
             "phone_number": "Teléfono",
+            "email": "Correo Electrónico",
         }
 
 
@@ -58,6 +65,7 @@ class PatientForm(forms.ModelForm):
             "birthdate",
             "sex",
             "phone_number",
+            "email",
             "lead_source",
         ]
         widgets = {
@@ -101,6 +109,12 @@ class PatientForm(forms.ModelForm):
                     "placeholder": "Número de teléfono",
                 }
             ),
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "correo@ejemplo.com",
+                }
+            ),
             "lead_source": forms.Select(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
@@ -115,6 +129,7 @@ class PatientForm(forms.ModelForm):
             "birthdate": "Fecha de Nacimiento",
             "sex": "Sexo",
             "phone_number": "Teléfono",
+            "email": "Correo Electrónico",
             "lead_source": "¿Cómo nos conoció?",
         }
 

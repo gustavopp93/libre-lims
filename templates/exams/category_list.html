@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Categorías de Exámenes - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        {% include 'includes/header.html' with page_title="Categorías de Exámenes" %}
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            {% include 'includes/breadcrumbs.html' %}
+<div class="bg-white rounded-lg shadow">
+    <!-- Header with Create Button -->
+    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800">Lista de Categorías</h3>
+        <a href="{% url 'exam_categories_create' %}" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+            Crear Categoría
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="p-6 border-b border-gray-200 bg-gray-50">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                    Nombre de la Categoría
+                </label>
+                <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    value="{{ name }}"
+                    placeholder="Buscar por nombre"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                >
+            </div>
+
+            <div class="flex items-end">
+                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline w-full">
+                    <i data-lucide="search" class="w-5 h-5 inline mr-2"></i>
+                    Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Código
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nombre
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        # Exámenes
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha Registro
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for category in categories %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {{ category.code }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ category.name }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ category.exams.count }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ category.created_at|date:"d/m/Y H:i" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <a href="{% url 'exam_categories_update' category.pk %}" class="text-blue-600 hover:text-blue-900">
+                            <i data-lucide="edit" class="w-4 h-4 inline"></i>
+                            Editar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        No se encontraron categorías
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% include 'includes/pagination.html' %}
+</div>
+        </main>
+    </div>
+</div>
+{% endblock %}
