@@ -87,12 +87,6 @@
                                 <label class="block text-gray-600 text-sm font-medium mb-1">Última Actualización</label>
                                 <p class="text-gray-900 font-semibold">{{ order.updated_at|date:"d/m/Y H:i" }}</p>
                             </div>
-                            {% if order.observations %}
-                                <div class="md:col-span-2">
-                                    <label class="block text-gray-600 text-sm font-medium mb-1">Observaciones</label>
-                                    <p class="text-gray-900 bg-gray-50 p-3 rounded border border-gray-200">{{ order.observations }}</p>
-                                </div>
-                            {% endif %}
                         </div>
                     </div>
 
@@ -140,10 +134,25 @@
                         </div>
                     </div>
 
+                    <!-- Observaciones -->
+                    {% if order.observations %}
+                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i data-lucide="message-square" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            Observaciones del Paciente
+                        </h3>
+                        <p class="text-gray-900 bg-gray-50 p-4 rounded border border-gray-200">{{ order.observations }}</p>
+                    </div>
+                    {% endif %}
+
                     <!-- Acciones -->
                     <div class="flex justify-end space-x-4">
                         <a href="{% url 'orders_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
                             Volver
+                        </a>
+                        <a href="{% url 'order_results_form' order.pk %}" target="_blank" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                            <i data-lucide="file-text" class="w-5 h-5 mr-2"></i>
+                            Formulario de Resultados
                         </a>
                         <a href="{% url 'order_print' order.pk %}" target="_blank" class="flex items-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
                             <i data-lucide="printer" class="w-5 h-5 mr-2"></i>

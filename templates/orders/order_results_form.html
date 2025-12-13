@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Resultados - Orden #{{ order.id }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'DejaVu Sans', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15mm;
+            padding-bottom: 5mm;
+            border-bottom: 2px solid #000;
+        }
+
+        .header h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 3mm;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 10pt;
+            margin: 1mm 0;
+        }
+
+        .section-title {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-top: 8mm;
+            margin-bottom: 4mm;
+            padding-bottom: 2mm;
+            border-bottom: 1px solid #333;
+            background-color: #f0f0f0;
+            padding: 3mm;
+        }
+
+        .patient-info {
+            display: table;
+            width: 100%;
+            margin-bottom: 8mm;
+        }
+
+        .patient-row {
+            display: table-row;
+        }
+
+        .patient-label {
+            display: table-cell;
+            font-weight: bold;
+            width: 35%;
+            padding: 2mm 0;
+            vertical-align: top;
+        }
+
+        .patient-value {
+            display: table-cell;
+            padding: 2mm 0;
+            border-bottom: 1px solid #ccc;
+            vertical-align: top;
+        }
+
+        .exam-list {
+            margin-top: 5mm;
+        }
+
+        .exam-item {
+            page-break-inside: avoid;
+            margin-bottom: 8mm;
+            padding: 3mm;
+            border: 1px solid #333;
+        }
+
+        .exam-name {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-bottom: 4mm;
+            padding-bottom: 2mm;
+            border-bottom: 1px dashed #666;
+        }
+
+        .result-field {
+            margin-top: 3mm;
+        }
+
+        .result-label {
+            font-weight: bold;
+            margin-bottom: 2mm;
+            display: block;
+        }
+
+        .result-lines {
+            border: 1px solid #999;
+            min-height: 20mm;
+            padding: 2mm;
+            background-color: #fafafa;
+        }
+
+        .result-line {
+            border-bottom: 1px solid #ccc;
+            height: 6mm;
+            margin-bottom: 0;
+        }
+
+        .observations-section {
+            margin-top: 8mm;
+            page-break-inside: avoid;
+        }
+
+        .observations-box {
+            border: 1px solid #333;
+            padding: 4mm;
+            min-height: 25mm;
+            background-color: #fafafa;
+        }
+
+        .footer {
+            margin-top: 15mm;
+            padding-top: 5mm;
+            border-top: 1px solid #333;
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+        }
+
+        .metadata {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8mm;
+            font-size: 10pt;
+        }
+
+        .metadata-item {
+            flex: 1;
+        }
+
+        .metadata-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 1mm;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>{{ company.business_name|upper }}</h1>
+        <p>LABORATORIO CLÍNICO</p>
+        <p>{{ company.legal_address|upper }}</p>
+        <p>RUC: {{ company.document_number }} | Teléfono: {{ company.phone_number }}</p>
+    </div>
+
+    <!-- Title -->
+    <div style="text-align: center; margin-bottom: 8mm;">
+        <h2 style="font-size: 15pt; font-weight: bold;">FORMULARIO DE RESULTADOS</h2>
+        <p style="font-size: 11pt; margin-top: 2mm;">Orden #{{ order.id }}</p>
+    </div>
+
+    <!-- Metadata -->
+    <div class="metadata">
+        <div class="metadata-item">
+            <span class="metadata-label">Fecha de Orden:</span>
+            <span>{{ order.created_at|date:"d/m/Y H:i" }}</span>
+        </div>
+        <div class="metadata-item" style="text-align: right;">
+            <span class="metadata-label">Estado:</span>
+            <span>{{ order.get_status_display|upper }}</span>
+        </div>
+    </div>
+
+    <!-- Patient Information -->
+    <div class="section-title">INFORMACIÓN DEL PACIENTE</div>
+    <div class="patient-info">
+        <div class="patient-row">
+            <div class="patient-label">Apellidos y Nombres:</div>
+            <div class="patient-value">{{ order.patient.last_name|upper }}, {{ order.patient.first_name|upper }}</div>
+        </div>
+        <div class="patient-row">
+            <div class="patient-label">Tipo de Documento:</div>
+            <div class="patient-value">{{ order.patient.get_document_type_display }}</div>
+        </div>
+        <div class="patient-row">
+            <div class="patient-label">Número de Documento:</div>
+            <div class="patient-value">{{ order.patient.document_number }}</div>
+        </div>
+        <div class="patient-row">
+            <div class="patient-label">Fecha de Nacimiento:</div>
+            <div class="patient-value">{{ order.patient.birthdate|date:"d/m/Y" }}</div>
+        </div>
+        <div class="patient-row">
+            <div class="patient-label">Sexo:</div>
+            <div class="patient-value">{{ order.patient.get_sex_display }}</div>
+        </div>
+        <div class="patient-row">
+            <div class="patient-label">Teléfono:</div>
+            <div class="patient-value">{{ order.patient.phone_number }}</div>
+        </div>
+    </div>
+
+    <!-- Exams -->
+    <div class="section-title">EXÁMENES SOLICITADOS</div>
+    <div class="exam-list">
+        {% for detail in order.details.all %}
+        <div class="exam-item">
+            <div class="exam-name">{{ forloop.counter }}. {{ detail.exam.name|upper }}</div>
+            <div class="result-field">
+                <span class="result-label">Resultados:</span>
+                <div class="result-lines">
+                    <div class="result-line"></div>
+                    <div class="result-line"></div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Observations -->
+    {% if order.observations %}
+    <div class="observations-section">
+        <div class="section-title">OBSERVACIONES DEL PACIENTE</div>
+        <div class="observations-box">
+            {{ order.observations }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Este es un formulario de trabajo interno - No es un documento oficial de resultados</p>
+        <p>Fecha de impresión: {% now "d/m/Y H:i" %}</p>
+    </div>
+</body>
+</html>
