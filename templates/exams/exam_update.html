@@ -13,7 +13,7 @@
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
             {% include 'includes/breadcrumbs.html' %}
-<div class="max-w-4xl mx-auto" x-data="{ hasComponents: {{ form.has_components.value|default:'false'|lower }} }">
+<div class="max-w-4xl mx-auto" x-data="{ hasComponents: {% if form.has_components.value != None %}{{ form.has_components.value|yesno:'true,false' }}{% else %}{{ exam.has_components|yesno:'true,false' }}{% endif %} }">
     <div class="bg-white rounded-lg shadow p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-6">Editar Examen: {{ exam.name }}</h3>
 
@@ -125,6 +125,38 @@
                         </div>
                         {% endfor %}
                     </div>
+
+                    <!-- Template oculto para clonar cuando no hay componentes -->
+                    <template id="component-template">
+                        <div class="component-form p-4 bg-gray-50 rounded border" data-formset-form>
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-8">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                                        Examen Componente
+                                    </label>
+                                    <select name="component_items-__prefix__-component_exam" id="id_component_items-__prefix__-component_exam" class="template-select shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+                                        <option value="">---------</option>
+                                        {% for exam in available_exams %}
+                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-span-3">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                                        Orden
+                                    </label>
+                                    <input type="number" name="component_items-__prefix__-order" value="0" id="id_component_items-__prefix__-order" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+                                </div>
+                                <div class="col-span-1 flex items-end">
+                                    <button type="button" class="remove-component text-red-600 hover:text-red-800">
+                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    </button>
+                                    <input type="checkbox" name="component_items-__prefix__-DELETE" id="id_component_items-__prefix__-DELETE" style="display:none;">
+                                </div>
+                            </div>
+                            <input type="hidden" name="component_items-__prefix__-id" id="id_component_items-__prefix__-id">
+                        </div>
+                    </template>
                 </div>
             </div>
 
@@ -150,6 +182,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const formsContainer = document.getElementById('component-forms');
 
     if (!addButton || !formsContainer) return;
+
+    // Inicializar TomSelect en los selectores existentes de componentes
+    function initializeTomSelect(selectElement) {
+        if (!selectElement) return;
+
+        // Verificar si ya tiene TomSelect y destruirlo
+        if (selectElement.tomselect) {
+            selectElement.tomselect.destroy();
+        }
+
+        new TomSelect(selectElement, {
+            placeholder: 'Buscar examen...',
+            allowEmptyOption: false,
+            create: false,
+            onInitialize: function() {
+                // Asegurar que el wrapper tenga el ancho correcto
+                this.wrapper.style.width = '100%';
+            }
+        });
+    }
+
+    // Inicializar TomSelect en todos los selects existentes
+    document.querySelectorAll('select[id*="component_exam"]').forEach(select => {
+        initializeTomSelect(select);
+    });
 
     // Función para actualizar los índices del formset
     function updateFormIndices() {
@@ -178,11 +235,49 @@ document.addEventListener('DOMContentLoaded', function() {
         const forms = formsContainer.querySelectorAll('[data-formset-form]');
         const totalForms = document.getElementById('id_component_items-TOTAL_FORMS');
         const newIndex = forms.length;
+        let templateForm;
 
-        // Clonar el primer formulario como template
-        const templateForm = forms[0].cloneNode(true);
+        if (forms.length > 0) {
+            // Si hay formularios existentes, clonar el primero
+            const firstForm = forms[0];
 
-        // Limpiar valores
+            // Obtener el select original y guardar su valor antes de destruir TomSelect
+            const originalSelect = firstForm.querySelector('select[id*="component_exam"]');
+            let originalTomSelect = null;
+            let savedValue = null;
+
+            if (originalSelect && originalSelect.tomselect) {
+                originalTomSelect = originalSelect.tomselect;
+                savedValue = originalSelect.tomselect.getValue(); // Guardar el valor seleccionado
+                originalTomSelect.destroy();
+            } else if (originalSelect) {
+                savedValue = originalSelect.value; // Si no tiene TomSelect, guardar el valor del select
+            }
+
+            // Clonar el formulario con el select limpio
+            templateForm = firstForm.cloneNode(true);
+
+            // Restaurar TomSelect en el formulario original con el valor guardado
+            if (originalSelect) {
+                initializeTomSelect(originalSelect);
+                // Restaurar el valor seleccionado
+                if (savedValue && originalSelect.tomselect) {
+                    originalSelect.tomselect.setValue(savedValue, true);
+                }
+            }
+        } else {
+            // Si no hay formularios, usar el template
+            const template = document.getElementById('component-template');
+            templateForm = template.content.firstElementChild.cloneNode(true);
+        }
+
+        // Limpiar el TomSelect clonado (si existe algún residuo)
+        const clonedTomSelectWrapper = templateForm.querySelector('.ts-wrapper');
+        if (clonedTomSelectWrapper) {
+            clonedTomSelectWrapper.remove();
+        }
+
+        // Limpiar valores del formulario clonado
         templateForm.querySelectorAll('input:not([type="hidden"]), select').forEach(element => {
             if (element.type === 'checkbox') {
                 element.checked = false;
@@ -190,6 +285,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 element.checked = false;
             } else {
                 element.value = '';
+            }
+
+            // Remover atributos de TomSelect si existen
+            element.removeAttribute('data-ts-control');
+            if (element.classList.contains('tomselected')) {
+                element.classList.remove('tomselected');
             }
         });
 
@@ -214,6 +315,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Re-inicializar iconos de Lucide
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
+        }
+
+        // Inicializar TomSelect en el nuevo selector
+        const newSelect = templateForm.querySelector('select[id*="component_exam"]');
+        if (newSelect) {
+            // Asegurar que el select esté visible
+            newSelect.style.display = 'block';
+            initializeTomSelect(newSelect);
         }
 
         // Agregar event listener al botón de eliminar

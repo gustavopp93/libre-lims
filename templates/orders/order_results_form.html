@@ -43,20 +43,20 @@
         }
 
         .section-title {
-            font-size: 13pt;
+            font-size: 11pt;
             font-weight: bold;
-            margin-top: 8mm;
-            margin-bottom: 4mm;
-            padding-bottom: 2mm;
+            margin-top: 4mm;
+            margin-bottom: 2mm;
+            padding-bottom: 1mm;
             border-bottom: 1px solid #333;
             background-color: #f0f0f0;
-            padding: 3mm;
+            padding: 2mm;
         }
 
         .patient-info {
             display: table;
             width: 100%;
-            margin-bottom: 8mm;
+            margin-bottom: 4mm;
         }
 
         .patient-row {
@@ -67,15 +67,17 @@
             display: table-cell;
             font-weight: bold;
             width: 35%;
-            padding: 2mm 0;
+            padding: 1mm 0;
             vertical-align: top;
+            font-size: 9pt;
         }
 
         .patient-value {
             display: table-cell;
-            padding: 2mm 0;
+            padding: 1mm 0;
             border-bottom: 1px solid #ccc;
             vertical-align: top;
+            font-size: 9pt;
         }
 
         .exam-list {
@@ -84,40 +86,14 @@
 
         .exam-item {
             page-break-inside: avoid;
-            margin-bottom: 8mm;
-            padding: 3mm;
-            border: 1px solid #333;
+            margin-bottom: 3mm;
+            padding: 2mm 0;
+            border-bottom: 1px solid #ccc;
         }
 
         .exam-name {
-            font-size: 12pt;
+            font-size: 11pt;
             font-weight: bold;
-            margin-bottom: 4mm;
-            padding-bottom: 2mm;
-            border-bottom: 1px dashed #666;
-        }
-
-        .result-field {
-            margin-top: 3mm;
-        }
-
-        .result-label {
-            font-weight: bold;
-            margin-bottom: 2mm;
-            display: block;
-        }
-
-        .result-lines {
-            border: 1px solid #999;
-            min-height: 20mm;
-            padding: 2mm;
-            background-color: #fafafa;
-        }
-
-        .result-line {
-            border-bottom: 1px solid #ccc;
-            height: 6mm;
-            margin-bottom: 0;
         }
 
         .observations-section {
@@ -144,8 +120,8 @@
         .metadata {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8mm;
-            font-size: 10pt;
+            margin-bottom: 4mm;
+            font-size: 9pt;
         }
 
         .metadata-item {
@@ -155,23 +131,15 @@
         .metadata-label {
             font-weight: bold;
             display: block;
-            margin-bottom: 1mm;
+            margin-bottom: 0.5mm;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <h1>{{ company.business_name|upper }}</h1>
-        <p>LABORATORIO CLÍNICO</p>
-        <p>{{ company.legal_address|upper }}</p>
-        <p>RUC: {{ company.document_number }} | Teléfono: {{ company.phone_number }}</p>
-    </div>
-
     <!-- Title -->
     <div style="text-align: center; margin-bottom: 8mm;">
         <h2 style="font-size: 15pt; font-weight: bold;">FORMULARIO DE RESULTADOS</h2>
-        <p style="font-size: 11pt; margin-top: 2mm;">Orden #{{ order.id }}</p>
+        <p style="font-size: 11pt; margin-top: 2mm;">Orden {{ order.code }}</p>
     </div>
 
     <!-- Metadata -->
@@ -180,18 +148,18 @@
             <span class="metadata-label">Fecha de Orden:</span>
             <span>{{ order.created_at|date:"d/m/Y H:i" }}</span>
         </div>
-        <div class="metadata-item" style="text-align: right;">
-            <span class="metadata-label">Estado:</span>
-            <span>{{ order.get_status_display|upper }}</span>
-        </div>
     </div>
 
     <!-- Patient Information -->
     <div class="section-title">INFORMACIÓN DEL PACIENTE</div>
     <div class="patient-info">
         <div class="patient-row">
-            <div class="patient-label">Apellidos y Nombres:</div>
-            <div class="patient-value">{{ order.patient.last_name|upper }}, {{ order.patient.first_name|upper }}</div>
+            <div class="patient-label">Apellidos:</div>
+            <div class="patient-value">{{ order.patient.last_name|upper }}</div>
+        </div>
+        <div class="patient-row">
+            <div class="patient-label">Nombres:</div>
+            <div class="patient-value">{{ order.patient.first_name|upper }}</div>
         </div>
         <div class="patient-row">
             <div class="patient-label">Tipo de Documento:</div>
@@ -209,10 +177,6 @@
             <div class="patient-label">Sexo:</div>
             <div class="patient-value">{{ order.patient.get_sex_display }}</div>
         </div>
-        <div class="patient-row">
-            <div class="patient-label">Teléfono:</div>
-            <div class="patient-value">{{ order.patient.phone_number }}</div>
-        </div>
     </div>
 
     <!-- Exams -->
@@ -221,13 +185,6 @@
         {% for detail in order.details.all %}
         <div class="exam-item">
             <div class="exam-name">{{ forloop.counter }}. {{ detail.exam.name|upper }}</div>
-            <div class="result-field">
-                <span class="result-label">Resultados:</span>
-                <div class="result-lines">
-                    <div class="result-line"></div>
-                    <div class="result-line"></div>
-                </div>
-            </div>
         </div>
         {% endfor %}
     </div>

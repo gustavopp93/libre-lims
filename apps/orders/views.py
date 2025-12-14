@@ -3,6 +3,7 @@ import logging
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models, transaction
 from django.http import HttpResponse, JsonResponse
@@ -30,7 +31,11 @@ class OrdersListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Order.objects.select_related("patient").prefetch_related("details__exam").order_by("-created_at")
+        return (
+            Order.objects.select_related("patient", "referral")
+            .prefetch_related("details__exam")
+            .order_by("-created_at")
+        )
 
 
 class CreateOrderView(LoginRequiredMixin, TemplateView):
@@ -184,9 +189,12 @@ def create_order_api(request):
                 OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
 
         # Agregar mensaje de éxito a la sesión
-        messages.success(request, f"Orden #{order.id} creada exitosamente")
+        messages.success(request, f"Orden {order.code} creada exitosamente")
 
-        return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
+        return JsonResponse(
+            {"success": True, "order_id": order.id, "order_code": order.code, "message": "Orden creada exitosamente"},
+            status=201,
+        )
 
     except Exception as e:
         logger.exception("Error al crear la orden")
@@ -296,10 +304,66 @@ def create_referral_order_api(request):
             for detail in validated_details:
                 OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
 
-        messages.success(request, f"Orden de referido #{order.id} creada exitosamente")
+        messages.success(request, f"Orden de referido {order.code} creada exitosamente")
 
-        return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
+        return JsonResponse(
+            {"success": True, "order_id": order.id, "order_code": order.code, "message": "Orden creada exitosamente"},
+            status=201,
+        )
 
     except Exception as e:
         logger.exception("Error al crear la orden de referido")
         return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)
+
+
+@login_required
+@require_POST
+def cancel_order(request, order_id):
+    """Cancelar una orden"""
+    try:
+        order = Order.objects.get(id=order_id)
+
+        if order.status != Order.Status.PENDING:
+            return JsonResponse({"error": "Solo se pueden cancelar órdenes pendientes"}, status=400)
+
+        order.status = Order.Status.CANCELLED
+        order.save()
+
+        return JsonResponse({"success": True, "message": "Orden cancelada exitosamente"})
+
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "Orden no encontrada"}, status=404)
+    except Exception as e:
+        logger.exception("Error al cancelar la orden")
+        return JsonResponse({"error": f"Error al cancelar la orden: {str(e)}"}, status=500)
+
+
+@login_required
+@require_POST
+def complete_order(request, order_id):
+    """Completar una orden con método de pago"""
+    try:
+        order = Order.objects.get(id=order_id)
+
+        if order.status != Order.Status.PENDING:
+            return JsonResponse({"error": "Solo se pueden completar órdenes pendientes"}, status=400)
+
+        payment_method = request.POST.get("payment_method")
+
+        if not payment_method:
+            return JsonResponse({"error": "Debe especificar un método de pago"}, status=400)
+
+        if payment_method not in dict(Order.PaymentMethod.choices):
+            return JsonResponse({"error": "Método de pago inválido"}, status=400)
+
+        order.status = Order.Status.COMPLETED
+        order.payment_method = payment_method
+        order.save()
+
+        return JsonResponse({"success": True, "message": "Pago registrado exitosamente"})
+
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "Orden no encontrada"}, status=404)
+    except Exception as e:
+        logger.exception("Error al completar la orden")
+        return JsonResponse({"error": f"Error al completar la orden: {str(e)}"}, status=500)
