@@ -3,6 +3,7 @@ import logging
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models, transaction
 from django.http import HttpResponse, JsonResponse
@@ -313,3 +314,56 @@ def create_referral_order_api(request):
     except Exception as e:
         logger.exception("Error al crear la orden de referido")
         return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)
+
+
+@login_required
+@require_POST
+def cancel_order(request, order_id):
+    """Cancelar una orden"""
+    try:
+        order = Order.objects.get(id=order_id)
+
+        if order.status != Order.Status.PENDING:
+            return JsonResponse({"error": "Solo se pueden cancelar órdenes pendientes"}, status=400)
+
+        order.status = Order.Status.CANCELLED
+        order.save()
+
+        return JsonResponse({"success": True, "message": "Orden cancelada exitosamente"})
+
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "Orden no encontrada"}, status=404)
+    except Exception as e:
+        logger.exception("Error al cancelar la orden")
+        return JsonResponse({"error": f"Error al cancelar la orden: {str(e)}"}, status=500)
+
+
+@login_required
+@require_POST
+def complete_order(request, order_id):
+    """Completar una orden con método de pago"""
+    try:
+        order = Order.objects.get(id=order_id)
+
+        if order.status != Order.Status.PENDING:
+            return JsonResponse({"error": "Solo se pueden completar órdenes pendientes"}, status=400)
+
+        payment_method = request.POST.get("payment_method")
+
+        if not payment_method:
+            return JsonResponse({"error": "Debe especificar un método de pago"}, status=400)
+
+        if payment_method not in dict(Order.PaymentMethod.choices):
+            return JsonResponse({"error": "Método de pago inválido"}, status=400)
+
+        order.status = Order.Status.COMPLETED
+        order.payment_method = payment_method
+        order.save()
+
+        return JsonResponse({"success": True, "message": "Pago registrado exitosamente"})
+
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "Orden no encontrada"}, status=404)
+    except Exception as e:
+        logger.exception("Error al completar la orden")
+        return JsonResponse({"error": f"Error al completar la orden: {str(e)}"}, status=500)
