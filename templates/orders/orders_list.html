@@ -30,11 +30,11 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Código</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paciente</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">Documento</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referido</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exámenes</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
@@ -44,9 +44,9 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for order in orders %}
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.code }}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-xs font-medium text-gray-700">{{ order.code }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.patient.first_name }} {{ order.patient.last_name }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.patient.document_type }} {{ order.patient.document_number }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{{ order.patient.document_type }} {{ order.patient.document_number }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {% if order.referral %}
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
@@ -56,18 +56,18 @@
                             <span class="text-gray-400">-</span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <td class="px-3 py-4 whitespace-nowrap text-sm">
                         {% if order.status == 'pending' %}
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                 Pendiente
                             </span>
-                        {% elif order.status == 'completed' %}
+                        {% elif order.status == 'paid' %}
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                Completada
+                                Pagado
                             </span>
-                        {% elif order.status == 'cancelled' %}
+                        {% elif order.status == 'voided' %}
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                Cancelada
+                                Anulado
                             </span>
                         {% endif %}
                     </td>
@@ -81,17 +81,32 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/. {{ order.total }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.created_at|date:"d/m/Y H:i" }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div class="flex items-center space-x-2">
-                            <a href="{% url 'order_detail' order.pk %}" class="text-blue-600 hover:text-blue-900" title="Ver Detalle">
-                                <i data-lucide="eye" class="w-4 h-4 inline"></i>
-                            </a>
+                        <div class="flex items-center space-x-3">
+                            <div class="relative group">
+                                <a href="{% url 'order_detail' order.pk %}" class="text-blue-600 hover:text-blue-900 cursor-pointer">
+                                    <i data-lucide="eye" class="w-4 h-4 inline"></i>
+                                </a>
+                                <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                    Ver Detalle
+                                </span>
+                            </div>
                             {% if order.status == 'pending' %}
-                                <button onclick="openPaymentModal({{ order.id }}, '{{ order.code }}', {{ order.total }})" class="text-green-600 hover:text-green-900" title="Registrar Pago">
-                                    <i data-lucide="credit-card" class="w-4 h-4 inline"></i>
-                                </button>
-                                <button onclick="confirmCancelOrder({{ order.id }}, '{{ order.code }}')" class="text-red-600 hover:text-red-900" title="Cancelar Orden">
-                                    <i data-lucide="x-circle" class="w-4 h-4 inline"></i>
-                                </button>
+                                <div class="relative group">
+                                    <button type="button" onclick="openPaymentModal({{ order.id }}, '{{ order.code }}', {{ order.total }})" class="text-green-600 hover:text-green-900 cursor-pointer">
+                                        <i data-lucide="credit-card" class="w-4 h-4 inline"></i>
+                                    </button>
+                                    <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                        Registrar Pago
+                                    </span>
+                                </div>
+                                <div class="relative group">
+                                    <button type="button" onclick="confirmCancelOrder({{ order.id }}, '{{ order.code }}')" class="text-red-600 hover:text-red-900 cursor-pointer">
+                                        <i data-lucide="x-circle" class="w-4 h-4 inline"></i>
+                                    </button>
+                                    <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                        Anular Orden
+                                    </span>
+                                </div>
                             {% endif %}
                         </div>
                     </td>
@@ -202,7 +217,7 @@ document.getElementById('paymentForm').addEventListener('submit', function(e) {
 });
 
 function confirmCancelOrder(orderId, orderCode) {
-    if (confirm(`¿Está seguro que desea cancelar la orden ${orderCode}?`)) {
+    if (confirm(`¿Está seguro que desea anular la orden ${orderCode}?`)) {
         fetch(`/orders/${orderId}/cancel/`, {
             method: 'POST',
             headers: {
@@ -215,12 +230,12 @@ function confirmCancelOrder(orderId, orderCode) {
             if (data.success) {
                 location.reload();
             } else {
-                alert(data.error || 'Error al cancelar la orden');
+                alert(data.error || 'Error al anular la orden');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error al cancelar la orden');
+            alert('Error al anular la orden');
         });
     }
 }

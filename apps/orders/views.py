@@ -319,34 +319,34 @@ def create_referral_order_api(request):
 @login_required
 @require_POST
 def cancel_order(request, order_id):
-    """Cancelar una orden"""
+    """Anular una orden"""
     try:
         order = Order.objects.get(id=order_id)
 
         if order.status != Order.Status.PENDING:
-            return JsonResponse({"error": "Solo se pueden cancelar órdenes pendientes"}, status=400)
+            return JsonResponse({"error": "Solo se pueden anular órdenes pendientes"}, status=400)
 
-        order.status = Order.Status.CANCELLED
+        order.status = Order.Status.VOIDED
         order.save()
 
-        return JsonResponse({"success": True, "message": "Orden cancelada exitosamente"})
+        return JsonResponse({"success": True, "message": "Orden anulada exitosamente"})
 
     except Order.DoesNotExist:
         return JsonResponse({"error": "Orden no encontrada"}, status=404)
     except Exception as e:
-        logger.exception("Error al cancelar la orden")
-        return JsonResponse({"error": f"Error al cancelar la orden: {str(e)}"}, status=500)
+        logger.exception("Error al anular la orden")
+        return JsonResponse({"error": f"Error al anular la orden: {str(e)}"}, status=500)
 
 
 @login_required
 @require_POST
 def complete_order(request, order_id):
-    """Completar una orden con método de pago"""
+    """Registrar pago de una orden"""
     try:
         order = Order.objects.get(id=order_id)
 
         if order.status != Order.Status.PENDING:
-            return JsonResponse({"error": "Solo se pueden completar órdenes pendientes"}, status=400)
+            return JsonResponse({"error": "Solo se pueden registrar pagos de órdenes pendientes"}, status=400)
 
         payment_method = request.POST.get("payment_method")
 
@@ -356,7 +356,7 @@ def complete_order(request, order_id):
         if payment_method not in dict(Order.PaymentMethod.choices):
             return JsonResponse({"error": "Método de pago inválido"}, status=400)
 
-        order.status = Order.Status.COMPLETED
+        order.status = Order.Status.PAID
         order.payment_method = payment_method
         order.save()
 

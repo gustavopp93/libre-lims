@@ -92,7 +92,7 @@
         }
 
         .exam-name {
-            font-size: 11pt;
+            font-size: 9pt;
             font-weight: bold;
         }
 
@@ -104,7 +104,7 @@
         .observations-box {
             border: 1px solid #333;
             padding: 4mm;
-            min-height: 25mm;
+            min-height: 12mm;
             background-color: #fafafa;
         }
 
@@ -162,14 +162,6 @@
             <div class="patient-value">{{ order.patient.first_name|upper }}</div>
         </div>
         <div class="patient-row">
-            <div class="patient-label">Tipo de Documento:</div>
-            <div class="patient-value">{{ order.patient.get_document_type_display }}</div>
-        </div>
-        <div class="patient-row">
-            <div class="patient-label">Número de Documento:</div>
-            <div class="patient-value">{{ order.patient.document_number }}</div>
-        </div>
-        <div class="patient-row">
             <div class="patient-label">Fecha de Nacimiento:</div>
             <div class="patient-value">{{ order.patient.birthdate|date:"d/m/Y" }}</div>
         </div>
@@ -177,16 +169,6 @@
             <div class="patient-label">Sexo:</div>
             <div class="patient-value">{{ order.patient.get_sex_display }}</div>
         </div>
-    </div>
-
-    <!-- Exams -->
-    <div class="section-title">EXÁMENES SOLICITADOS</div>
-    <div class="exam-list">
-        {% for detail in order.details.all %}
-        <div class="exam-item">
-            <div class="exam-name">{{ forloop.counter }}. {{ detail.exam.name|upper }}</div>
-        </div>
-        {% endfor %}
     </div>
 
     <!-- Observations -->
@@ -198,6 +180,16 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- Exams -->
+    <div class="section-title">EXÁMENES SOLICITADOS</div>
+    <div class="exam-list">
+        {% for detail in order.details.all %}
+        <div class="exam-item">
+            <div class="exam-name">{{ forloop.counter }}. {{ detail.exam.name|upper }}</div>
+        </div>
+        {% endfor %}
+    </div>
 
     <!-- Footer -->
     <div class="footer">
