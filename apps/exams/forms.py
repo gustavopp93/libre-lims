@@ -120,7 +120,7 @@ ExamComponentFormSet = inlineformset_factory(
     form=ExamComponentForm,
     fk_name="parent_exam",
     fields=["component_exam", "order"],
-    extra=1,
+    extra=0,
     can_delete=True,
 )
 

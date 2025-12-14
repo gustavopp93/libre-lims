@@ -30,7 +30,11 @@ class OrdersListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Order.objects.select_related("patient").prefetch_related("details__exam").order_by("-created_at")
+        return (
+            Order.objects.select_related("patient", "referral")
+            .prefetch_related("details__exam")
+            .order_by("-created_at")
+        )
 
 
 class CreateOrderView(LoginRequiredMixin, TemplateView):
@@ -184,9 +188,12 @@ def create_order_api(request):
                 OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
 
         # Agregar mensaje de éxito a la sesión
-        messages.success(request, f"Orden #{order.id} creada exitosamente")
+        messages.success(request, f"Orden {order.code} creada exitosamente")
 
-        return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
+        return JsonResponse(
+            {"success": True, "order_id": order.id, "order_code": order.code, "message": "Orden creada exitosamente"},
+            status=201,
+        )
 
     except Exception as e:
         logger.exception("Error al crear la orden")
@@ -296,9 +303,12 @@ def create_referral_order_api(request):
             for detail in validated_details:
                 OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
 
-        messages.success(request, f"Orden de referido #{order.id} creada exitosamente")
+        messages.success(request, f"Orden de referido {order.code} creada exitosamente")
 
-        return JsonResponse({"success": True, "order_id": order.id, "message": "Orden creada exitosamente"}, status=201)
+        return JsonResponse(
+            {"success": True, "order_id": order.id, "order_code": order.code, "message": "Orden creada exitosamente"},
+            status=201,
+        )
 
     except Exception as e:
         logger.exception("Error al crear la orden de referido")

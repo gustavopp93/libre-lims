@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orden #{{ order.id }}</title>
+    <title>Orden {{ order.code }}</title>
     <style>
         @page {
             size: 72mm auto;
@@ -131,6 +131,14 @@
     <p>{{ company.legal_address|upper }}</p>
     <p>RUC: {{ company.document_number }}</p>
     <p>TELEFONO: {{ company.phone_number }}</p>
+</div>
+
+<!-- Order Code -->
+<div class="patient-section">
+    <div class="patient-row">
+        <span class="label">ORDEN:</span>
+        <span>{{ order.code }}</span>
+    </div>
 </div>
 
 <!-- Patient Information -->

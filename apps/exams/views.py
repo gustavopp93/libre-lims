@@ -30,7 +30,7 @@ class ExamsListView(LoginRequiredMixin, ListView):
         if name:
             queryset = queryset.filter(name__icontains=name)
 
-        return queryset.order_by("name")
+        return queryset.order_by("-created_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -58,11 +58,33 @@ class CreateExamView(LoginRequiredMixin, CreateView):
             context["component_formset"] = ExamComponentFormSet(self.request.POST)
         else:
             context["component_formset"] = ExamComponentFormSet()
+
+        # Agregar lista de exámenes disponibles para componentes
+        context["available_exams"] = Exam.objects.filter(has_components=False).values("id", "name")
         return context
 
     def form_valid(self, form):
         context = self.get_context_data()
         component_formset = context["component_formset"]
+
+        # Validar que si tiene componentes, debe haber al menos uno
+        has_components = form.cleaned_data.get("has_components", False)
+        if has_components:
+            # Validar el formset primero
+            if not component_formset.is_valid():
+                return self.form_invalid(form)
+
+            # Contar componentes válidos (no marcados para eliminar)
+            valid_components = sum(
+                1
+                for form_item in component_formset
+                if hasattr(form_item, "cleaned_data")
+                and form_item.cleaned_data
+                and not form_item.cleaned_data.get("DELETE", False)
+            )
+            if valid_components == 0:
+                form.add_error("has_components", "Debe agregar al menos un componente al examen.")
+                return self.form_invalid(form)
 
         with transaction.atomic():
             # Generar código automáticamente
@@ -98,6 +120,24 @@ class UpdateExamView(LoginRequiredMixin, UpdateView):
     login_url = reverse_lazy("login")
     context_object_name = "exam"
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Deshabilitar el checkbox de componentes si:
+        # 1. El examen ya tiene componentes guardados
+        # 2. El examen es usado como componente de otro examen
+        has_saved_components = self.object.component_items.exists()
+        is_used_as_component = self.object.parent_exams.exists()
+
+        if has_saved_components or is_used_as_component:
+            form.fields["has_components"].widget.attrs["disabled"] = "disabled"
+            form.fields["has_components"].widget.attrs["title"] = (
+                "No se puede modificar porque el examen tiene componentes guardados"
+                if has_saved_components
+                else "No se puede modificar porque este examen es usado como componente de otro examen"
+            )
+
+        return form
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["breadcrumbs"] = [
@@ -108,11 +148,41 @@ class UpdateExamView(LoginRequiredMixin, UpdateView):
             context["component_formset"] = ExamComponentFormSet(self.request.POST, instance=self.object)
         else:
             context["component_formset"] = ExamComponentFormSet(instance=self.object)
+
+        # Agregar lista de exámenes disponibles para componentes (excluyendo el examen actual)
+        context["available_exams"] = (
+            Exam.objects.filter(has_components=False).exclude(id=self.object.id).values("id", "name")
+        )
         return context
 
     def form_valid(self, form):
         context = self.get_context_data()
         component_formset = context["component_formset"]
+
+        # Si el checkbox está deshabilitado, restaurar el valor original
+        has_saved_components = self.object.component_items.exists()
+        is_used_as_component = self.object.parent_exams.exists()
+        if has_saved_components or is_used_as_component:
+            form.instance.has_components = self.object.has_components
+
+        # Validar que si tiene componentes, debe haber al menos uno
+        has_components = form.instance.has_components
+        if has_components:
+            # Validar el formset primero
+            if not component_formset.is_valid():
+                return self.form_invalid(form)
+
+            # Contar componentes válidos (no marcados para eliminar)
+            valid_components = sum(
+                1
+                for form_item in component_formset
+                if hasattr(form_item, "cleaned_data")
+                and form_item.cleaned_data
+                and not form_item.cleaned_data.get("DELETE", False)
+            )
+            if valid_components == 0:
+                form.add_error("has_components", "Debe agregar al menos un componente al examen.")
+                return self.form_invalid(form)
 
         with transaction.atomic():
             self.object = form.save()

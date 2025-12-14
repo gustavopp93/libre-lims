@@ -192,8 +192,16 @@ class PriceListDownloadTemplateView(LoginRequiredMixin, View):
         # Get all exams
         exams = Exam.objects.all().order_by("code", "name")
 
+        # Get existing prices for this price list
+        existing_prices = {
+            item.exam_id: item.price
+            for item in PriceListItem.objects.filter(price_list=price_list).select_related("exam")
+        }
+
         for exam in exams:
-            ws.append([exam.code or "", exam.name, float(exam.price)])
+            # Use existing price from price list if available, otherwise use exam's base price
+            price = existing_prices.get(exam.id, exam.price)
+            ws.append([exam.code or "", exam.name, float(price)])
 
         # Adjust column widths
         ws.column_dimensions["A"].width = 15

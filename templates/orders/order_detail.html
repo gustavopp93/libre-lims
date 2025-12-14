@@ -8,7 +8,7 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            {% include 'includes/header.html' with page_title="Detalle de Venta #"|add:order.id|stringformat:"s" %}
+            {% include 'includes/header.html' with page_title="Detalle de Venta "|add:order.code %}
 
             <!-- Main Content Area -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
@@ -55,8 +55,8 @@
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-gray-600 text-sm font-medium mb-1">Número de Venta</label>
-                                <p class="text-gray-900 font-semibold">#{{ order.id }}</p>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Código de Orden</label>
+                                <p class="text-gray-900 font-semibold">{{ order.code }}</p>
                             </div>
                             <div>
                                 <label class="block text-gray-600 text-sm font-medium mb-1">Estado</label>
