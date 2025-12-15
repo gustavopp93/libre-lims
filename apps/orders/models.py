@@ -9,8 +9,8 @@ from apps.patients.models import Patient
 class Order(TimeStampedModel):
     class Status(models.TextChoices):
         PENDING = "pending", "Pendiente"
-        COMPLETED = "completed", "Completada"
-        CANCELLED = "cancelled", "Cancelada"
+        PAID = "paid", "Pagado"
+        VOIDED = "voided", "Anulado"
 
     class PaymentMethod(models.TextChoices):
         CASH = "cash", "Efectivo"

@@ -90,12 +90,7 @@ class ExamComponentForm(forms.ModelForm):
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                 }
             ),
-            "order": forms.NumberInput(
-                attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
-                    "placeholder": "0",
-                }
-            ),
+            "order": forms.HiddenInput(),
         }
         labels = {
             "component_exam": "Examen Componente",
@@ -103,21 +98,35 @@ class ExamComponentForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        parent_exam = kwargs.pop("parent_exam", None)
+        kwargs.pop("parent_exam", None)
         super().__init__(*args, **kwargs)
-        # Excluir el examen padre de la lista de componentes disponibles
-        if parent_exam:
-            self.fields["component_exam"].queryset = Exam.objects.exclude(pk=parent_exam.pk).filter(
-                has_components=False
-            )
+
+        # Optimización: El queryset no se renderiza en HTML (TomSelect carga via API)
+        # Solo necesitamos cargar lo mínimo para validación
+        if self.data:
+            # Si hay datos POST, cargar todos los IDs para validación (solo IDs, no todos los campos)
+            self.fields["component_exam"].queryset = Exam.objects.only("id")
+        elif self.instance and self.instance.pk and self.instance.component_exam_id:
+            # Si hay una instancia guardada, solo cargar ese examen específico
+            self.fields["component_exam"].queryset = Exam.objects.filter(pk=self.instance.component_exam_id)
         else:
-            self.fields["component_exam"].queryset = Exam.objects.filter(has_components=False)
+            # Si no hay datos ni instancia, queryset vacío
+            self.fields["component_exam"].queryset = Exam.objects.none()
+
+
+class BaseExamComponentFormSet(forms.BaseInlineFormSet):
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        # Cambiar el widget del campo DELETE a HiddenInput
+        if "DELETE" in form.fields:
+            form.fields["DELETE"].widget = forms.HiddenInput()
 
 
 ExamComponentFormSet = inlineformset_factory(
     Exam,
     ExamComponent,
     form=ExamComponentForm,
+    formset=BaseExamComponentFormSet,
     fk_name="parent_exam",
     fields=["component_exam", "order"],
     extra=0,
