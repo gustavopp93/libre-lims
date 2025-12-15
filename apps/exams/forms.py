@@ -41,6 +41,12 @@ class ExamUpdateForm(forms.ModelForm):
             "has_components": "¿Este examen es un panel/perfil con componentes?",
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer que el campo category sea opcional
+        self.fields["category"].required = False
+        self.fields["category"].empty_label = "Sin categoría"
+
 
 class ExamForm(forms.ModelForm):
     class Meta:
@@ -78,6 +84,12 @@ class ExamForm(forms.ModelForm):
             "price": "Precio",
             "has_components": "¿Este examen es un panel/perfil con componentes?",
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer que el campo category sea opcional
+        self.fields["category"].required = False
+        self.fields["category"].empty_label = "Sin categoría"
 
 
 class ExamComponentForm(forms.ModelForm):
