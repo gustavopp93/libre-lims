@@ -34,9 +34,17 @@
                         <li>{{ error }}</li>
                     {% endfor %}
                     {% for formset_form in component_formset %}
-                        {% for error in formset_form.non_field_errors %}
-                            <li>{{ error }}</li>
+                        {% for field in formset_form %}
+                            {% for error in field.errors %}
+                                <li>Componente {{ forloop.parentloop.counter }}: {{ field.label }}: {{ error }}</li>
+                            {% endfor %}
                         {% endfor %}
+                        {% for error in formset_form.non_field_errors %}
+                            <li>Componente {{ forloop.counter }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in component_formset.non_form_errors %}
+                        <li>{{ error }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -95,63 +103,51 @@
 
                     {{ component_formset.management_form }}
 
-                    <div id="component-forms" class="space-y-4">
+                    <div id="component-forms" class="space-y-3">
                         {% for form in component_formset %}
-                        <div class="component-form p-4 bg-gray-50 rounded border" data-formset-form>
-                            <div class="grid grid-cols-12 gap-4">
-                                <div class="col-span-8">
-                                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                                        Examen Componente
-                                    </label>
-                                    {{ form.component_exam }}
-                                </div>
-                                <div class="col-span-3">
-                                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                                        Orden
-                                    </label>
-                                    {{ form.order }}
-                                </div>
-                                <div class="col-span-1 flex items-end">
-                                    <button type="button" class="remove-component text-red-600 hover:text-red-800">
-                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                    </button>
-                                    {{ form.DELETE }}
-                                </div>
+                        <div class="component-form p-4 bg-gray-50 rounded border flex items-center gap-3 cursor-move hover:bg-gray-100 transition-colors" data-formset-form>
+                            <div class="drag-handle text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing flex-shrink-0">
+                                <i data-lucide="grip-vertical" class="w-5 h-5"></i>
                             </div>
-                            {{ form.id }}
+                            <div class="flex-1">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">
+                                    Examen Componente
+                                </label>
+                                {{ form.component_exam }}
+                                {{ form.order }}
+                                {{ form.id }}
+                            </div>
+                            <div class="flex-shrink-0">
+                                <button type="button" class="remove-component text-red-600 hover:text-red-800">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                                {{ form.DELETE }}
+                            </div>
                         </div>
                         {% endfor %}
                     </div>
 
                     <!-- Template oculto para clonar cuando no hay componentes -->
                     <template id="component-template">
-                        <div class="component-form p-4 bg-gray-50 rounded border" data-formset-form>
-                            <div class="grid grid-cols-12 gap-4">
-                                <div class="col-span-8">
-                                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                                        Examen Componente
-                                    </label>
-                                    <select name="component_items-__prefix__-component_exam" id="id_component_items-__prefix__-component_exam" class="template-select shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
-                                        <option value="">---------</option>
-                                        {% for exam in available_exams %}
-                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-span-3">
-                                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                                        Orden
-                                    </label>
-                                    <input type="number" name="component_items-__prefix__-order" value="0" id="id_component_items-__prefix__-order" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
-                                </div>
-                                <div class="col-span-1 flex items-end">
-                                    <button type="button" class="remove-component text-red-600 hover:text-red-800">
-                                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                    </button>
-                                    <input type="checkbox" name="component_items-__prefix__-DELETE" id="id_component_items-__prefix__-DELETE" style="display:none;">
-                                </div>
+                        <div class="component-form p-4 bg-gray-50 rounded border flex items-center gap-3 cursor-move hover:bg-gray-100 transition-colors" data-formset-form>
+                            <div class="drag-handle text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing flex-shrink-0">
+                                <i data-lucide="grip-vertical" class="w-5 h-5"></i>
                             </div>
-                            <input type="hidden" name="component_items-__prefix__-id" id="id_component_items-__prefix__-id">
+                            <div class="flex-1">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">
+                                    Examen Componente
+                                </label>
+                                <select name="component_items-__prefix__-component_exam" id="id_component_items-__prefix__-component_exam" class="template-select shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+                                </select>
+                                <input type="hidden" name="component_items-__prefix__-order" value="0" id="id_component_items-__prefix__-order">
+                                <input type="hidden" name="component_items-__prefix__-id" id="id_component_items-__prefix__-id">
+                            </div>
+                            <div class="flex-shrink-0">
+                                <button type="button" class="remove-component text-red-600 hover:text-red-800">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                                <input type="checkbox" name="component_items-__prefix__-DELETE" id="id_component_items-__prefix__-DELETE" style="display:none;">
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -173,12 +169,39 @@
     </div>
 </div>
 
+<!-- SortableJS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const addButton = document.getElementById('add-component');
     const formsContainer = document.getElementById('component-forms');
 
     if (!addButton || !formsContainer) return;
+
+    // Función para actualizar el orden de los componentes
+    function updateComponentOrder() {
+        const forms = formsContainer.querySelectorAll('[data-formset-form]:not([style*="display: none"])');
+        forms.forEach((form, index) => {
+            const orderInput = form.querySelector('input[name*="-order"]');
+            if (orderInput) {
+                orderInput.value = index + 1;
+            }
+        });
+    }
+
+    // Inicializar SortableJS para drag & drop
+    const sortable = new Sortable(formsContainer, {
+        handle: '.drag-handle',
+        animation: 150,
+        ghostClass: 'bg-blue-100',
+        chosenClass: 'bg-blue-50',
+        dragClass: 'opacity-50',
+        onEnd: function() {
+            // Solo actualizar el orden, NO los índices del formset
+            updateComponentOrder();
+        }
+    });
 
     // Inicializar TomSelect en los selectores existentes de componentes
     function initializeTomSelect(selectElement) {
@@ -190,11 +213,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         new TomSelect(selectElement, {
+            valueField: 'id',
+            labelField: 'name',
+            searchField: 'name',
             placeholder: 'Buscar examen...',
-            allowEmptyOption: false,
-            create: false,
+            load: function(query, callback) {
+                if (!query.length) return callback();
+                fetch(`/api/exams/search/?name=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json.exams);
+                    }).catch(() => {
+                        callback();
+                    });
+            },
             onInitialize: function() {
-                // Asegurar que el wrapper tenga el ancho correcto
                 this.wrapper.style.width = '100%';
             }
         });
@@ -204,6 +237,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('select[id*="component_exam"]').forEach(select => {
         initializeTomSelect(select);
     });
+
+    // Inicializar orden de componentes existentes al cargar la página
+    updateComponentOrder();
+
+    // Si hay errores de validación, restaurar componentes marcados para eliminar
+    const hasErrors = document.querySelector('.bg-red-100');
+    if (hasErrors) {
+        // Mostrar solo los componentes que estaban marcados para eliminar
+        formsContainer.querySelectorAll('[data-formset-form]').forEach(form => {
+            const deleteInput = form.querySelector('input[name*="DELETE"]');
+            // Solo restaurar si está oculto Y tiene DELETE marcado
+            if (deleteInput && deleteInput.value === 'on' && form.style.display === 'none') {
+                form.style.display = '';
+                deleteInput.value = '';
+            }
+        });
+    }
 
     // Función para actualizar los índices del formset
     function updateFormIndices() {
@@ -275,14 +325,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Limpiar valores del formulario clonado
-        templateForm.querySelectorAll('input:not([type="hidden"]), select').forEach(element => {
-            if (element.type === 'checkbox') {
+        templateForm.querySelectorAll('input, select').forEach(element => {
+            if (element.type === 'checkbox' && !element.id?.includes('DELETE')) {
                 element.checked = false;
-            } else if (element.id && element.id.includes('DELETE')) {
-                element.checked = false;
-            } else {
+            } else if (element.type === 'hidden' && element.name?.includes('-id')) {
+                // Limpiar el ID (no es un objeto guardado)
                 element.value = '';
+            } else if (element.tagName === 'SELECT') {
+                // Limpiar el select de examen
+                element.value = '';
+                element.selectedIndex = 0;
             }
+            // Nota: NO limpiamos el campo order aquí, lo estableceremos después
 
             // Remover atributos de TomSelect si existen
             element.removeAttribute('data-ts-control');
@@ -296,10 +350,18 @@ document.addEventListener('DOMContentLoaded', function() {
             ['name', 'id', 'for'].forEach(attr => {
                 if (element.hasAttribute(attr)) {
                     const value = element.getAttribute(attr);
-                    element.setAttribute(attr, value.replace(/component_items-\d+-/, `component_items-${newIndex}-`));
+                    // Reemplazar tanto __prefix__ como índices numéricos
+                    const newValue = value.replace(/__prefix__/g, newIndex).replace(/component_items-\d+-/, `component_items-${newIndex}-`);
+                    element.setAttribute(attr, newValue);
                 }
             });
         });
+
+        // Establecer el orden del nuevo formulario inmediatamente
+        const orderInput = templateForm.querySelector('input[name*="-order"]');
+        if (orderInput) {
+            orderInput.value = newIndex + 1;
+        }
 
         // Agregar al contenedor
         formsContainer.appendChild(templateForm);
@@ -329,6 +391,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 removeComponent(templateForm);
             });
         }
+
+        // Actualizar orden después de agregar
+        updateComponentOrder();
     });
 
     // Función para eliminar componente
@@ -338,13 +403,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Si el formulario ya existe en la base de datos, marcarlo para eliminar
             const idInput = form.querySelector('input[name*="-id"]');
             if (idInput && idInput.value) {
-                deleteInput.checked = true;
+                // Marcar como DELETE (ahora es un hidden input, no checkbox)
+                deleteInput.value = 'on';
                 form.style.display = 'none';
             } else {
                 // Si es nuevo, simplemente removerlo
                 form.remove();
                 updateFormIndices();
             }
+            // Actualizar orden después de eliminar
+            updateComponentOrder();
         }
     }
 
@@ -372,6 +440,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }, 100);
             }
+        });
+    }
+
+    // Sincronizar TomSelect con los campos select antes de enviar el formulario
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Sincronizar todos los TomSelect
+            document.querySelectorAll('select[id*="component_exam"]').forEach(select => {
+                if (select.tomselect) {
+                    const value = select.tomselect.getValue();
+                    select.value = value;
+                }
+            });
         });
     }
 });

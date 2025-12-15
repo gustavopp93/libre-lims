@@ -55,12 +55,12 @@ class CreateExamView(LoginRequiredMixin, CreateView):
             {"name": "Crear Examen", "url": None},
         ]
         if self.request.POST:
-            context["component_formset"] = ExamComponentFormSet(self.request.POST)
+            # Usar POST limpio si existe (cuando hubo error de validación)
+            post_data = getattr(self, "_cleaned_post", self.request.POST)
+            context["component_formset"] = ExamComponentFormSet(post_data)
         else:
             context["component_formset"] = ExamComponentFormSet()
 
-        # Agregar lista de exámenes disponibles para componentes
-        context["available_exams"] = Exam.objects.filter(has_components=False).values("id", "name")
         return context
 
     def form_valid(self, form):
@@ -84,6 +84,17 @@ class CreateExamView(LoginRequiredMixin, CreateView):
             )
             if valid_components == 0:
                 form.add_error("has_components", "Debe agregar al menos un componente al examen.")
+
+                # Limpiar los DELETE del POST para que los componentes vuelvan a aparecer
+                mutable_post = self.request.POST.copy()
+                for i in range(len(component_formset)):
+                    delete_field = f"component_items-{i}-DELETE"
+                    if delete_field in mutable_post:
+                        del mutable_post[delete_field]
+
+                # Almacenar el POST limpio para que get_context_data() lo use
+                self._cleaned_post = mutable_post
+
                 return self.form_invalid(form)
 
         with transaction.atomic():
@@ -145,14 +156,15 @@ class UpdateExamView(LoginRequiredMixin, UpdateView):
             {"name": f"Editar: {self.object.name}", "url": None},
         ]
         if self.request.POST:
-            context["component_formset"] = ExamComponentFormSet(self.request.POST, instance=self.object)
+            # Usar POST limpio si existe (cuando hubo error de validación)
+            post_data = getattr(self, "_cleaned_post", self.request.POST)
+            context["component_formset"] = ExamComponentFormSet(post_data, instance=self.object)
         else:
-            context["component_formset"] = ExamComponentFormSet(instance=self.object)
+            # Ordenar los componentes por el campo 'order'
+            context["component_formset"] = ExamComponentFormSet(
+                instance=self.object, queryset=self.object.component_items.order_by("order")
+            )
 
-        # Agregar lista de exámenes disponibles para componentes (excluyendo el examen actual)
-        context["available_exams"] = (
-            Exam.objects.filter(has_components=False).exclude(id=self.object.id).values("id", "name")
-        )
         return context
 
     def form_valid(self, form):
@@ -182,6 +194,17 @@ class UpdateExamView(LoginRequiredMixin, UpdateView):
             )
             if valid_components == 0:
                 form.add_error("has_components", "Debe agregar al menos un componente al examen.")
+
+                # Limpiar los DELETE del POST para que los componentes vuelvan a aparecer
+                mutable_post = self.request.POST.copy()
+                for i in range(len(component_formset)):
+                    delete_field = f"component_items-{i}-DELETE"
+                    if delete_field in mutable_post:
+                        del mutable_post[delete_field]
+
+                # Almacenar el POST limpio para que get_context_data() lo use
+                self._cleaned_post = mutable_post
+
                 return self.form_invalid(form)
 
         with transaction.atomic():
@@ -203,11 +226,18 @@ def search_exams_api(request):
         return JsonResponse({"error": "No autenticado"}, status=401)
 
     name = request.GET.get("name", "")
+    parent_exam_id = request.GET.get("parent_exam_id", None)
 
     if not name:
         return JsonResponse({"exams": []})
 
-    exams = Exam.objects.filter(name__icontains=name)[:10]  # Limitar a 10 resultados
+    exams = Exam.objects.filter(name__icontains=name)
+
+    # Excluir el examen padre
+    if parent_exam_id:
+        exams = exams.exclude(id=parent_exam_id)
+
+    exams = exams[:10]  # Limitar a 10 resultados
 
     exams_data = [
         {
