@@ -133,6 +133,40 @@ class BaseExamComponentFormSet(forms.BaseInlineFormSet):
         if "DELETE" in form.fields:
             form.fields["DELETE"].widget = forms.HiddenInput()
 
+    def clean(self):
+        """Validar que no haya referencias circulares en los componentes"""
+        super().clean()
+
+        if any(self.errors):
+            return
+
+        parent_exam = self.instance
+        if not parent_exam or not parent_exam.pk:
+            return
+
+        # Obtener todos los componentes que se están agregando/manteniendo
+        component_ids = []
+        for form in self.forms:
+            if form.cleaned_data and not form.cleaned_data.get("DELETE", False):
+                component_exam = form.cleaned_data.get("component_exam")
+                if component_exam:
+                    component_ids.append(component_exam.id)
+
+        # Verificar que el examen padre no esté en la lista de componentes
+        if parent_exam.pk in component_ids:
+            raise forms.ValidationError("Un examen no puede incluirse a sí mismo como componente.")
+
+        # Verificar referencias circulares: si algún componente tiene al padre como componente
+        # (esto previene A->B, B->A)
+        for component_id in component_ids:
+            component = Exam.objects.get(pk=component_id)
+            # Obtener todos los componentes del componente
+            sub_component_ids = list(component.component_items.values_list("component_exam_id", flat=True))
+            if parent_exam.pk in sub_component_ids:
+                raise forms.ValidationError(
+                    f"Referencia circular detectada: {component.name} ya contiene a {parent_exam.name} como componente."
+                )
+
 
 ExamComponentFormSet = inlineformset_factory(
     Exam,
