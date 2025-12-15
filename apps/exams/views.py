@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.http import JsonResponse
@@ -220,11 +221,9 @@ class UpdateExamView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
+@login_required
 def search_exams_api(request):
     """API endpoint para buscar exámenes por nombre"""
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "No autenticado"}, status=401)
-
     name = request.GET.get("name", "")
     parent_exam_id = request.GET.get("parent_exam_id", None)
 
@@ -233,9 +232,14 @@ def search_exams_api(request):
 
     exams = Exam.objects.filter(name__icontains=name)
 
-    # Excluir el examen padre
+    # Excluir el examen padre (validar que sea un entero válido)
     if parent_exam_id:
-        exams = exams.exclude(id=parent_exam_id)
+        try:
+            parent_exam_id = int(parent_exam_id)
+            exams = exams.exclude(id=parent_exam_id)
+        except (ValueError, TypeError):
+            # Si no es un entero válido, ignorar el filtro
+            pass
 
     exams = exams[:10]  # Limitar a 10 resultados
 
