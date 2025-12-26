@@ -150,6 +150,31 @@ class PatientForm(forms.ModelForm):
             "presumptive_diagnosis": "Presunción Médica",
         }
 
+    def clean_document_number(self):
+        document_number = self.cleaned_data.get("document_number")
+        document_type = self.cleaned_data.get("document_type")
+
+        # Validar que DNI tenga exactamente 8 caracteres
+        if document_type == Patient.DocumentType.DNI and document_number and len(document_number) != 8:
+            raise forms.ValidationError("El DNI debe tener exactamente 8 caracteres")
+
+        # Validar que no exista otro paciente con el mismo número de documento
+        # (solo al crear, no al editar)
+        if document_number and document_type:
+            existing_patient = Patient.objects.filter(
+                document_type=document_type, document_number=document_number
+            ).first()
+
+            # Si estamos editando, excluir el paciente actual
+            if existing_patient and (not self.instance.pk or existing_patient.pk != self.instance.pk):
+                # Obtener el nombre legible del tipo de documento
+                document_type_display = dict(Patient.DocumentType.choices).get(document_type, document_type)
+                raise forms.ValidationError(
+                    f'El número de {document_type_display} "{document_number}" ya se encuentra registrado'
+                )
+
+        return document_number
+
 
 class LeadSourceForm(forms.ModelForm):
     class Meta:
