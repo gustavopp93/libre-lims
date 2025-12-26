@@ -31,11 +31,7 @@ class OrdersListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return (
-            Order.objects.select_related("patient", "referral")
-            .prefetch_related("details__exam")
-            .order_by("-created_at")
-        )
+        return Order.objects.select_related("patient", "referral").order_by("-created_at")
 
 
 class CreateOrderView(LoginRequiredMixin, TemplateView):

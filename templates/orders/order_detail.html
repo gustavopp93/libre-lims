@@ -44,6 +44,12 @@
                                 <label class="block text-gray-600 text-sm font-medium mb-1">Apellidos</label>
                                 <p class="text-gray-900 font-semibold">{{ order.patient.last_name }}</p>
                             </div>
+                            {% if order.patient.presumptive_diagnosis %}
+                            <div class="md:col-span-2 -mt-2">
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Presunciones Médicas</label>
+                                <p class="text-gray-900 bg-gray-50 p-3 rounded border border-gray-200 leading-tight">{{ order.patient.presumptive_diagnosis }}</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -139,7 +145,7 @@
                     <div class="bg-white rounded-lg shadow p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                             <i data-lucide="message-square" class="w-5 h-5 mr-2 text-blue-600"></i>
-                            Observaciones del Paciente
+                            Observaciones de Admisión
                         </h3>
                         <p class="text-gray-900 bg-gray-50 p-4 rounded border border-gray-200">{{ order.observations }}</p>
                     </div>
@@ -152,11 +158,11 @@
                         </a>
                         <a href="{% url 'order_results_form' order.pk %}" target="_blank" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
                             <i data-lucide="file-text" class="w-5 h-5 mr-2"></i>
-                            Formulario de Resultados
+                            Imprimir Orden
                         </a>
                         <a href="{% url 'order_print' order.pk %}" target="_blank" class="flex items-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
                             <i data-lucide="printer" class="w-5 h-5 mr-2"></i>
-                            Imprimir Orden
+                            Imprimir Ticket
                         </a>
                     </div>
                 </div>
