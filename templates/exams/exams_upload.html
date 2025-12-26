@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Exámenes - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+    <div class="flex h-screen bg-gray-100">
+        {% include 'includes/sidebar.html' %}
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            {% include 'includes/header.html' with page_title="Importar Exámenes" %}
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                {% include 'includes/breadcrumbs.html' %}
+                <div class="max-w-3xl mx-auto">
+                    <!-- Info Card -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="info" class="h-5 w-5 text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">Plantilla de Importación</h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    <p>Descarga la plantilla con el formato correcto para importar exámenes.</p>
+                                </div>
+                                <div class="mt-4">
+                                    <a href="{% url 'exams_download_template' %}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                        <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                                        Descargar Plantilla
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Form Card -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Subir Archivo de Exámenes</h3>
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="mb-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="file">
+                                    Archivo Excel (.xlsx) <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="file"
+                                    id="file"
+                                    name="file"
+                                    accept=".xlsx"
+                                    required
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                                >
+                                <p class="text-gray-600 text-xs mt-2">
+                                    El archivo debe contener las columnas: Nombre del Examen, Precio, Código de Categoría
+                                </p>
+                            </div>
+
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="alert-triangle" class="h-5 w-5 text-yellow-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-yellow-800">Reglas de Importación</h3>
+                                        <div class="mt-2 text-sm text-yellow-700">
+                                            <ul class="list-disc list-inside space-y-1">
+                                                <li><strong>Nombre:</strong> El nombre del examen (se omitirá si ya existe con el mismo nombre)</li>
+                                                <li><strong>Precio:</strong> Debe ser un número mayor o igual a 0. Solo ingresar el valor numérico, sin símbolos de moneda (S/., $, etc.)</li>
+                                                <li><strong>Código de Categoría:</strong> Debe ser un código válido de una categoría existente (ej: CA001)</li>
+                                                <li>Si el examen ya existe (mismo nombre, sin importar mayúsculas/minúsculas), se omitirá</li>
+                                                <li>Las filas con errores serán omitidas automáticamente</li>
+                                                <li>El código del examen se generará automáticamente</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <a href="{% url 'exams_list' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline flex items-center">
+                                    <i data-lucide="upload" class="w-5 h-5 mr-2"></i>
+                                    Importar Exámenes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+{% endblock %}
