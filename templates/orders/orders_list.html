@@ -35,7 +35,6 @@
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">Documento</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referido</th>
                     <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exámenes</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -45,7 +44,10 @@
                 {% for order in orders %}
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 py-4 whitespace-nowrap text-xs font-medium text-gray-700">{{ order.code }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.patient.first_name }} {{ order.patient.last_name }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        <div class="leading-tight">{{ order.patient.first_name }}</div>
+                        <div class="leading-tight">{{ order.patient.last_name }}</div>
+                    </td>
                     <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{{ order.patient.document_type }} {{ order.patient.document_number }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {% if order.referral %}
@@ -71,15 +73,8 @@
                             </span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-500">
-                        <ul class="list-disc list-inside">
-                            {% for detail in order.details.all %}
-                            <li>{{ detail.exam.name }} - S/. {{ detail.price }}</li>
-                            {% endfor %}
-                        </ul>
-                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/. {{ order.total }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ order.created_at|date:"d/m/Y H:i" }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div class="flex items-center space-x-3">
                             <div class="relative group">
@@ -113,7 +108,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
                         No hay ventas registradas
                     </td>
                 </tr>

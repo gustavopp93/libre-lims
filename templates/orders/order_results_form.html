@@ -19,7 +19,7 @@
         body {
             font-family: 'Arial', 'DejaVu Sans', sans-serif;
             font-size: 11pt;
-            line-height: 1.4;
+            line-height: 0.7;
             color: #000;
         }
 
@@ -54,30 +54,34 @@
         }
 
         .patient-info {
-            display: table;
-            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1mm 4mm;
             margin-bottom: 4mm;
+            line-height: 0.6;
         }
 
         .patient-row {
-            display: table-row;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-row.full-width {
+            grid-column: 1 / -1;
         }
 
         .patient-label {
-            display: table-cell;
             font-weight: bold;
-            width: 35%;
-            padding: 1mm 0;
-            vertical-align: top;
-            font-size: 9pt;
+            padding: 0.5mm 0;
+            font-size: 10pt;
+            line-height: 0.6;
         }
 
         .patient-value {
-            display: table-cell;
             padding: 1mm 0;
             border-bottom: 1px solid #ccc;
-            vertical-align: top;
-            font-size: 9pt;
+            font-size: 10pt;
+            line-height: 0.6;
         }
 
         .exam-list {
@@ -121,7 +125,7 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 4mm;
-            font-size: 9pt;
+            font-size: 11pt;
         }
 
         .metadata-item {
@@ -153,6 +157,7 @@
     <!-- Patient Information -->
     <div class="section-title">INFORMACIÓN DEL PACIENTE</div>
     <div class="patient-info">
+        <!-- Fila 1 -->
         <div class="patient-row">
             <div class="patient-label">Apellidos:</div>
             <div class="patient-value">{{ order.patient.last_name|upper }}</div>
@@ -161,20 +166,53 @@
             <div class="patient-label">Nombres:</div>
             <div class="patient-value">{{ order.patient.first_name|upper }}</div>
         </div>
+        <!-- Fila 2 -->
         <div class="patient-row">
             <div class="patient-label">Fecha de Nacimiento:</div>
             <div class="patient-value">{{ order.patient.birthdate|date:"d/m/Y" }}</div>
         </div>
         <div class="patient-row">
+            <div class="patient-label">Edad:</div>
+            <div class="patient-value">{{ order.patient.age }} años</div>
+        </div>
+        <!-- Fila 3 -->
+        <div class="patient-row">
             <div class="patient-label">Sexo:</div>
             <div class="patient-value">{{ order.patient.get_sex_display }}</div>
         </div>
+        <div class="patient-row">
+            <div class="patient-label">Documento:</div>
+            <div class="patient-value">{{ order.patient.get_document_type_display }} - {{ order.patient.document_number }}</div>
+        </div>
     </div>
+
+    <!-- Presunciones Médicas (ancho completo) -->
+    {% if order.patient.presumptive_diagnosis %}
+    <div>
+        <div class="patient-label">Presunciones Médicas:</div>
+        <div class="patient-value">{{ order.patient.presumptive_diagnosis }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Referral Information (if exists) -->
+    {% if order.referral %}
+    <div class="section-title">REFERIDO POR</div>
+    <div class="patient-info">
+        <div class="patient-row">
+            <div class="patient-label">Razón Social:</div>
+            <div class="patient-value">{{ order.referral.business_name|upper }}</div>
+        </div>
+        <div class="patient-row">
+            <div class="patient-label">RUC:</div>
+            <div class="patient-value">{{ order.referral.document_number }}</div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Observations -->
     {% if order.observations %}
     <div class="observations-section">
-        <div class="section-title">OBSERVACIONES DEL PACIENTE</div>
+        <div class="section-title">OBSERVACIONES DE ADMISIÓN</div>
         <div class="observations-box">
             {{ order.observations }}
         </div>

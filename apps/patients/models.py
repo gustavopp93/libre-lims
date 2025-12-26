@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 
 from apps.core.models import TimeStampedModel
@@ -63,3 +65,10 @@ class Patient(TimeStampedModel):
 
     def __str__(self):
         return f"{self.last_name}, {self.first_name} - {self.document_type} {self.document_number}"
+
+    @property
+    def age(self):
+        """Calcula la edad del paciente en base a su fecha de nacimiento"""
+        today = date.today()
+        age = today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
+        return age
