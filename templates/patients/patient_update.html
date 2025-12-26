@@ -130,6 +130,14 @@
                     </label>
                     {{ form.email }}
                 </div>
+
+                <!-- Presunción Médica (editable) -->
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.presumptive_diagnosis.id_for_label }}">
+                        {{ form.presumptive_diagnosis.label }}
+                    </label>
+                    {{ form.presumptive_diagnosis }}
+                </div>
             </div>
 
             <!-- Buttons -->

@@ -17,10 +17,16 @@
                     <!-- Header with Create Button -->
                     <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-gray-800">Lista de Pacientes</h3>
-                        <a href="{% url 'patients_create' %}" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
-                            Crear Paciente
-                        </a>
+                        <div class="flex space-x-3">
+                            <a href="{% url 'patients_upload' %}" class="flex items-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                <i data-lucide="upload" class="w-5 h-5 mr-2"></i>
+                                Importar
+                            </a>
+                            <a href="{% url 'patients_create' %}" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                                Crear Paciente
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Filters -->

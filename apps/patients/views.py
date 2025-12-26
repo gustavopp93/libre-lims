@@ -1,15 +1,21 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.decorators.http import require_GET
 from django.views.generic import CreateView, FormView, ListView, RedirectView, TemplateView, UpdateView
 
 from apps.patients.forms import LeadSourceForm, LoginForm, PatientForm, PatientUpdateForm
 from apps.patients.models import LeadSource, Patient
+
+logger = logging.getLogger(__name__)
 
 
 class LoginView(FormView):
@@ -124,6 +130,226 @@ class UpdatePatientView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, "Paciente actualizado exitosamente")
         return super().form_valid(form)
+
+
+class PatientsDownloadTemplateView(LoginRequiredMixin, View):
+    """Download template Excel for patient import"""
+
+    login_url = reverse_lazy("login")
+
+    def get(self, request):
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill
+
+        # Crear workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Plantilla Pacientes"
+
+        # Headers: Apellidos, Nombres, Tipo Documento, Número Documento, Fecha Nacimiento, Sexo, Teléfono
+        headers = ["Apellidos", "Nombres", "Tipo Documento", "Número Documento", "Fecha Nacimiento", "Sexo", "Teléfono"]
+        ws.append(headers)
+
+        # Estilizar headers (mismo estilo que pricing)
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+
+        # Fila de ejemplo
+        ws.append(["García López", "Juan Carlos", "DNI", "12345678", "17/10/1990", "M", "987654321"])
+
+        # Ajustar anchos de columna
+        ws.column_dimensions["A"].width = 20  # Apellidos
+        ws.column_dimensions["B"].width = 20  # Nombres
+        ws.column_dimensions["C"].width = 15  # Tipo Documento
+        ws.column_dimensions["D"].width = 15  # Número Documento
+        ws.column_dimensions["E"].width = 18  # Fecha Nacimiento
+        ws.column_dimensions["F"].width = 8  # Sexo
+        ws.column_dimensions["G"].width = 15  # Teléfono
+
+        # Create response
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = 'attachment; filename="plantilla_pacientes.xlsx"'
+
+        wb.save(response)
+        return response
+
+
+class PatientsUploadView(LoginRequiredMixin, View):
+    """Upload patients from Excel file"""
+
+    login_url = reverse_lazy("login")
+    template_name = "patients/patients_upload.html"
+
+    def get(self, request):
+        context = {
+            "breadcrumbs": [
+                {"name": "Pacientes", "url": reverse_lazy("patients_list")},
+                {"name": "Importar Pacientes", "url": None},
+            ],
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        if "file" not in request.FILES:
+            messages.error(request, "No se seleccionó ningún archivo")
+            return redirect("patients_list")
+
+        excel_file = request.FILES["file"]
+
+        try:
+            from datetime import datetime
+
+            import openpyxl
+
+            wb = openpyxl.load_workbook(excel_file)
+            ws = wb.active
+
+            created_count = 0
+            skipped_count = 0
+            error_count = 0
+
+            # Mapeos
+            document_type_map = {
+                "DNI": Patient.DocumentType.DNI,
+                "C.E": Patient.DocumentType.CE,
+                "PAS": Patient.DocumentType.PASAPORTE,
+            }
+
+            sex_map = {"F": Patient.Sex.FEMALE, "M": Patient.Sex.MALE}
+
+            # Iterar desde fila 2 (skip header)
+            for row_number, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                # Columnas: Apellidos, Nombres, Tipo Documento, Número Documento, Fecha Nacimiento, Sexo, Teléfono
+                last_name = row[0]
+                first_name = row[1]
+                document_type_excel = row[2]
+                document_number = row[3]
+                birthdate_str = row[4]
+                sex_excel = row[5]
+                phone_number = row[6]
+
+                # Skip si faltan datos críticos
+                if not all(
+                    [
+                        last_name,
+                        first_name,
+                        document_type_excel,
+                        document_number,
+                        birthdate_str,
+                        sex_excel,
+                        phone_number,
+                    ]
+                ):
+                    missing_fields = []
+                    if not last_name:
+                        missing_fields.append("Apellidos")
+                    if not first_name:
+                        missing_fields.append("Nombres")
+                    if not document_type_excel:
+                        missing_fields.append("Tipo Documento")
+                    if not document_number:
+                        missing_fields.append("Número Documento")
+                    if not birthdate_str:
+                        missing_fields.append("Fecha Nacimiento")
+                    if not sex_excel:
+                        missing_fields.append("Sexo")
+                    if not phone_number:
+                        missing_fields.append("Teléfono")
+
+                    logger.warning(
+                        f"Fila {row_number}: Datos incompletos - Faltan campos: {', '.join(missing_fields)} "
+                        f"[{last_name or 'N/A'}, {first_name or 'N/A'}, {document_type_excel or 'N/A'} {document_number or 'N/A'}]"
+                    )
+                    error_count += 1
+                    continue
+
+                try:
+                    # Mapear tipo documento
+                    document_type = document_type_map.get(document_type_excel)
+                    if not document_type:
+                        logger.warning(
+                            f"Fila {row_number}: Tipo de documento inválido '{document_type_excel}' "
+                            f"[{last_name}, {first_name}, {document_number}] - Valores permitidos: DNI, C.E, PAS"
+                        )
+                        error_count += 1
+                        continue
+
+                    # Validar DNI con 8 caracteres
+                    if document_type == Patient.DocumentType.DNI and len(str(document_number)) != 8:
+                        logger.warning(
+                            f"Fila {row_number}: DNI inválido '{document_number}' tiene {len(str(document_number))} caracteres, debe tener 8 "
+                            f"[{last_name}, {first_name}]"
+                        )
+                        skipped_count += 1
+                        continue
+
+                    # Mapear sexo
+                    sex = sex_map.get(sex_excel)
+                    if not sex:
+                        logger.warning(
+                            f"Fila {row_number}: Sexo inválido '{sex_excel}' "
+                            f"[{last_name}, {first_name}, {document_type_excel} {document_number}] - Valores permitidos: F, M"
+                        )
+                        error_count += 1
+                        continue
+
+                    # Parsear fecha (formato: d/M/Y, ej: 17/10/2023)
+                    # Si viene como string
+                    if isinstance(birthdate_str, str):
+                        birthdate = datetime.strptime(birthdate_str, "%d/%m/%Y").date()
+                    else:
+                        # Si viene como datetime de Excel
+                        birthdate = birthdate_str.date() if hasattr(birthdate_str, "date") else birthdate_str
+
+                    # Verificar si paciente ya existe (por document_type + document_number)
+                    if Patient.objects.filter(
+                        document_type=document_type, document_number=str(document_number)
+                    ).exists():
+                        logger.warning(
+                            f"Fila {row_number}: Paciente duplicado - Ya existe con {document_type_excel} {document_number} "
+                            f"[{last_name}, {first_name}]"
+                        )
+                        skipped_count += 1
+                        continue
+
+                    # Crear paciente
+                    Patient.objects.create(
+                        document_type=document_type,
+                        document_number=str(document_number),
+                        first_name=first_name,
+                        last_name=last_name,
+                        birthdate=birthdate,
+                        sex=sex,
+                        phone_number=str(phone_number),
+                        email="",  # Optional
+                        lead_source=None,  # Optional
+                    )
+
+                    created_count += 1
+
+                except Exception as e:
+                    logger.warning(
+                        f"Fila {row_number}: Error al procesar - {str(e)} "
+                        f"[{last_name}, {first_name}, {document_type_excel} {document_number}]"
+                    )
+                    logger.exception(f"Detalles del error en fila {row_number}")
+                    error_count += 1
+                    continue
+
+            messages.success(
+                request,
+                f"Importación completada: {created_count} creados, {skipped_count} omitidos, {error_count} errores",
+            )
+
+        except Exception as e:
+            logger.exception("Error al procesar el archivo de pacientes")
+            messages.error(request, f"Error al procesar el archivo: {str(e)}")
+
+        return redirect("patients_list")
 
 
 class AdmissionView(LoginRequiredMixin, TemplateView):
