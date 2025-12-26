@@ -1,9 +1,13 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
 
 from apps.exams.forms import (
@@ -14,6 +18,8 @@ from apps.exams.forms import (
     ExamUpdateForm,
 )
 from apps.exams.models import Exam, ExamCategory
+
+logger = logging.getLogger(__name__)
 
 
 class ExamsListView(LoginRequiredMixin, ListView):
@@ -335,3 +341,187 @@ class UpdateExamCategoryView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         messages.success(self.request, "Categoría actualizada exitosamente")
         return super().form_valid(form)
+
+
+class ExamsDownloadTemplateView(LoginRequiredMixin, View):
+    """Download template Excel for exams import"""
+
+    login_url = reverse_lazy("login")
+
+    def get(self, request):
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill
+
+        # Crear workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Plantilla Exámenes"
+
+        # Headers: Nombre del Examen, Precio, Código de Categoría
+        headers = ["Nombre del Examen", "Precio", "Código de Categoría"]
+        ws.append(headers)
+
+        # Estilizar headers
+        header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+
+        # Fila de ejemplo
+        ws.append(["Hemograma Completo", 25.50, "CA001"])
+
+        # Ajustar anchos de columna
+        ws.column_dimensions["A"].width = 40  # Nombre del Examen
+        ws.column_dimensions["B"].width = 15  # Precio
+        ws.column_dimensions["C"].width = 20  # Código de Categoría
+
+        # Create response
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = 'attachment; filename="plantilla_examenes.xlsx"'
+
+        wb.save(response)
+        return response
+
+
+class ExamsUploadView(LoginRequiredMixin, View):
+    """Upload exams from Excel file"""
+
+    login_url = reverse_lazy("login")
+    template_name = "exams/exams_upload.html"
+
+    def get(self, request):
+        context = {
+            "breadcrumbs": [
+                {"name": "Exámenes", "url": reverse_lazy("exams_list")},
+                {"name": "Importar Exámenes", "url": None},
+            ],
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        if "file" not in request.FILES:
+            messages.error(request, "No se seleccionó ningún archivo")
+            return redirect("exams_list")
+
+        excel_file = request.FILES["file"]
+
+        try:
+            import openpyxl
+
+            wb = openpyxl.load_workbook(excel_file)
+            ws = wb.active
+
+            created_count = 0
+            skipped_count = 0
+            error_count = 0
+
+            # Iterar desde fila 2 (skip header)
+            for row_number, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                # Columnas: Nombre del Examen, Precio, Código de Categoría
+                exam_name = row[0]
+                price = row[1]
+                category_code = row[2]
+
+                # Skip si faltan datos críticos
+                if not all([exam_name, price, category_code]):
+                    missing_fields = []
+                    if not exam_name:
+                        missing_fields.append("Nombre del Examen")
+                    if not price:
+                        missing_fields.append("Precio")
+                    if not category_code:
+                        missing_fields.append("Código de Categoría")
+
+                    logger.warning(
+                        f"Fila {row_number}: Datos incompletos - Faltan campos: {', '.join(missing_fields)} "
+                        f"[{exam_name or 'N/A'}, {price or 'N/A'}, {category_code or 'N/A'}]"
+                    )
+                    error_count += 1
+                    continue
+
+                try:
+                    # Aplicar strip() para limpiar espacios en blanco
+                    exam_name = str(exam_name).strip()
+                    category_code = str(category_code).strip()
+
+                    # Verificar si el examen ya existe (case insensitive)
+                    if Exam.objects.filter(name__iexact=exam_name).exists():
+                        logger.warning(
+                            f"Fila {row_number}: Examen duplicado - Ya existe un examen con el nombre '{exam_name}'"
+                        )
+                        skipped_count += 1
+                        continue
+
+                    # Buscar categoría por código
+                    try:
+                        category = ExamCategory.objects.get(code=category_code)
+                    except ExamCategory.DoesNotExist:
+                        logger.warning(
+                            f"Fila {row_number}: Categoría no encontrada con código '{category_code}' "
+                            f"[{exam_name}, {price}]"
+                        )
+                        error_count += 1
+                        continue
+
+                    # Validar precio
+                    try:
+                        price = float(price)
+                        if price < 0:
+                            logger.warning(
+                                f"Fila {row_number}: Precio inválido '{price}' debe ser mayor o igual a 0 "
+                                f"[{exam_name}, {category_code}]"
+                            )
+                            error_count += 1
+                            continue
+                    except (ValueError, TypeError):
+                        logger.warning(
+                            f"Fila {row_number}: Precio inválido '{price}' debe ser un número "
+                            f"[{exam_name}, {category_code}]"
+                        )
+                        error_count += 1
+                        continue
+
+                    # Generar código automáticamente
+                    last_exam = Exam.objects.order_by("-code").first()
+                    if last_exam and last_exam.code and last_exam.code.startswith("EX"):
+                        try:
+                            last_number = int(last_exam.code[2:])
+                            new_number = last_number + 1
+                        except ValueError:
+                            new_number = 1
+                    else:
+                        new_number = 1
+
+                    exam_code = f"EX{new_number:05d}"
+
+                    # Crear examen
+                    Exam.objects.create(
+                        code=exam_code,
+                        name=exam_name,
+                        price=price,
+                        category=category,
+                        has_components=False,
+                    )
+
+                    created_count += 1
+
+                except Exception as e:
+                    logger.warning(
+                        f"Fila {row_number}: Error al procesar - {str(e)} " f"[{exam_name}, {price}, {category_code}]"
+                    )
+                    logger.exception(f"Detalles del error en fila {row_number}")
+                    error_count += 1
+                    continue
+
+            messages.success(
+                request,
+                f"Importación completada: {created_count} creados, {skipped_count} omitidos, {error_count} errores",
+            )
+
+        except Exception as e:
+            logger.exception("Error al procesar el archivo de exámenes")
+            messages.error(request, f"Error al procesar el archivo: {str(e)}")
+
+        return redirect("exams_list")
