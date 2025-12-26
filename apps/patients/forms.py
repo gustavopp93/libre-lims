@@ -6,7 +6,7 @@ from apps.patients.models import LeadSource, Patient
 class PatientUpdateForm(forms.ModelForm):
     class Meta:
         model = Patient
-        fields = ["phone_number", "email"]
+        fields = ["phone_number", "email", "presumptive_diagnosis"]
         widgets = {
             "phone_number": forms.TextInput(
                 attrs={
@@ -20,10 +20,18 @@ class PatientUpdateForm(forms.ModelForm):
                     "placeholder": "correo@ejemplo.com",
                 }
             ),
+            "presumptive_diagnosis": forms.Textarea(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "Ingrese la presunción médica del paciente",
+                    "rows": 3,
+                }
+            ),
         }
         labels = {
             "phone_number": "Teléfono",
             "email": "Correo Electrónico",
+            "presumptive_diagnosis": "Presunción Médica",
         }
 
 
@@ -67,6 +75,7 @@ class PatientForm(forms.ModelForm):
             "phone_number",
             "email",
             "lead_source",
+            "presumptive_diagnosis",
         ]
         widgets = {
             "document_type": forms.Select(
@@ -120,6 +129,13 @@ class PatientForm(forms.ModelForm):
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                 }
             ),
+            "presumptive_diagnosis": forms.Textarea(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "Ingrese la presunción médica del paciente",
+                    "rows": 3,
+                }
+            ),
         }
         labels = {
             "document_type": "Tipo de Documento",
@@ -131,6 +147,7 @@ class PatientForm(forms.ModelForm):
             "phone_number": "Teléfono",
             "email": "Correo Electrónico",
             "lead_source": "¿Cómo nos conoció?",
+            "presumptive_diagnosis": "Presunción Médica",
         }
 
 

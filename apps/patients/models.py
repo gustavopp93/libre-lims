@@ -51,6 +51,11 @@ class Patient(TimeStampedModel):
         verbose_name="¿Cómo nos conoció?",
         help_text="Canal por el cual el cliente llegó por primera vez",
     )
+    presumptive_diagnosis = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Presunción Médica",
+    )
 
     class Meta:
         verbose_name = "Patient"

@@ -39,7 +39,7 @@ class Order(TimeStampedModel):
     payment_method = models.CharField(
         max_length=20, choices=PaymentMethod.choices, null=True, blank=True, verbose_name="Método de Pago"
     )
-    observations = models.TextField(blank=True, default="")
+    observations = models.TextField(blank=True, default="", verbose_name="Observaciones")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
 
     class Meta:
