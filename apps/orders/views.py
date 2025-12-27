@@ -31,6 +31,10 @@ class OrdersListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
+        from datetime import datetime
+
+        from django.utils import timezone
+
         queryset = Order.objects.select_related("patient", "referral")
 
         # Filtrar por tipo de documento
@@ -43,12 +47,33 @@ class OrdersListView(LoginRequiredMixin, ListView):
         if document_number:
             queryset = queryset.filter(patient__document_number__icontains=document_number)
 
+        # Filtrar por rango de fechas
+        date_from = self.request.GET.get("date_from")
+        if date_from:
+            try:
+                date_from_obj = datetime.strptime(date_from, "%Y-%m-%d")
+                date_from_aware = timezone.make_aware(datetime.combine(date_from_obj.date(), datetime.min.time()))
+                queryset = queryset.filter(created_at__gte=date_from_aware)
+            except ValueError:
+                pass
+
+        date_to = self.request.GET.get("date_to")
+        if date_to:
+            try:
+                date_to_obj = datetime.strptime(date_to, "%Y-%m-%d")
+                date_to_aware = timezone.make_aware(datetime.combine(date_to_obj.date(), datetime.max.time()))
+                queryset = queryset.filter(created_at__lte=date_to_aware)
+            except ValueError:
+                pass
+
         return queryset.order_by("-created_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["document_type"] = self.request.GET.get("document_type", "")
         context["document_number"] = self.request.GET.get("document_number", "")
+        context["date_from"] = self.request.GET.get("date_from", "")
+        context["date_to"] = self.request.GET.get("date_to", "")
         return context
 
 
