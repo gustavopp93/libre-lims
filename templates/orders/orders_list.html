@@ -29,7 +29,7 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <!-- Filters -->
         <div class="p-6 border-b border-gray-200 bg-gray-50">
-            <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="document_type">
                         Tipo de Documento
@@ -52,6 +52,32 @@
                         id="document_number"
                         value="{{ document_number }}"
                         placeholder="Buscar por número"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="date_from">
+                        Fecha Desde
+                    </label>
+                    <input
+                        type="date"
+                        name="date_from"
+                        id="date_from"
+                        value="{{ date_from }}"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="date_to">
+                        Fecha Hasta
+                    </label>
+                    <input
+                        type="date"
+                        name="date_to"
+                        id="date_to"
+                        value="{{ date_to }}"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
                     >
                 </div>
