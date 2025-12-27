@@ -234,6 +234,9 @@ def search_referrals_api(request):
             "document_number": ref.document_number,
             "price_list_id": ref.price_list_id,
             "price_list_name": ref.price_list.name,
+            "phone_number": ref.phone_number or "",
+            "email": ref.email or "",
+            "address": ref.address or "",
         }
         for ref in referrals
     ]
