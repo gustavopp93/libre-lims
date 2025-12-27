@@ -27,6 +27,43 @@
 
     <!-- Sales List -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- Filters -->
+        <div class="p-6 border-b border-gray-200 bg-gray-50">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="document_type">
+                        Tipo de Documento
+                    </label>
+                    <select name="document_type" id="document_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+                        <option value="">Todos</option>
+                        <option value="DNI" {% if document_type == 'DNI' %}selected{% endif %}>DNI</option>
+                        <option value="CE" {% if document_type == 'CE' %}selected{% endif %}>Carnet de Extranjería</option>
+                        <option value="PASAPORTE" {% if document_type == 'PASAPORTE' %}selected{% endif %}>Pasaporte</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="document_number">
+                        Número de Documento
+                    </label>
+                    <input
+                        type="text"
+                        name="document_number"
+                        id="document_number"
+                        value="{{ document_number }}"
+                        placeholder="Buscar por número"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                    >
+                </div>
+
+                <div class="flex items-end">
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline w-full">
+                        <i data-lucide="search" class="w-5 h-5 inline mr-2"></i>
+                        Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>

@@ -31,7 +31,25 @@ class OrdersListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Order.objects.select_related("patient", "referral").order_by("-created_at")
+        queryset = Order.objects.select_related("patient", "referral")
+
+        # Filtrar por tipo de documento
+        document_type = self.request.GET.get("document_type")
+        if document_type:
+            queryset = queryset.filter(patient__document_type=document_type)
+
+        # Filtrar por número de documento
+        document_number = self.request.GET.get("document_number")
+        if document_number:
+            queryset = queryset.filter(patient__document_number__icontains=document_number)
+
+        return queryset.order_by("-created_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["document_type"] = self.request.GET.get("document_type", "")
+        context["document_number"] = self.request.GET.get("document_number", "")
+        return context
 
 
 class CreateOrderView(LoginRequiredMixin, TemplateView):
