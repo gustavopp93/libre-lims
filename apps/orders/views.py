@@ -122,12 +122,10 @@ class OrderResultsFormView(LoginRequiredMixin, View):
         return response
 
 
+@login_required
 @require_POST
 def create_order_api(request):
     """API endpoint para crear una orden con sus detalles"""
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "No autenticado"}, status=401)
-
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
@@ -215,12 +213,10 @@ def create_order_api(request):
         return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)
 
 
+@login_required
 @require_GET
 def search_referrals_api(request):
     """API endpoint para buscar referidos"""
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "No autenticado"}, status=401)
-
     query = request.GET.get("query", "").strip()
 
     if len(query) < 2:
@@ -245,12 +241,10 @@ def search_referrals_api(request):
     return JsonResponse({"referrals": referrals_data})
 
 
+@login_required
 @require_POST
 def create_referral_order_api(request):
     """API endpoint para crear una orden de referido con sus detalles"""
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "No autenticado"}, status=401)
-
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:

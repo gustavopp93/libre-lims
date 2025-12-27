@@ -3,6 +3,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
 from django.http import HttpResponse, JsonResponse
@@ -357,12 +358,10 @@ class AdmissionView(LoginRequiredMixin, TemplateView):
     login_url = reverse_lazy("login")
 
 
+@login_required
 @require_GET
 def search_patient_api(request):
     """API endpoint para buscar pacientes por tipo y número de documento o por query general"""
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "No autenticado"}, status=401)
-
     # Búsqueda nueva por query (nombre, apellido, documento)
     query = request.GET.get("query", "").strip()
     if query:
@@ -412,6 +411,56 @@ def search_patient_api(request):
         )
     except Patient.DoesNotExist:
         return JsonResponse({"found": False, "message": "Paciente no encontrado"})
+
+
+@login_required
+@require_GET
+def patient_details_api(request):
+    """API endpoint para obtener detalles completos del paciente incluyendo presunciones y últimas órdenes"""
+    patient_id = request.GET.get("patient_id")
+    if not patient_id:
+        return JsonResponse({"error": "patient_id es requerido"}, status=400)
+
+    try:
+        from apps.orders.models import Order
+
+        patient = Patient.objects.get(id=patient_id)
+
+        # Obtener las últimas 5 órdenes del paciente
+        recent_orders = Order.objects.filter(patient=patient).order_by("-created_at")[:5]
+
+        orders_data = [
+            {
+                "id": order.id,
+                "code": order.code,
+                "total": str(order.total),
+                "status": order.status,
+                "status_display": order.get_status_display(),
+                "created_at": order.created_at.strftime("%d/%m/%Y %H:%M"),
+            }
+            for order in recent_orders
+        ]
+
+        return JsonResponse(
+            {
+                "patient": {
+                    "id": patient.id,
+                    "document_type": patient.document_type,
+                    "document_number": patient.document_number,
+                    "first_name": patient.first_name,
+                    "last_name": patient.last_name,
+                    "age": patient.age,
+                    "phone_number": patient.phone_number,
+                    "presumptive_diagnosis": patient.presumptive_diagnosis or "",
+                },
+                "recent_orders": orders_data,
+            }
+        )
+    except Patient.DoesNotExist:
+        return JsonResponse({"error": "Paciente no encontrado"}, status=404)
+    except Exception as e:
+        logger.exception("Error obteniendo detalles del paciente")
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 class LeadSourceListView(LoginRequiredMixin, ListView):

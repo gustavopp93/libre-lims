@@ -54,6 +54,7 @@ from apps.patients.views import (
     PatientsUploadView,
     UpdateLeadSourceView,
     UpdatePatientView,
+    patient_details_api,
     search_patient_api,
 )
 
@@ -92,6 +93,7 @@ urlpatterns = [
     path("exam-categories/create/", CreateExamCategoryView.as_view(), name="exam_categories_create"),
     path("exam-categories/<int:pk>/update/", UpdateExamCategoryView.as_view(), name="exam_categories_update"),
     path("api/patients/search/", search_patient_api, name="api_patient_search"),
+    path("api/patients/details/", patient_details_api, name="api_patient_details"),
     path("api/exams/search/", search_exams_api, name="api_exams_search"),
     path("api/orders/create/", create_order_api, name="api_orders_create"),
     path("api/orders/referral/create/", create_referral_order_api, name="api_referral_orders_create"),
