@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -425,6 +426,7 @@ class ReferralUpdateView(LoginRequiredMixin, UpdateView):
 
 
 # API Endpoints
+@login_required
 def get_exam_price_api(request):
     """
     API endpoint para obtener el precio de un examen considerando cupón, tarifario del referido o precio base.
@@ -441,9 +443,6 @@ def get_exam_price_api(request):
             - price_list_id: ID del tarifario (si aplica)
             - coupon_code: código del cupón (si aplica)
     """
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "No autenticado"}, status=401)
-
     exam_id = request.GET.get("exam_id")
     referral_id = request.GET.get("referral_id")
     coupon_code = request.GET.get("coupon_code", "").strip()
@@ -472,6 +471,7 @@ def get_exam_price_api(request):
         return JsonResponse({"error": f"Error al obtener precio: {str(e)}"}, status=500)
 
 
+@login_required
 @require_GET
 def validate_coupon_api(request):
     """
@@ -486,9 +486,6 @@ def validate_coupon_api(request):
             - coupon: datos del cupón (si es válido)
             - error: mensaje de error (si no es válido)
     """
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "No autenticado"}, status=401)
-
     coupon_code = request.GET.get("coupon_code", "").strip()
 
     if not coupon_code:

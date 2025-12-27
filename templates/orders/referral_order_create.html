@@ -22,59 +22,112 @@
                 </div>
 
                 <!-- Step 1: Search Referral Card -->
-                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <div id="referralSearchCard" class="bg-white rounded-lg shadow p-6 mb-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Paso 1: Buscar Referido</h3>
 
-                    <div class="grid grid-cols-1 gap-4">
+                    <div id="referralSearchInput" class="grid grid-cols-1 gap-4">
                         <div>
                             <label class="block text-gray-700 text-sm font-bold mb-2">Buscar por Nombre de Negocio o RUC</label>
                             <select id="referralSelect" placeholder="Buscar referido..."></select>
                         </div>
                     </div>
+
+                    <!-- Referral Selected Badge -->
+                    <div id="referralSelectedBadge" class="hidden mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600 mr-2"></i>
+                                <div>
+                                    <p class="text-sm font-semibold text-green-800">Referido seleccionado</p>
+                                    <p class="text-xs text-green-700 mt-1">
+                                        <span id="selectedReferralName"></span> - <span id="selectedReferralRuc"></span>
+                                    </p>
+                                </div>
+                            </div>
+                            <button type="button" id="changeReferralBtn" class="text-blue-600 hover:text-blue-800 text-sm underline">
+                                Cambiar Referido
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Referral Selected -->
+                <!-- Referral Details -->
                 <div id="referralSelected" class="hidden">
                     <div class="bg-white rounded-lg shadow p-6 mb-6">
                         <h4 class="text-lg font-semibold mb-4">Datos del Referido</h4>
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <div><p class="text-sm text-gray-600">Negocio</p><p class="font-semibold" id="referralBusinessName"></p></div>
                             <div><p class="text-sm text-gray-600">RUC</p><p class="font-semibold" id="referralDocNumber"></p></div>
-                            <div><p class="text-sm text-gray-600">Tarifario</p><p class="font-semibold" id="referralPriceList"></p></div>
                         </div>
                     </div>
 
                     <!-- Step 2: Search Patient Card -->
-                    <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <div id="patientSearchCard" class="bg-white rounded-lg shadow p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Paso 2: Buscar Paciente</h3>
 
-                        <div class="grid grid-cols-1 gap-4">
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Buscar Paciente</label>
-                                <select id="patientSelect" placeholder="Buscar por nombre, apellido o documento..."></select>
+                        <div id="patientSearchInput">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Buscar Paciente</label>
+                                    <select id="patientSelect" placeholder="Buscar por nombre, apellido o documento..."></select>
+                                </div>
+                            </div>
+
+                            <!-- Patient Not Found -->
+                            <div id="patientNotFound" class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <p class="text-sm text-gray-700 mb-2">¿El paciente no aparece en la búsqueda?</p>
+                                <a href="{% url 'patients_create' %}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded inline-block text-sm">
+                                    <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                                    Crear Nuevo Paciente
+                                </a>
+                                <p class="text-xs text-gray-600 mt-2">Después de crear el paciente, recargue esta página y búsquelo nuevamente.</p>
                             </div>
                         </div>
 
-                        <!-- Patient Not Found -->
-                        <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                            <p class="text-sm text-gray-700 mb-2">¿El paciente no aparece en la búsqueda?</p>
-                            <a href="{% url 'patients_create' %}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded inline-block text-sm">
-                                <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
-                                Crear Nuevo Paciente
-                            </a>
-                            <p class="text-xs text-gray-600 mt-2">Después de crear el paciente, recargue esta página y búsquelo nuevamente.</p>
+                        <!-- Patient Selected Badge -->
+                        <div id="patientSelectedBadge" class="hidden mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-green-600 mr-2"></i>
+                                    <div>
+                                        <p class="text-sm font-semibold text-green-800">Paciente seleccionado</p>
+                                        <p class="text-xs text-green-700 mt-1">
+                                            <span id="selectedPatientName"></span> - <span id="selectedPatientDoc"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <button type="button" id="changePatientBtn" class="text-blue-600 hover:text-blue-800 text-sm underline">
+                                    Cambiar Paciente
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Patient Found -->
+                    <!-- Patient Details -->
                     <div id="patientFound" class="hidden">
                         <div class="bg-white rounded-lg shadow p-6 mb-6">
-                            <h4 class="text-lg font-semibold mb-4">Datos del Paciente</h4>
-                            <div class="grid grid-cols-4 gap-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold">Datos del Paciente</h4>
+                                <a id="editPatientBtn" href="#" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm flex items-center">
+                                    <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
+                                    Editar Paciente
+                                </a>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 mb-4">
                                 <div><p class="text-sm text-gray-600">Tipo de Documento</p><p class="font-semibold" id="patientDocType"></p></div>
                                 <div><p class="text-sm text-gray-600">Número de Documento</p><p class="font-semibold" id="patientDocNumber"></p></div>
                                 <div><p class="text-sm text-gray-600">Nombres</p><p class="font-semibold" id="patientFirstName"></p></div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 mb-6">
                                 <div><p class="text-sm text-gray-600">Apellidos</p><p class="font-semibold" id="patientLastName"></p></div>
+                                <div><p class="text-sm text-gray-600">Edad</p><p class="font-semibold" id="patientAge"></p></div>
+                                <div><p class="text-sm text-gray-600">Teléfono</p><p class="font-semibold" id="patientPhone"></p></div>
+                            </div>
+
+                            <!-- Presunciones Diagnósticas -->
+                            <div id="diagnosisSection" class="border-t pt-4">
+                                <h5 class="text-sm font-semibold text-gray-700 mb-2">Presunción Médica</h5>
+                                <p id="patientDiagnosis" class="text-sm text-gray-600 italic"></p>
                             </div>
                         </div>
 
@@ -158,9 +211,17 @@
                         currentReferralId = value;
                         currentPriceListId = selectedOption.price_list_id;
 
+                        // Ocultar input de búsqueda
+                        document.getElementById('referralSearchInput').classList.add('hidden');
+
+                        // Actualizar badge de referido seleccionado
+                        document.getElementById('selectedReferralName').textContent = selectedOption.business_name;
+                        document.getElementById('selectedReferralRuc').textContent = selectedOption.document_number;
+                        document.getElementById('referralSelectedBadge').classList.remove('hidden');
+
+                        // Actualizar detalles completos del referido
                         document.getElementById('referralBusinessName').textContent = selectedOption.business_name;
                         document.getElementById('referralDocNumber').textContent = selectedOption.document_number;
-                        document.getElementById('referralPriceList').textContent = selectedOption.price_list_name;
 
                         document.getElementById('referralSelected').classList.remove('hidden');
 
@@ -175,13 +236,17 @@
 
                         // Limpiar datos de paciente
                         currentPatientId = null;
+                        document.getElementById('patientSearchInput').classList.remove('hidden');
                         document.getElementById('patientFound').classList.add('hidden');
+                        document.getElementById('patientSelectedBadge').classList.add('hidden');
 
                         lucide.createIcons();
                     }
                 } else {
                     currentReferralId = null;
                     currentPriceListId = null;
+                    document.getElementById('referralSearchInput').classList.remove('hidden');
+                    document.getElementById('referralSelectedBadge').classList.add('hidden');
                     document.getElementById('referralSelected').classList.add('hidden');
                 }
             }
@@ -227,16 +292,22 @@
                         return `<div>${escape(item.last_name)}, ${escape(item.first_name)} - ${escape(item.document_type)}: ${escape(item.document_number)}</div>`;
                     }
                 },
-                onChange: function(value) {
+                onChange: async function(value) {
                     if (value) {
                         const selectedOption = this.options[value];
                         if (selectedOption) {
                             currentPatientId = value;
 
-                            document.getElementById('patientDocType').textContent = selectedOption.document_type;
-                            document.getElementById('patientDocNumber').textContent = selectedOption.document_number;
-                            document.getElementById('patientFirstName').textContent = selectedOption.first_name;
-                            document.getElementById('patientLastName').textContent = selectedOption.last_name;
+                            // Ocultar input de búsqueda
+                            document.getElementById('patientSearchInput').classList.add('hidden');
+
+                            // Actualizar badge de paciente seleccionado
+                            document.getElementById('selectedPatientName').textContent = `${selectedOption.last_name}, ${selectedOption.first_name}`;
+                            document.getElementById('selectedPatientDoc').textContent = `${selectedOption.document_type}: ${selectedOption.document_number}`;
+                            document.getElementById('patientSelectedBadge').classList.remove('hidden');
+
+                            // Cargar detalles completos del paciente
+                            await loadPatientDetails(value);
 
                             document.getElementById('patientFound').classList.remove('hidden');
 
@@ -253,11 +324,73 @@
                         }
                     } else {
                         currentPatientId = null;
+                        document.getElementById('patientSearchInput').classList.remove('hidden');
+                        document.getElementById('patientSelectedBadge').classList.add('hidden');
                         document.getElementById('patientFound').classList.add('hidden');
                     }
                 }
             });
         }
+
+        // Función para cargar detalles completos del paciente
+        async function loadPatientDetails(patientId) {
+            try {
+                const response = await fetch(`/api/patients/details/?patient_id=${patientId}`);
+                const data = await response.json();
+
+                if (response.ok && data.patient) {
+                    const patient = data.patient;
+
+                    // Actualizar datos básicos del paciente
+                    document.getElementById('patientDocType').textContent = patient.document_type;
+                    document.getElementById('patientDocNumber').textContent = patient.document_number;
+                    document.getElementById('patientFirstName').textContent = patient.first_name;
+                    document.getElementById('patientLastName').textContent = patient.last_name;
+                    document.getElementById('patientAge').textContent = patient.age || 'No registrado';
+                    document.getElementById('patientPhone').textContent = patient.phone_number || 'No registrado';
+
+                    // Actualizar presunción médica
+                    const diagnosisText = patient.presumptive_diagnosis || 'No hay presunción registrada';
+                    document.getElementById('patientDiagnosis').textContent = diagnosisText;
+
+                    // Actualizar link de editar paciente
+                    document.getElementById('editPatientBtn').href = `/patients/${patientId}/edit/`;
+                }
+            } catch (error) {
+                console.error('Error cargando detalles del paciente:', error);
+            }
+        }
+
+        // Botón "Cambiar Referido"
+        document.getElementById('changeReferralBtn').addEventListener('click', function() {
+            if (referralTomSelect) {
+                referralTomSelect.clear();
+                referralTomSelect.clearOptions();
+                referralTomSelect.focus();
+            }
+            document.getElementById('referralSearchInput').classList.remove('hidden');
+            document.getElementById('referralSelectedBadge').classList.add('hidden');
+            document.getElementById('referralSelected').classList.add('hidden');
+            document.getElementById('patientSearchInput').classList.remove('hidden');
+            document.getElementById('patientSelectedBadge').classList.add('hidden');
+            document.getElementById('patientFound').classList.add('hidden');
+            currentReferralId = null;
+            currentPriceListId = null;
+            currentPatientId = null;
+        });
+
+        // Botón "Cambiar Paciente"
+        document.getElementById('changePatientBtn').addEventListener('click', function() {
+            if (patientTomSelect) {
+                patientTomSelect.clear();
+                patientTomSelect.clearOptions();
+                patientTomSelect.focus();
+            }
+            document.getElementById('patientSearchInput').classList.remove('hidden');
+            document.getElementById('patientSelectedBadge').classList.add('hidden');
+            document.getElementById('patientFound').classList.add('hidden');
+            currentPatientId = null;
+        });
 
         document.getElementById('addExamRowBtn').addEventListener('click', addExamRow);
 
