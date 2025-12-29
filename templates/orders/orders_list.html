@@ -15,6 +15,10 @@
 <div class="max-w-7xl mx-auto">
     <!-- Action Buttons -->
     <div class="mb-6 flex justify-end space-x-3">
+        <button id="downloadExcelBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded flex items-center">
+            <i data-lucide="download" class="w-5 h-5 mr-2"></i>
+            Descargar Excel
+        </button>
         <a href="{% url 'create_referral_order' %}" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded flex items-center">
             <i data-lucide="truck" class="w-5 h-5 mr-2"></i>
             Orden de Referido
@@ -303,6 +307,28 @@ document.getElementById('paymentModal').addEventListener('click', function(e) {
     if (e.target === this) {
         closePaymentModal();
     }
+});
+
+// Manejar descarga de Excel
+document.getElementById('downloadExcelBtn').addEventListener('click', function() {
+    // Obtener los valores de los filtros actuales
+    const documentType = document.getElementById('document_type').value;
+    const documentNumber = document.getElementById('document_number').value;
+    const dateFrom = document.getElementById('date_from').value;
+    const dateTo = document.getElementById('date_to').value;
+
+    // Construir la URL con los parámetros de filtro
+    const params = new URLSearchParams();
+    if (documentType) params.append('document_type', documentType);
+    if (documentNumber) params.append('document_number', documentNumber);
+    if (dateFrom) params.append('date_from', dateFrom);
+    if (dateTo) params.append('date_to', dateTo);
+
+    // Construir URL completa
+    const url = "{% url 'orders_download_excel' %}" + (params.toString() ? '?' + params.toString() : '');
+
+    // Descargar el archivo
+    window.location.href = url;
 });
 </script>
 {% endblock %}
