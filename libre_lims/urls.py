@@ -40,6 +40,7 @@ from apps.orders.views import (
     complete_order,
     create_order_api,
     create_referral_order_api,
+    download_orders_excel,
     search_referrals_api,
 )
 from apps.patients.views import (
@@ -71,6 +72,7 @@ urlpatterns = [
     path("orders/", OrdersListView.as_view(), name="orders_list"),
     path("orders/create/", CreateOrderView.as_view(), name="create_order"),
     path("orders/referral/create/", CreateReferralOrderView.as_view(), name="create_referral_order"),
+    path("orders/download-excel/", download_orders_excel, name="orders_download_excel"),
     path("orders/<int:order_id>/cancel/", cancel_order, name="cancel_order"),
     path("orders/<int:order_id>/complete/", complete_order, name="complete_order"),
     path("orders/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),

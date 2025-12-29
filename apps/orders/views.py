@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -9,9 +10,12 @@ from django.db import models, transaction
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView, ListView, TemplateView
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, PatternFill
 from weasyprint import HTML
 
 from apps.billing.models import Company
@@ -403,3 +407,110 @@ def complete_order(request, order_id):
     except Exception as e:
         logger.exception("Error al completar la orden")
         return JsonResponse({"error": f"Error al completar la orden: {str(e)}"}, status=500)
+
+
+@login_required
+@require_GET
+def download_orders_excel(request):
+    """Descargar órdenes en formato Excel con filtros aplicados"""
+    # Aplicar los mismos filtros que OrdersListView
+    queryset = Order.objects.select_related("patient", "referral")
+
+    # Filtrar por tipo de documento
+    document_type = request.GET.get("document_type")
+    if document_type:
+        queryset = queryset.filter(patient__document_type=document_type)
+
+    # Filtrar por número de documento
+    document_number = request.GET.get("document_number")
+    if document_number:
+        queryset = queryset.filter(patient__document_number__icontains=document_number)
+
+    # Filtrar por rango de fechas
+    date_from = request.GET.get("date_from")
+    if date_from:
+        try:
+            date_from_obj = datetime.strptime(date_from, "%Y-%m-%d")
+            date_from_aware = timezone.make_aware(datetime.combine(date_from_obj.date(), datetime.min.time()))
+            queryset = queryset.filter(created_at__gte=date_from_aware)
+        except ValueError:
+            pass
+
+    date_to = request.GET.get("date_to")
+    if date_to:
+        try:
+            date_to_obj = datetime.strptime(date_to, "%Y-%m-%d")
+            date_to_aware = timezone.make_aware(datetime.combine(date_to_obj.date(), datetime.max.time()))
+            queryset = queryset.filter(created_at__lte=date_to_aware)
+        except ValueError:
+            pass
+
+    orders = queryset.order_by("-created_at")
+
+    # Crear libro de Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Órdenes"
+
+    # Estilos
+    header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    header_alignment = Alignment(horizontal="center", vertical="center")
+
+    # Encabezados
+    headers = [
+        "Código de Orden",
+        "Estado",
+        "Método de Pago",
+        "Fecha",
+        "Monto Total",
+        "Tipo de Documento",
+        "Número de Documento",
+        "Apellidos",
+        "Nombres",
+    ]
+
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+
+    # Datos
+    for row_num, order in enumerate(orders, 2):
+        ws.cell(row=row_num, column=1).value = order.code
+        ws.cell(row=row_num, column=2).value = order.get_status_display()
+        ws.cell(row=row_num, column=3).value = order.get_payment_method_display() if order.payment_method else "-"
+        ws.cell(row=row_num, column=4).value = timezone.localtime(order.created_at).strftime("%d/%m/%Y %H:%M")
+        ws.cell(row=row_num, column=5).value = float(order.total)
+        ws.cell(row=row_num, column=6).value = order.patient.get_document_type_display()
+        ws.cell(row=row_num, column=7).value = order.patient.document_number
+        ws.cell(row=row_num, column=8).value = order.patient.last_name
+        ws.cell(row=row_num, column=9).value = order.patient.first_name
+
+    # Ajustar ancho de columnas
+    ws.column_dimensions["A"].width = 18
+    ws.column_dimensions["B"].width = 12
+    ws.column_dimensions["C"].width = 22
+    ws.column_dimensions["D"].width = 18
+    ws.column_dimensions["E"].width = 14
+    ws.column_dimensions["F"].width = 20
+    ws.column_dimensions["G"].width = 20
+    ws.column_dimensions["H"].width = 25
+    ws.column_dimensions["I"].width = 25
+
+    # Generar nombre de archivo con fecha actual
+    now = timezone.localtime(timezone.now())
+    filename = f"ordenes_{now.strftime('%Y%m%d_%H%M%S')}.xlsx"
+
+    # Crear respuesta HTTP
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+    # Guardar el libro en la respuesta
+    wb.save(response)
+
+    return response
