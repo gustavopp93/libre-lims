@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Resultados - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        {% include 'includes/header.html' with page_title="Resultados" %}
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+<div class="max-w-7xl mx-auto">
+    <!-- Results List -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- Filters -->
+        <div class="p-6 border-b border-gray-200 bg-gray-50">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="order_code">
+                        Código de Orden
+                    </label>
+                    <input
+                        type="text"
+                        name="order_code"
+                        id="order_code"
+                        value="{{ order_code }}"
+                        placeholder="Buscar por código"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="document_number">
+                        Número de Documento
+                    </label>
+                    <input
+                        type="text"
+                        name="document_number"
+                        id="document_number"
+                        value="{{ document_number }}"
+                        placeholder="Buscar por documento"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
+                        Estado
+                    </label>
+                    <select name="status" id="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+                        <option value="">Todos</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="flex items-end">
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline w-full">
+                        <i data-lucide="search" class="w-5 h-5 inline mr-2"></i>
+                        Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Código Orden</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paciente</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">Documento</th>
+                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Creación</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for result in results %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-3 py-4 whitespace-nowrap text-xs font-medium text-gray-700">{{ result.order.code }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        <div class="leading-tight">{{ result.order.patient.first_name }}</div>
+                        <div class="leading-tight">{{ result.order.patient.last_name }}</div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{{ result.order.patient.document_type }} {{ result.order.patient.document_number }}</td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm">
+                        {% if result.status == 'pending' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                Pendiente
+                            </span>
+                        {% elif result.status == 'in_progress' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                En Proceso
+                            </span>
+                        {% elif result.status == 'partial_results' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                Resultados Parciales
+                            </span>
+                        {% elif result.status == 'completed' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Completado
+                            </span>
+                        {% elif result.status == 'partial_delivery' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                Entrega Parcial
+                            </span>
+                        {% elif result.status == 'delivered' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                Entregado
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ result.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div class="flex items-center space-x-3">
+                            <div class="relative group">
+                                <a href="#" class="text-blue-600 hover:text-blue-900 cursor-pointer">
+                                    <i data-lucide="eye" class="w-4 h-4 inline"></i>
+                                </a>
+                                <span class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                    Ver Detalle
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                        No hay resultados registrados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        {% include 'includes/pagination.html' %}
+    </div>
+</div>
+        </main>
+    </div>
+</div>
+{% endblock %}

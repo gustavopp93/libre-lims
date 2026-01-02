@@ -58,6 +58,7 @@ from apps.patients.views import (
     patient_details_api,
     search_patient_api,
 )
+from apps.results.views import ResultListView
 
 
 def health_check(request):
@@ -78,6 +79,7 @@ urlpatterns = [
     path("orders/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
     path("orders/<int:pk>/print/", OrderPrintView.as_view(), name="order_print"),
     path("orders/<int:pk>/results-form/", OrderResultsFormView.as_view(), name="order_results_form"),
+    path("results/", ResultListView.as_view(), name="results_list"),
     path("patients/", PatientsListView.as_view(), name="patients_list"),
     path("patients/create/", CreatePatientView.as_view(), name="patients_create"),
     path("patients/<int:pk>/update/", UpdatePatientView.as_view(), name="patients_update"),
