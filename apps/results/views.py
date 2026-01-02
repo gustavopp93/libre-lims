@@ -1,8 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 
-from apps.results.models import Result
+from apps.results.models import Result, ResultDetail
 
 
 class ResultListView(LoginRequiredMixin, ListView):
@@ -39,3 +41,96 @@ class ResultListView(LoginRequiredMixin, ListView):
         context["order_code"] = self.request.GET.get("order_code", "")
         context["status_choices"] = Result.ResultStatus.choices
         return context
+
+
+class ResultDetailView(LoginRequiredMixin, DetailView):
+    model = Result
+    template_name = "results/result_detail.html"
+    context_object_name = "result"
+    login_url = reverse_lazy("login")
+
+    def get_queryset(self):
+        return Result.objects.select_related("order", "order__patient").prefetch_related(
+            "details__exam", "details__order_detail"
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Verificar si todos los exámenes están entregados
+        result = self.get_object()
+        all_delivered = all(detail.status == ResultDetail.ExamResultStatus.DELIVERED for detail in result.details.all())
+        context["all_delivered"] = all_delivered
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Procesar cambios de estado de los detalles"""
+        result = self.get_object()
+
+        # Procesar cada detalle
+        for detail in result.details.all():
+            # Obtener nuevo estado del form
+            new_status = request.POST.get(f"detail_{detail.id}_status")
+            if new_status and new_status != detail.status:
+                # Validar que la transición es válida
+                allowed_statuses = [status for status, label in detail.get_allowed_transitions()]
+                if new_status in allowed_statuses:
+                    detail.status = new_status
+                    detail.save()
+
+        # Recalcular estado general del resultado
+        self._update_result_status(result)
+
+        messages.success(request, "Estados actualizados exitosamente")
+        return redirect("result_detail", pk=result.pk)
+
+    def _update_result_status(self, result):
+        """
+        Actualiza el estado general del resultado basado en los estados de los detalles.
+        La prioridad es de los estados más avanzados a los menos avanzados.
+        """
+        details = result.details.all()
+        if not details.exists():
+            return
+
+        statuses = [d.status for d in details]
+
+        # PRIORIDAD 1: Estados de entrega (más avanzados)
+        # Todos entregados -> DELIVERED
+        if all(s == ResultDetail.ExamResultStatus.DELIVERED for s in statuses):
+            result.status = Result.ResultStatus.DELIVERED
+        # Al menos uno entregado pero no todos -> PARTIAL_DELIVERY
+        elif any(s == ResultDetail.ExamResultStatus.DELIVERED for s in statuses):
+            result.status = Result.ResultStatus.PARTIAL_DELIVERY
+
+        # PRIORIDAD 2: Estados de completado
+        # Todos completados o validados (ninguno entregado) -> COMPLETED
+        elif all(
+            s in [ResultDetail.ExamResultStatus.COMPLETED, ResultDetail.ExamResultStatus.VALIDATED] for s in statuses
+        ):
+            result.status = Result.ResultStatus.COMPLETED
+        # Algunos completados/validados pero no todos -> PARTIAL_RESULTS
+        elif any(
+            s in [ResultDetail.ExamResultStatus.COMPLETED, ResultDetail.ExamResultStatus.VALIDATED] for s in statuses
+        ):
+            result.status = Result.ResultStatus.PARTIAL_RESULTS
+
+        # PRIORIDAD 3: Estados intermedios
+        # Al menos uno en proceso -> IN_PROGRESS
+        elif any(
+            s
+            in [
+                ResultDetail.ExamResultStatus.SAMPLE_RECEIVED,
+                ResultDetail.ExamResultStatus.INTERNAL_ANALYSIS,
+                ResultDetail.ExamResultStatus.SENT_EXTERNAL,
+                ResultDetail.ExamResultStatus.RECEIVED_EXTERNAL,
+            ]
+            for s in statuses
+        ):
+            result.status = Result.ResultStatus.IN_PROGRESS
+
+        # PRIORIDAD 4: Estado inicial
+        # Todos pendiente muestra -> PENDING
+        elif all(s == ResultDetail.ExamResultStatus.PENDING_SAMPLE for s in statuses):
+            result.status = Result.ResultStatus.PENDING
+
+        result.save()

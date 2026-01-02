@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Resultado - {{ result.order.code }} - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        {% include 'includes/header.html' with page_title="Detalle de Resultado" %}
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            <div class="max-w-6xl mx-auto">
+                <!-- Back Button -->
+                <div class="mb-4">
+                    <a href="{% url 'results_list' %}" class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+                        Volver al listado
+                    </a>
+                </div>
+
+                <!-- Info General -->
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">📋 Información General</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Orden</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ result.order.code }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Estado General</p>
+                            <p class="text-lg">
+                                {% if result.status == 'pending' %}
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Pendiente
+                                    </span>
+                                {% elif result.status == 'in_progress' %}
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        En Proceso
+                                    </span>
+                                {% elif result.status == 'partial_results' %}
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Resultados Parciales
+                                    </span>
+                                {% elif result.status == 'completed' %}
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Completado
+                                    </span>
+                                {% elif result.status == 'partial_delivery' %}
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                        Entrega Parcial
+                                    </span>
+                                {% elif result.status == 'delivered' %}
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                        Entregado
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Paciente</p>
+                            <p class="text-lg font-semibold text-gray-900">
+                                {{ result.order.patient.first_name }} {{ result.order.patient.last_name }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Documento</p>
+                            <p class="text-lg font-semibold text-gray-900">
+                                {{ result.order.patient.document_type }} {{ result.order.patient.document_number }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Fecha de Creación</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ result.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exámenes -->
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+                        <div class="p-6 border-b border-gray-200">
+                            <h2 class="text-xl font-bold text-gray-800">🧪 Exámenes ({{ result.details.count }})</h2>
+                        </div>
+
+                        <!-- Header -->
+                        <div class="bg-gray-50 border-b border-gray-200">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-6 py-3">
+                                <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Examen
+                                </div>
+                                <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Estado
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="divide-y divide-gray-200">
+                            {% for detail in result.details.all %}
+                            <div class="p-6 hover:bg-gray-50">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                                    <!-- Nombre del Examen -->
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">
+                                            {{ detail.exam.name }}
+                                        </h3>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
+                                            {{ detail.updated_at|date:"d/m/Y H:i" }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Estado -->
+                                    <div>
+                                        <select
+                                            name="detail_{{ detail.id }}_status"
+                                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500 {% if detail.status == 'delivered' %}bg-gray-100 cursor-not-allowed{% endif %}"
+                                            {% if detail.status == 'delivered' %}disabled{% endif %}
+                                        >
+                                            {% for status_value, status_label in detail.get_allowed_transitions %}
+                                                <option value="{{ status_value }}"
+                                                        {% if detail.status == status_value %}selected{% endif %}>
+                                                    {{ status_label }}{% if detail.status == 'delivered' %} 🔒{% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="p-6 text-center text-gray-500">
+                                No hay exámenes registrados
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Botón Guardar -->
+                    {% if not all_delivered %}
+                        <div class="flex justify-end">
+                            <button
+                                type="submit"
+                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-8 rounded flex items-center"
+                            >
+                                <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="flex justify-end">
+                            <div class="bg-green-100 border border-green-400 text-green-700 px-6 py-3 rounded flex items-center">
+                                <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i>
+                                Todos los exámenes han sido entregados
+                            </div>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
