@@ -400,6 +400,11 @@ def complete_order(request, order_id):
         order.payment_method = payment_method
         order.save()
 
+        # Crear resultado para la orden
+        from apps.results.services import create_result_for_order
+
+        create_result_for_order(order)
+
         return JsonResponse({"success": True, "message": "Pago registrado exitosamente"})
 
     except Order.DoesNotExist:
