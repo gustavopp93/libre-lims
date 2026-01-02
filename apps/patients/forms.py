@@ -6,8 +6,20 @@ from apps.patients.models import LeadSource, Patient
 class PatientUpdateForm(forms.ModelForm):
     class Meta:
         model = Patient
-        fields = ["phone_number", "email", "presumptive_diagnosis"]
+        fields = ["first_name", "last_name", "phone_number", "email", "presumptive_diagnosis"]
         widgets = {
+            "first_name": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "Nombres del paciente",
+                }
+            ),
+            "last_name": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "placeholder": "Apellidos del paciente",
+                }
+            ),
             "phone_number": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
@@ -29,6 +41,8 @@ class PatientUpdateForm(forms.ModelForm):
             ),
         }
         labels = {
+            "first_name": "Nombres",
+            "last_name": "Apellidos",
             "phone_number": "Teléfono",
             "email": "Correo Electrónico",
             "presumptive_diagnosis": "Presunción Médica",
