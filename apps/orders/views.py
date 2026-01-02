@@ -344,6 +344,11 @@ def create_referral_order_api(request):
             for detail in validated_details:
                 OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
 
+        # Crear resultado para la orden de referido
+        from apps.results.services import create_result_for_order
+
+        create_result_for_order(order)
+
         messages.success(request, f"Orden de referido {order.code} creada exitosamente")
 
         return JsonResponse(
@@ -400,10 +405,12 @@ def complete_order(request, order_id):
         order.payment_method = payment_method
         order.save()
 
-        # Crear resultado para la orden
-        from apps.results.services import create_result_for_order
+        # Crear resultado para la orden solo si NO es de referido
+        # (las órdenes de referidos ya tienen su resultado creado al momento de crear la orden)
+        if not order.referral:
+            from apps.results.services import create_result_for_order
 
-        create_result_for_order(order)
+            create_result_for_order(order)
 
         return JsonResponse({"success": True, "message": "Pago registrado exitosamente"})
 
