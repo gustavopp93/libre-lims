@@ -6,7 +6,7 @@ from apps.patients.models import LeadSource, Patient
 class PatientUpdateForm(forms.ModelForm):
     class Meta:
         model = Patient
-        fields = ["first_name", "last_name", "phone_number", "email", "presumptive_diagnosis"]
+        fields = ["first_name", "last_name", "birthdate", "sex", "phone_number", "email", "presumptive_diagnosis"]
         widgets = {
             "first_name": forms.TextInput(
                 attrs={
@@ -18,6 +18,18 @@ class PatientUpdateForm(forms.ModelForm):
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                     "placeholder": "Apellidos del paciente",
+                }
+            ),
+            "birthdate": forms.DateInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
+                    "type": "date",
+                },
+                format="%Y-%m-%d",
+            ),
+            "sex": forms.Select(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500",
                 }
             ),
             "phone_number": forms.TextInput(
@@ -43,6 +55,8 @@ class PatientUpdateForm(forms.ModelForm):
         labels = {
             "first_name": "Nombres",
             "last_name": "Apellidos",
+            "birthdate": "Fecha de Nacimiento",
+            "sex": "Sexo",
             "phone_number": "Teléfono",
             "email": "Correo Electrónico",
             "presumptive_diagnosis": "Presunción Médica",
