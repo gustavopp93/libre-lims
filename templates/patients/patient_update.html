@@ -60,26 +60,20 @@
                     <p class="text-gray-500 text-xs mt-1">Este campo no se puede editar</p>
                 </div>
 
-                <!-- Nombres (readonly) -->
+                <!-- Nombres (editable) -->
                 <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Nombres
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.first_name.id_for_label }}">
+                        {{ form.first_name.label }} <span class="text-red-500">*</span>
                     </label>
-                    <div class="bg-gray-100 border border-gray-300 rounded w-full py-2 px-3 text-gray-600">
-                        {{ patient.first_name }}
-                    </div>
-                    <p class="text-gray-500 text-xs mt-1">Este campo no se puede editar</p>
+                    {{ form.first_name }}
                 </div>
 
-                <!-- Apellidos (readonly) -->
+                <!-- Apellidos (editable) -->
                 <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Apellidos
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.last_name.id_for_label }}">
+                        {{ form.last_name.label }} <span class="text-red-500">*</span>
                     </label>
-                    <div class="bg-gray-100 border border-gray-300 rounded w-full py-2 px-3 text-gray-600">
-                        {{ patient.last_name }}
-                    </div>
-                    <p class="text-gray-500 text-xs mt-1">Este campo no se puede editar</p>
+                    {{ form.last_name }}
                 </div>
 
                 <!-- Fecha de Nacimiento (readonly) -->
