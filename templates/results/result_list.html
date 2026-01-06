@@ -47,14 +47,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="status_group">
                         Estado
                     </label>
-                    <select name="status" id="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+                    <select name="status_group" id="status_group" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
                         <option value="">Todos</option>
-                        {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
+                        <option value="pendiente" {% if status_group == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="en_progreso" {% if status_group == 'en_progreso' %}selected{% endif %}>En Progreso</option>
+                        <option value="entregado" {% if status_group == 'entregado' %}selected{% endif %}>Entregado</option>
                     </select>
                 </div>
 

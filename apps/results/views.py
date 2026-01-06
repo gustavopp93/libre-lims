@@ -17,10 +17,22 @@ class ResultListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = Result.objects.select_related("order", "order__patient").prefetch_related("details")
 
-        # Filtrar por estado
-        status = self.request.GET.get("status")
-        if status:
-            queryset = queryset.filter(status=status)
+        # Mapeo de grupos de status por color
+        status_groups = {
+            "pendiente": [Result.ResultStatus.PENDING],
+            "en_progreso": [
+                Result.ResultStatus.IN_PROGRESS,
+                Result.ResultStatus.PARTIAL_RESULTS,
+                Result.ResultStatus.COMPLETED,
+                Result.ResultStatus.PARTIAL_DELIVERY,
+            ],
+            "entregado": [Result.ResultStatus.DELIVERED],
+        }
+
+        # Filtrar por grupo de estado (basado en color)
+        status_group = self.request.GET.get("status_group")
+        if status_group and status_group in status_groups:
+            queryset = queryset.filter(status__in=status_groups[status_group])
 
         # Filtrar por número de documento del paciente
         document_number = self.request.GET.get("document_number")
@@ -36,10 +48,9 @@ class ResultListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["status"] = self.request.GET.get("status", "")
+        context["status_group"] = self.request.GET.get("status_group", "")
         context["document_number"] = self.request.GET.get("document_number", "")
         context["order_code"] = self.request.GET.get("order_code", "")
-        context["status_choices"] = Result.ResultStatus.choices
         return context
 
 
