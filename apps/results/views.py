@@ -15,6 +15,8 @@ class ResultListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
+        from django.db import models
+
         queryset = Result.objects.select_related("order", "order__patient").prefetch_related("details")
 
         # Mapeo de grupos de status por color
@@ -39,6 +41,14 @@ class ResultListView(LoginRequiredMixin, ListView):
         if document_number:
             queryset = queryset.filter(order__patient__document_number__icontains=document_number)
 
+        # Filtrar por nombre del paciente (first_name OR last_name)
+        patient_name = self.request.GET.get("patient_name")
+        if patient_name:
+            queryset = queryset.filter(
+                models.Q(order__patient__first_name__icontains=patient_name)
+                | models.Q(order__patient__last_name__icontains=patient_name)
+            )
+
         # Filtrar por código de orden
         order_code = self.request.GET.get("order_code")
         if order_code:
@@ -50,6 +60,7 @@ class ResultListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["status_group"] = self.request.GET.get("status_group", "")
         context["document_number"] = self.request.GET.get("document_number", "")
+        context["patient_name"] = self.request.GET.get("patient_name", "")
         context["order_code"] = self.request.GET.get("order_code", "")
         return context
 

@@ -51,6 +51,14 @@ class OrdersListView(LoginRequiredMixin, ListView):
         if document_number:
             queryset = queryset.filter(patient__document_number__icontains=document_number)
 
+        # Filtrar por nombre del paciente (first_name OR last_name)
+        patient_name = self.request.GET.get("patient_name")
+        if patient_name:
+            queryset = queryset.filter(
+                models.Q(patient__first_name__icontains=patient_name)
+                | models.Q(patient__last_name__icontains=patient_name)
+            )
+
         # Filtrar por rango de fechas
         date_from = self.request.GET.get("date_from")
         if date_from:
@@ -76,6 +84,7 @@ class OrdersListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["document_type"] = self.request.GET.get("document_type", "")
         context["document_number"] = self.request.GET.get("document_number", "")
+        context["patient_name"] = self.request.GET.get("patient_name", "")
         context["date_from"] = self.request.GET.get("date_from", "")
         context["date_to"] = self.request.GET.get("date_to", "")
         return context

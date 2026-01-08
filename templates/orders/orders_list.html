@@ -33,7 +33,7 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <!-- Filters -->
         <div class="p-6 border-b border-gray-200 bg-gray-50">
-            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="document_type">
                         Tipo de Documento
@@ -56,6 +56,20 @@
                         id="document_number"
                         value="{{ document_number }}"
                         placeholder="Buscar por número"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="patient_name">
+                        Nombre del Paciente
+                    </label>
+                    <input
+                        type="text"
+                        name="patient_name"
+                        id="patient_name"
+                        value="{{ patient_name }}"
+                        placeholder="Buscar por nombre"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
                     >
                 </div>
@@ -112,8 +126,8 @@
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 py-4 whitespace-nowrap text-xs font-medium text-gray-700">{{ order.code }}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">
-                        <div class="leading-tight">{{ order.patient.first_name }}</div>
                         <div class="leading-tight">{{ order.patient.last_name }}</div>
+                        <div class="leading-tight">{{ order.patient.first_name }}</div>
                     </td>
                     <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{{ order.patient.document_type }} {{ order.patient.document_number }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -141,7 +155,7 @@
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/. {{ order.total }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ order.created_at|date:"d/m/Y" }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div class="flex items-center space-x-3">
                             <div class="relative group">
@@ -314,6 +328,7 @@ document.getElementById('downloadExcelBtn').addEventListener('click', function()
     // Obtener los valores de los filtros actuales
     const documentType = document.getElementById('document_type').value;
     const documentNumber = document.getElementById('document_number').value;
+    const patientName = document.getElementById('patient_name').value;
     const dateFrom = document.getElementById('date_from').value;
     const dateTo = document.getElementById('date_to').value;
 
@@ -321,6 +336,7 @@ document.getElementById('downloadExcelBtn').addEventListener('click', function()
     const params = new URLSearchParams();
     if (documentType) params.append('document_type', documentType);
     if (documentNumber) params.append('document_number', documentNumber);
+    if (patientName) params.append('patient_name', patientName);
     if (dateFrom) params.append('date_from', dateFrom);
     if (dateTo) params.append('date_to', dateTo);
 
