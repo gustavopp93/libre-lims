@@ -41,11 +41,6 @@ class OrdersListView(LoginRequiredMixin, ListView):
 
         queryset = Order.objects.select_related("patient", "referral")
 
-        # Filtrar por tipo de documento
-        document_type = self.request.GET.get("document_type")
-        if document_type:
-            queryset = queryset.filter(patient__document_type=document_type)
-
         # Filtrar por número de documento
         document_number = self.request.GET.get("document_number")
         if document_number:
@@ -82,7 +77,6 @@ class OrdersListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["document_type"] = self.request.GET.get("document_type", "")
         context["document_number"] = self.request.GET.get("document_number", "")
         context["patient_name"] = self.request.GET.get("patient_name", "")
         context["date_from"] = self.request.GET.get("date_from", "")
@@ -436,11 +430,6 @@ def download_orders_excel(request):
     """Descargar órdenes en formato Excel con filtros aplicados"""
     # Aplicar los mismos filtros que OrdersListView
     queryset = Order.objects.select_related("patient", "referral")
-
-    # Filtrar por tipo de documento
-    document_type = request.GET.get("document_type")
-    if document_type:
-        queryset = queryset.filter(patient__document_type=document_type)
 
     # Filtrar por número de documento
     document_number = request.GET.get("document_number")
