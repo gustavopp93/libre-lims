@@ -33,19 +33,7 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <!-- Filters -->
         <div class="p-6 border-b border-gray-200 bg-gray-50">
-            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="document_type">
-                        Tipo de Documento
-                    </label>
-                    <select name="document_type" id="document_type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
-                        <option value="">Todos</option>
-                        <option value="DNI" {% if document_type == 'DNI' %}selected{% endif %}>DNI</option>
-                        <option value="CE" {% if document_type == 'CE' %}selected{% endif %}>Carnet de Extranjería</option>
-                        <option value="PASAPORTE" {% if document_type == 'PASAPORTE' %}selected{% endif %}>Pasaporte</option>
-                    </select>
-                </div>
-
+            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="document_number">
                         Número de Documento
@@ -326,7 +314,6 @@ document.getElementById('paymentModal').addEventListener('click', function(e) {
 // Manejar descarga de Excel
 document.getElementById('downloadExcelBtn').addEventListener('click', function() {
     // Obtener los valores de los filtros actuales
-    const documentType = document.getElementById('document_type').value;
     const documentNumber = document.getElementById('document_number').value;
     const patientName = document.getElementById('patient_name').value;
     const dateFrom = document.getElementById('date_from').value;
@@ -334,7 +321,6 @@ document.getElementById('downloadExcelBtn').addEventListener('click', function()
 
     // Construir la URL con los parámetros de filtro
     const params = new URLSearchParams();
-    if (documentType) params.append('document_type', documentType);
     if (documentNumber) params.append('document_number', documentNumber);
     if (patientName) params.append('patient_name', patientName);
     if (dateFrom) params.append('date_from', dateFrom);
