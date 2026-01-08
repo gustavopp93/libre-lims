@@ -72,6 +72,14 @@
                             </p>
                         </div>
                         <div>
+                            <p class="text-sm text-gray-600">Teléfono</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ result.order.patient.phone|default:"-" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Fecha de Nacimiento</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ result.order.patient.birthdate|date:"d/m/Y"|default:"-" }}</p>
+                        </div>
+                        <div>
                             <p class="text-sm text-gray-600">Fecha de Creación</p>
                             <p class="text-lg font-semibold text-gray-900">{{ result.created_at|date:"d/m/Y H:i" }}</p>
                         </div>

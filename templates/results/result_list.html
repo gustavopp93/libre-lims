@@ -17,7 +17,7 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <!-- Filters -->
         <div class="p-6 border-b border-gray-200 bg-gray-50">
-            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="order_code">
                         Código de Orden
@@ -42,6 +42,20 @@
                         id="document_number"
                         value="{{ document_number }}"
                         placeholder="Buscar por documento"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="patient_name">
+                        Nombre del Paciente
+                    </label>
+                    <input
+                        type="text"
+                        name="patient_name"
+                        id="patient_name"
+                        value="{{ patient_name }}"
+                        placeholder="Buscar por nombre"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
                     >
                 </div>
@@ -82,8 +96,8 @@
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 py-4 whitespace-nowrap text-xs font-medium text-gray-700">{{ result.order.code }}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">
-                        <div class="leading-tight">{{ result.order.patient.first_name }}</div>
                         <div class="leading-tight">{{ result.order.patient.last_name }}</div>
+                        <div class="leading-tight">{{ result.order.patient.first_name }}</div>
                     </td>
                     <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{{ result.order.patient.document_type }} {{ result.order.patient.document_number }}</td>
                     <td class="px-3 py-4 whitespace-nowrap text-sm">
@@ -113,7 +127,7 @@
                             </span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ result.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ result.created_at|date:"d/m/Y" }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <div class="flex items-center space-x-3">
                             <div class="relative group">
