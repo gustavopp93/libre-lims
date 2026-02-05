@@ -64,22 +64,20 @@ class PatientsListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        # Filtrar por tipo de documento
-        document_type = self.request.GET.get("document_type")
-        if document_type:
-            queryset = queryset.filter(document_type=document_type)
-
-        # Filtrar por número de documento
-        document_number = self.request.GET.get("document_number")
-        if document_number:
-            queryset = queryset.filter(document_number__icontains=document_number)
+        # Búsqueda por documento, nombre o apellido
+        search = self.request.GET.get("search")
+        if search:
+            queryset = queryset.filter(
+                models.Q(document_number__icontains=search)
+                | models.Q(first_name__icontains=search)
+                | models.Q(last_name__icontains=search)
+            )
 
         return queryset.order_by("-created_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["document_type"] = self.request.GET.get("document_type", "")
-        context["document_number"] = self.request.GET.get("document_number", "")
+        context["search"] = self.request.GET.get("search", "")
         context["breadcrumbs"] = [
             {"name": "Pacientes", "url": None},
         ]

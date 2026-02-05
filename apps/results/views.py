@@ -54,7 +54,7 @@ class ResultListView(LoginRequiredMixin, ListView):
         if order_code:
             queryset = queryset.filter(order__code__icontains=order_code)
 
-        return queryset.order_by("-created_at")
+        return queryset.order_by("-order__created_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
