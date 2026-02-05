@@ -83,6 +83,10 @@
                             <p class="text-sm text-gray-600">Fecha de Creación</p>
                             <p class="text-lg font-semibold text-gray-900">{{ result.created_at|date:"d/m/Y H:i" }}</p>
                         </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Edad</p>
+                            <p class="text-lg font-semibold text-gray-900">{{ result.order.patient.age|default:"-" }} años</p>
+                        </div>
                     </div>
                 </div>
 
