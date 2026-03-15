@@ -458,19 +458,13 @@ def update_order_api(request, order_id):
 
     try:
         with transaction.atomic():
-            from apps.results.models import ResultDetail
-
             existing_details = {d.exam_id: d for d in order.details.select_related("exam").all()}
             new_exam_ids = {d["exam"].id for d in validated_details}
-            result = getattr(order, "result", None)
 
-            # Eliminar exámenes que ya no están en la orden
             for exam_id, order_detail in existing_details.items():
                 if exam_id not in new_exam_ids:
-                    order_detail.result_details.all().delete()
                     order_detail.delete()
 
-            # Actualizar o crear detalles
             for detail in validated_details:
                 exam = detail["exam"]
                 if exam.id in existing_details:
@@ -478,9 +472,7 @@ def update_order_api(request, order_id):
                     od.price = detail["price"]
                     od.save()
                 else:
-                    od = OrderDetail.objects.create(order=order, exam=exam, price=detail["price"])
-                    if result:
-                        ResultDetail.objects.create(result=result, order_detail=od, exam=exam)
+                    OrderDetail.objects.create(order=order, exam=exam, price=detail["price"])
 
             order.observations = observations
             order.save()
