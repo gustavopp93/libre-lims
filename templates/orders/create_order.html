@@ -424,6 +424,11 @@
                 return;
             }
 
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
             // Recolectar detalles de exámenes
             const examDetails = [];
             let hasErrors = false;
@@ -460,10 +465,18 @@
                 });
             });
 
-            if (hasErrors) return;
+            if (hasErrors) {
+                btn.disabled = false;
+                btn.textContent = 'Crear Orden';
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                return;
+            }
 
             if (examDetails.length === 0) {
                 alert('Debe agregar al menos un examen');
+                btn.disabled = false;
+                btn.textContent = 'Crear Orden';
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
                 return;
             }
 
@@ -495,9 +508,15 @@
                     window.location.href = '/orders/' + data.order_id + '/';
                 } else {
                     alert('Error: ' + (data.error || 'No se pudo crear la venta'));
+                    btn.disabled = false;
+                    btn.textContent = 'Crear Orden';
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             } catch (error) {
                 alert('Error al crear la venta: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = 'Crear Orden';
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         });
 
