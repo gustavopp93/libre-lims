@@ -32,6 +32,7 @@ from apps.exams.views import (
 from apps.orders.views import (
     CreateOrderView,
     CreateReferralOrderView,
+    EditOrderView,
     OrderDetailView,
     OrderPrintView,
     OrderResultsFormView,
@@ -42,6 +43,7 @@ from apps.orders.views import (
     create_referral_order_api,
     download_orders_excel,
     search_referrals_api,
+    update_order_api,
 )
 from apps.patients.views import (
     CreateLeadSourceView,
@@ -77,6 +79,7 @@ urlpatterns = [
     path("orders/<int:order_id>/cancel/", cancel_order, name="cancel_order"),
     path("orders/<int:order_id>/complete/", complete_order, name="complete_order"),
     path("orders/<int:pk>/", OrderDetailView.as_view(), name="order_detail"),
+    path("orders/<int:pk>/edit/", EditOrderView.as_view(), name="order_edit"),
     path("orders/<int:pk>/print/", OrderPrintView.as_view(), name="order_print"),
     path("orders/<int:pk>/results-form/", OrderResultsFormView.as_view(), name="order_results_form"),
     path("results/", ResultListView.as_view(), name="results_list"),
@@ -101,6 +104,7 @@ urlpatterns = [
     path("api/patients/details/", patient_details_api, name="api_patient_details"),
     path("api/exams/search/", search_exams_api, name="api_exams_search"),
     path("api/orders/create/", create_order_api, name="api_orders_create"),
+    path("api/orders/<int:order_id>/update/", update_order_api, name="api_orders_update"),
     path("api/orders/referral/create/", create_referral_order_api, name="api_referral_orders_create"),
     path("api/referrals/search/", search_referrals_api, name="api_referrals_search"),
     path("company/", include("apps.billing.urls")),

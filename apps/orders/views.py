@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models, transaction
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -92,6 +93,47 @@ class CreateOrderView(LoginRequiredMixin, TemplateView):
 class CreateReferralOrderView(LoginRequiredMixin, TemplateView):
     template_name = "orders/referral_order_create.html"
     login_url = reverse_lazy("login")
+
+
+class EditOrderView(LoginRequiredMixin, DetailView):
+    model = Order
+    template_name = "orders/edit_order.html"
+    context_object_name = "order"
+    login_url = reverse_lazy("login")
+
+    def get_queryset(self):
+        return Order.objects.select_related("patient", "coupon__price_list", "referral").prefetch_related(
+            "details__exam"
+        )
+
+    def get(self, request, *args, **kwargs):
+        order = self.get_object()
+        if order.referral:
+            messages.error(request, "No se pueden editar órdenes de referidos")
+            return redirect("order_detail", pk=order.pk)
+        if order.status != Order.Status.PENDING:
+            messages.error(request, "Solo se pueden editar órdenes pendientes")
+            return redirect("order_detail", pk=order.pk)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order = self.object
+
+        existing_details = [
+            {
+                "exam_id": detail.exam.id,
+                "exam_name": detail.exam.name,
+                "price": str(detail.price),
+            }
+            for detail in order.details.all()
+        ]
+        context["existing_details_json"] = json.dumps(existing_details)
+
+        context["coupon_code"] = order.coupon.code if order.coupon else None
+        context["referral_id"] = order.referral_id
+
+        return context
 
 
 class OrderDetailView(LoginRequiredMixin, DetailView):
@@ -362,6 +404,93 @@ def create_referral_order_api(request):
     except Exception as e:
         logger.exception("Error al crear la orden de referido")
         return JsonResponse({"error": f"Error al crear la orden: {str(e)}"}, status=500)
+
+
+@login_required
+@require_POST
+def update_order_api(request, order_id):
+    """API endpoint para actualizar los exámenes de una orden pendiente"""
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        return JsonResponse({"error": "Orden no encontrada"}, status=404)
+
+    if order.referral:
+        return JsonResponse({"error": "No se pueden editar órdenes de referidos"}, status=400)
+
+    if order.status != Order.Status.PENDING:
+        return JsonResponse({"error": "Solo se pueden editar órdenes pendientes"}, status=400)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON inválido"}, status=400)
+
+    exam_details = data.get("exam_details", [])
+    observations = data.get("observations", order.observations)
+
+    if not exam_details:
+        return JsonResponse({"error": "Debe agregar al menos un examen"}, status=400)
+
+    validated_details = []
+    for detail in exam_details:
+        exam_id = detail.get("exam_id")
+        price = detail.get("price")
+
+        if not exam_id or price is None:
+            return JsonResponse({"error": "Cada examen debe tener id y precio"}, status=400)
+
+        try:
+            exam = Exam.objects.get(id=exam_id)
+        except Exam.DoesNotExist:
+            return JsonResponse({"error": f"Examen con ID {exam_id} no encontrado"}, status=404)
+
+        try:
+            price_decimal = Decimal(str(price))
+            if price_decimal < 0:
+                return JsonResponse({"error": "El precio no puede ser negativo"}, status=400)
+            if price_decimal.as_tuple().exponent < -2:
+                return JsonResponse({"error": "El precio debe tener máximo 2 decimales"}, status=400)
+        except (InvalidOperation, ValueError):
+            return JsonResponse({"error": "Precio inválido"}, status=400)
+
+        validated_details.append({"exam": exam, "price": price_decimal})
+
+    try:
+        with transaction.atomic():
+            from apps.results.models import ResultDetail
+
+            existing_details = {d.exam_id: d for d in order.details.select_related("exam").all()}
+            new_exam_ids = {d["exam"].id for d in validated_details}
+            result = getattr(order, "result", None)
+
+            # Eliminar exámenes que ya no están en la orden
+            for exam_id, order_detail in existing_details.items():
+                if exam_id not in new_exam_ids:
+                    order_detail.result_details.all().delete()
+                    order_detail.delete()
+
+            # Actualizar o crear detalles
+            for detail in validated_details:
+                exam = detail["exam"]
+                if exam.id in existing_details:
+                    od = existing_details[exam.id]
+                    od.price = detail["price"]
+                    od.save()
+                else:
+                    od = OrderDetail.objects.create(order=order, exam=exam, price=detail["price"])
+                    if result:
+                        ResultDetail.objects.create(result=result, order_detail=od, exam=exam)
+
+            order.observations = observations
+            order.save()
+
+        messages.success(request, f"Orden {order.code} actualizada exitosamente")
+        return JsonResponse({"success": True, "order_id": order.id, "message": "Orden actualizada exitosamente"})
+
+    except Exception as e:
+        logger.exception("Error al actualizar la orden")
+        return JsonResponse({"error": f"Error al actualizar la orden: {str(e)}"}, status=500)
 
 
 @login_required
