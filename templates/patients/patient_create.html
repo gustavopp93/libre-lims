@@ -135,3 +135,15 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.querySelector('form').addEventListener('submit', function() {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    });
+</script>
+{% endblock %}
