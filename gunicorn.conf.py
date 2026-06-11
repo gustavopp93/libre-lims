@@ -9,11 +9,12 @@ bind = f"0.0.0.0:{os.getenv('PORT', '8000')}"
 # Worker processes
 # Formula: (2 * CPU cores) + 1
 workers = int(os.getenv("GUNICORN_WORKERS", multiprocessing.cpu_count() * 2 + 1))
-worker_class = "sync"
+worker_class = "gevent"
 worker_connections = 1000
 max_requests = 1000
 max_requests_jitter = 50
-timeout = 30
+timeout = int(os.getenv("GUNICORN_TIMEOUT", "120"))
+graceful_timeout = 30
 keepalive = 2
 
 # Logging
