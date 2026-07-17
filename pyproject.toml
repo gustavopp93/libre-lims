@@ -9,7 +9,7 @@ authors = [
     { name = "Gustavo Pajuelo Pardo" }
 ]
 dependencies = [
-    "django==5.2.8",
+    "django==5.2.16",
     "psycopg==3.2.3",
     "dj-database-url==2.2.0",
     "python-dotenv==1.0.1",
