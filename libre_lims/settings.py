@@ -46,6 +46,10 @@ CSRF_TRUSTED_ORIGINS = (
     os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if os.environ.get("CSRF_TRUSTED_ORIGINS") else []
 )
 
+# Trust the X-Forwarded-Proto header set by the reverse proxy (Coolify/Traefik)
+# so Django knows the original request was HTTPS (request.is_secure(), cookies, etc.)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 
 # Application definition
 
