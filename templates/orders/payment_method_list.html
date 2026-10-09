@@ -13,6 +13,7 @@
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
             {% include 'includes/breadcrumbs.html' %}
+{% csrf_token %}
 <div class="bg-white rounded-lg shadow">
     <!-- Header with Create Button -->
     <div class="p-6 border-b border-gray-200 flex justify-between items-center">
@@ -49,13 +50,10 @@
                         {{ payment_method.created_at|date:"d/m/Y H:i" }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <form method="post" action="{% url 'payment_methods_delete' payment_method.pk %}" class="inline" onsubmit="return confirm('¿Está seguro que desea eliminar el método de pago {{ payment_method.name|escapejs }}?');">
-                            {% csrf_token %}
-                            <button type="submit" class="text-red-600 hover:text-red-900">
-                                <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
-                                Eliminar
-                            </button>
-                        </form>
+                        <button type="button" class="text-red-600 hover:text-red-900" data-url="{% url 'api_payment_methods_deactivate' payment_method.pk %}" data-name="{{ payment_method.name }}" onclick="confirmDeletePaymentMethod(this)">
+                            <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
+                            Eliminar
+                        </button>
                     </td>
                 </tr>
                 {% empty %}
@@ -75,4 +73,41 @@
         </main>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+function confirmDeletePaymentMethod(btn) {
+    if (!confirm(`¿Está seguro que desea eliminar el método de pago ${btn.dataset.name}?`)) {
+        return;
+    }
+
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+    fetch(btn.dataset.url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error al eliminar el método de pago');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar el método de pago');
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    });
+}
+</script>
 {% endblock %}

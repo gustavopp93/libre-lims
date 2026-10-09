@@ -14,7 +14,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.decorators.http import require_GET, require_POST
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView
+from django.views.generic import CreateView, DetailView, ListView, TemplateView
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from weasyprint import HTML
@@ -686,19 +686,18 @@ class PaymentMethodCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class PaymentMethodDeleteView(LoginRequiredMixin, DeleteView):
+class PaymentMethodDeactivateAPIView(LoginRequiredMixin, View):
     """Soft delete: only sets is_active to False."""
 
-    model = PaymentMethod
-    success_url = reverse_lazy("payment_methods_list")
     login_url = reverse_lazy("login")
     http_method_names = ["post"]
 
-    def get_queryset(self):
-        return PaymentMethod.objects.filter(is_active=True)
+    def post(self, request, pk):
+        payment_method = PaymentMethod.objects.filter(pk=pk, is_active=True).first()
+        if payment_method is None:
+            return JsonResponse({"error": "Método de pago no encontrado"}, status=404)
 
-    def form_valid(self, form):
-        self.object.is_active = False
-        self.object.save(update_fields=["is_active", "updated_at"])
-        messages.success(self.request, f"Método de pago '{self.object.name}' eliminado exitosamente")
-        return redirect(self.get_success_url())
+        payment_method.is_active = False
+        payment_method.save(update_fields=["is_active", "updated_at"])
+
+        return JsonResponse({"success": True, "message": "Método de pago eliminado exitosamente"})
