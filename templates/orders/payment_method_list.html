@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Métodos de Pago - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        {% include 'includes/header.html' with page_title="Métodos de Pago" %}
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            {% include 'includes/breadcrumbs.html' %}
+{% csrf_token %}
+<div class="bg-white rounded-lg shadow">
+    <!-- Header with Create Button -->
+    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800">Lista de Métodos de Pago</h3>
+        <a href="{% url 'payment_methods_create' %}" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+            Crear Método de Pago
+        </a>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nombre
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha Registro
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for payment_method in payment_methods %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ payment_method.name }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ payment_method.created_at|date:"d/m/Y H:i" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <button type="button" class="text-red-600 hover:text-red-900" data-url="{% url 'api_payment_methods_deactivate' payment_method.pk %}" data-name="{{ payment_method.name }}" onclick="confirmDeletePaymentMethod(this)">
+                            <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-6 py-4 text-center text-gray-500">
+                        No se encontraron métodos de pago
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% include 'includes/pagination.html' %}
+</div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+function confirmDeletePaymentMethod(btn) {
+    if (!confirm(`¿Está seguro que desea eliminar el método de pago ${btn.dataset.name}?`)) {
+        return;
+    }
+
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+    fetch(btn.dataset.url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Error al eliminar el método de pago');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar el método de pago');
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    });
+}
+</script>
+{% endblock %}

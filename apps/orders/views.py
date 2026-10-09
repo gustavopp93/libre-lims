@@ -14,14 +14,15 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
 from django.views.decorators.http import require_GET, require_POST
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import CreateView, DetailView, ListView, TemplateView
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from weasyprint import HTML
 
 from apps.billing.models import Company
 from apps.exams.models import Exam
-from apps.orders.models import Order, OrderDetail
+from apps.orders.forms import PaymentMethodForm
+from apps.orders.models import Order, OrderDetail, PaymentMethod
 from apps.patients.models import Patient
 from apps.referrals.models import Referral
 
@@ -645,3 +646,58 @@ def download_orders_excel(request):
     wb.save(response)
 
     return response
+
+
+class PaymentMethodListView(LoginRequiredMixin, ListView):
+    model = PaymentMethod
+    template_name = "orders/payment_method_list.html"
+    context_object_name = "payment_methods"
+    paginate_by = 20
+    login_url = reverse_lazy("login")
+
+    def get_queryset(self):
+        return PaymentMethod.objects.filter(is_active=True).order_by("name")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Métodos de Pago", "url": None},
+        ]
+        return context
+
+
+class PaymentMethodCreateView(LoginRequiredMixin, CreateView):
+    model = PaymentMethod
+    form_class = PaymentMethodForm
+    template_name = "orders/payment_method_create.html"
+    success_url = reverse_lazy("payment_methods_list")
+    login_url = reverse_lazy("login")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"name": "Métodos de Pago", "url": reverse_lazy("payment_methods_list")},
+            {"name": "Crear Método de Pago", "url": None},
+        ]
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Método de pago '{form.instance.name}' creado exitosamente")
+        return super().form_valid(form)
+
+
+class PaymentMethodDeactivateAPIView(LoginRequiredMixin, View):
+    """Soft delete: only sets is_active to False."""
+
+    login_url = reverse_lazy("login")
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        payment_method = PaymentMethod.objects.filter(pk=pk, is_active=True).first()
+        if payment_method is None:
+            return JsonResponse({"error": "Método de pago no encontrado"}, status=404)
+
+        payment_method.is_active = False
+        payment_method.save(update_fields=["is_active", "updated_at"])
+
+        return JsonResponse({"success": True, "message": "Método de pago eliminado exitosamente"})
