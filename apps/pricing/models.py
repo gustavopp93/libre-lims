@@ -1,10 +1,10 @@
 from django.db import models
 
-from apps.core.models import TimeStampedModel
+from apps.core.models import TimeStampedMixin
 from apps.exams.models import Exam
 
 
-class PriceList(TimeStampedModel):
+class PriceList(TimeStampedMixin):
     name = models.CharField(max_length=200, verbose_name="Name")
     description = models.TextField(blank=True, verbose_name="Description")
     is_active = models.BooleanField(default=True, verbose_name="Active")
@@ -31,7 +31,7 @@ class PriceListItem(models.Model):
         return f"{self.price_list.name} - {self.exam.name}: S/. {self.price}"
 
 
-class Coupon(TimeStampedModel):
+class Coupon(TimeStampedMixin):
     code = models.CharField(max_length=50, unique=True, verbose_name="Code")
     price_list = models.ForeignKey(
         PriceList,

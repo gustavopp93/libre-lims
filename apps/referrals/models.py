@@ -1,10 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.core.models import TimeStampedModel
+from apps.core.models import TimeStampedMixin
 
 
-class Referral(TimeStampedModel):
+class Referral(TimeStampedMixin):
     business_name = models.CharField(max_length=200, verbose_name="Business Name")
     document_number = models.CharField(max_length=11, unique=True, verbose_name="RUC")
     phone_number = models.CharField(max_length=20, blank=True, verbose_name="Phone Number")
