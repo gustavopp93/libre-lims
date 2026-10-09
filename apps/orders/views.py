@@ -22,7 +22,7 @@ from weasyprint import HTML
 from apps.billing.models import Company
 from apps.exams.models import Exam
 from apps.orders.forms import PaymentMethodForm
-from apps.orders.models import Order, OrderDetail, PaymentMethod
+from apps.orders.models import Order, OrderDetail, Payment, PaymentDetail, PaymentMethod
 from apps.patients.models import Patient
 from apps.referrals.models import Referral
 
@@ -83,6 +83,7 @@ class OrdersListView(LoginRequiredMixin, ListView):
         context["patient_name"] = self.request.GET.get("patient_name", "")
         context["date_from"] = self.request.GET.get("date_from", "")
         context["date_to"] = self.request.GET.get("date_to", "")
+        context["payment_methods"] = PaymentMethod.objects.filter(is_active=True).order_by("name")
         return context
 
 
@@ -511,31 +512,88 @@ def cancel_order(request, order_id):
 @login_required
 @require_POST
 def complete_order(request, order_id):
-    """Registrar pago de una orden"""
+    """Registrar pago de una orden con uno o más métodos de pago"""
     try:
-        order = Order.objects.get(id=order_id)
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON inválido"}, status=400)
 
-        if order.status != Order.Status.PENDING:
-            return JsonResponse({"error": "Solo se pueden registrar pagos de órdenes pendientes"}, status=400)
+    payment_details = data.get("payment_details", [])
 
-        payment_method = request.POST.get("payment_method")
+    if not isinstance(payment_details, list) or len(payment_details) == 0:
+        return JsonResponse({"error": "Debe agregar al menos un método de pago"}, status=400)
 
-        if not payment_method:
-            return JsonResponse({"error": "Debe especificar un método de pago"}, status=400)
+    # Validar payment_details
+    validated_details = []
+    for detail in payment_details:
+        payment_method_id = detail.get("payment_method_id")
+        amount = detail.get("amount")
 
-        if payment_method not in dict(Order.PaymentMethod.choices):
+        if not payment_method_id or amount is None:
+            return JsonResponse({"error": "Cada pago debe tener método de pago y monto"}, status=400)
+
+        try:
+            payment_method_id = int(payment_method_id)
+        except (TypeError, ValueError):
             return JsonResponse({"error": "Método de pago inválido"}, status=400)
 
-        order.status = Order.Status.PAID
-        order.payment_method = payment_method
-        order.save()
+        try:
+            amount = Decimal(str(amount))
+        except InvalidOperation:
+            return JsonResponse({"error": "Monto inválido"}, status=400)
 
-        # Crear resultado para la orden solo si NO es de referido
-        # (las órdenes de referidos ya tienen su resultado creado al momento de crear la orden)
-        if not order.referral:
-            from apps.results.services import create_result_for_order
+        if not amount.is_finite() or amount <= 0:
+            return JsonResponse({"error": "El monto debe ser mayor a cero"}, status=400)
 
-            create_result_for_order(order)
+        validated_details.append({"payment_method_id": payment_method_id, "amount": amount})
+
+    payment_method_ids = [detail["payment_method_id"] for detail in validated_details]
+    if len(set(payment_method_ids)) != len(payment_method_ids):
+        return JsonResponse({"error": "No puede repetir un método de pago"}, status=400)
+
+    payment_methods = PaymentMethod.objects.in_bulk(payment_method_ids)
+    payment_methods = {pk: pm for pk, pm in payment_methods.items() if pm.is_active}
+    if len(payment_methods) != len(payment_method_ids):
+        return JsonResponse({"error": "Método de pago inválido"}, status=400)
+
+    try:
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(id=order_id)
+
+            if order.status != Order.Status.PENDING:
+                return JsonResponse({"error": "Solo se pueden registrar pagos de órdenes pendientes"}, status=400)
+
+            payments_total = sum(detail["amount"] for detail in validated_details)
+            if payments_total != order.total:
+                return JsonResponse(
+                    {
+                        "error": f"La suma de los montos (S/. {payments_total}) debe ser igual "
+                        f"al total de la orden (S/. {order.total})"
+                    },
+                    status=400,
+                )
+
+            payment = Payment.objects.create(order=order, created_by=request.user, updated_by=request.user)
+            PaymentDetail.objects.bulk_create(
+                [
+                    PaymentDetail(
+                        payment=payment,
+                        payment_method=payment_methods[detail["payment_method_id"]],
+                        amount=detail["amount"],
+                    )
+                    for detail in validated_details
+                ]
+            )
+
+            order.status = Order.Status.PAID
+            order.save()
+
+            # Crear resultado para la orden solo si NO es de referido
+            # (las órdenes de referidos ya tienen su resultado creado al momento de crear la orden)
+            if not order.referral:
+                from apps.results.services import create_result_for_order
+
+                create_result_for_order(order)
 
         return JsonResponse({"success": True, "message": "Pago registrado exitosamente"})
 
