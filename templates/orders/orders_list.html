@@ -195,7 +195,7 @@
 
 <!-- Modal de Pago -->
 <div id="paymentModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
         <div class="mt-3">
             <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Registrar Pago</h3>
             <form id="paymentForm" method="POST">
@@ -208,16 +208,19 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="payment_method" class="block text-gray-700 text-sm font-bold mb-2">
-                        Método de Pago <span class="text-red-500">*</span>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        Métodos de Pago <span class="text-red-500">*</span>
                     </label>
-                    <select id="payment_method" name="payment_method" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
-                        <option value="">Seleccione un método</option>
-                        <option value="cash">Efectivo</option>
-                        <option value="bank_transfer">Transferencia bancaria</option>
-                        <option value="card">Tarjeta</option>
-                        <option value="digital_wallet">Billeteras digitales</option>
-                    </select>
+                    <div id="payment_details_container" class="space-y-2"></div>
+                    <button type="button" id="addPaymentDetailBtn" onclick="addPaymentDetailRow()" class="mt-2 flex items-center text-sm text-blue-600 hover:text-blue-900">
+                        <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
+                        Agregar método de pago
+                    </button>
+                </div>
+
+                <div class="mb-4 text-sm">
+                    <p class="text-gray-600">Suma de montos: S/. <span id="payment_sum" class="font-semibold">0.00</span></p>
+                    <p id="payment_difference" class="font-semibold"></p>
                 </div>
 
                 <div class="flex items-center justify-end space-x-3">
@@ -233,26 +236,130 @@
     </div>
 </div>
 
+<template id="paymentDetailRowTemplate">
+    <div class="payment-detail-row flex items-center space-x-2">
+        <select class="payment-method-select flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+            <option value="">Seleccione un método</option>
+            {% for payment_method in payment_methods %}
+            <option value="{{ payment_method.pk }}">{{ payment_method.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" step="0.01" min="0.01" placeholder="Monto" class="payment-amount-input w-32 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+        <button type="button" onclick="removePaymentDetailRow(this)" class="text-red-600 hover:text-red-900" title="Quitar">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+        </button>
+    </div>
+</template>
+
 <script>
+let paymentOrderTotalCents = 0;
+
+function toCents(value) {
+    const number = parseFloat(value);
+    return isNaN(number) ? 0 : Math.round(number * 100);
+}
+
+function formatCents(cents) {
+    return (cents / 100).toFixed(2);
+}
+
+function getPaymentDetailRows() {
+    return Array.from(document.querySelectorAll('#payment_details_container .payment-detail-row'));
+}
+
+function addPaymentDetailRow(amountCents = null) {
+    const template = document.getElementById('paymentDetailRowTemplate');
+    const row = template.content.firstElementChild.cloneNode(true);
+    const amountInput = row.querySelector('.payment-amount-input');
+    if (amountCents !== null) {
+        amountInput.value = formatCents(amountCents);
+    }
+    row.querySelector('.payment-method-select').addEventListener('change', updatePaymentSummary);
+    amountInput.addEventListener('input', updatePaymentSummary);
+    document.getElementById('payment_details_container').appendChild(row);
+    lucide.createIcons();
+    updatePaymentSummary();
+}
+
+function removePaymentDetailRow(btn) {
+    if (getPaymentDetailRows().length === 1) {
+        return;
+    }
+    btn.closest('.payment-detail-row').remove();
+    updatePaymentSummary();
+}
+
+function updatePaymentSummary() {
+    const rows = getPaymentDetailRows();
+    const sumCents = rows.reduce((sum, row) => sum + toCents(row.querySelector('.payment-amount-input').value), 0);
+    const differenceCents = paymentOrderTotalCents - sumCents;
+    const differenceEl = document.getElementById('payment_difference');
+
+    document.getElementById('payment_sum').textContent = formatCents(sumCents);
+    if (differenceCents === 0) {
+        differenceEl.textContent = 'Los montos cuadran con el total';
+        differenceEl.className = 'font-semibold text-green-600';
+    } else if (differenceCents > 0) {
+        differenceEl.textContent = `Falta: S/. ${formatCents(differenceCents)}`;
+        differenceEl.className = 'font-semibold text-red-600';
+    } else {
+        differenceEl.textContent = `Excede: S/. ${formatCents(-differenceCents)}`;
+        differenceEl.className = 'font-semibold text-red-600';
+    }
+
+    // Disable methods already selected in other rows
+    const selectedIds = rows.map(row => row.querySelector('.payment-method-select').value).filter(Boolean);
+    rows.forEach(row => {
+        const select = row.querySelector('.payment-method-select');
+        Array.from(select.options).forEach(option => {
+            option.disabled = option.value !== '' && option.value !== select.value && selectedIds.includes(option.value);
+        });
+    });
+
+    const methodsCount = document.getElementById('paymentDetailRowTemplate').content.querySelectorAll('option[value]:not([value=""])').length;
+    document.getElementById('addPaymentDetailBtn').classList.toggle('hidden', rows.length >= methodsCount);
+}
+
 function openPaymentModal(orderId, orderCode, orderTotal) {
     document.getElementById('order_id').value = orderId;
     document.getElementById('modal_order_code').textContent = orderCode;
     document.getElementById('modal_order_total').textContent = orderTotal;
+    paymentOrderTotalCents = toCents(orderTotal);
+    document.getElementById('payment_details_container').innerHTML = '';
+    addPaymentDetailRow(paymentOrderTotalCents);
     document.getElementById('paymentModal').classList.remove('hidden');
 }
 
 function closePaymentModal() {
     document.getElementById('paymentModal').classList.add('hidden');
     document.getElementById('paymentForm').reset();
+    document.getElementById('payment_details_container').innerHTML = '';
 }
 
 document.getElementById('paymentForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const orderId = document.getElementById('order_id').value;
-    const paymentMethod = document.getElementById('payment_method').value;
+    const rows = getPaymentDetailRows();
+    const paymentDetails = [];
 
-    if (!paymentMethod) {
-        alert('Por favor seleccione un método de pago');
+    for (const row of rows) {
+        const paymentMethodId = row.querySelector('.payment-method-select').value;
+        const amountCents = toCents(row.querySelector('.payment-amount-input').value);
+
+        if (!paymentMethodId) {
+            alert('Por favor seleccione un método de pago en cada fila');
+            return;
+        }
+        if (amountCents <= 0) {
+            alert('Cada monto debe ser mayor a cero');
+            return;
+        }
+        paymentDetails.push({ payment_method_id: paymentMethodId, amount: formatCents(amountCents) });
+    }
+
+    const sumCents = paymentDetails.reduce((sum, detail) => sum + toCents(detail.amount), 0);
+    if (sumCents !== paymentOrderTotalCents) {
+        alert(`La suma de los montos (S/. ${formatCents(sumCents)}) debe ser igual al total (S/. ${formatCents(paymentOrderTotalCents)})`);
         return;
     }
 
@@ -265,10 +372,10 @@ document.getElementById('paymentForm').addEventListener('submit', function(e) {
     fetch(`/orders/${orderId}/complete/`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         },
-        body: `payment_method=${paymentMethod}`
+        body: JSON.stringify({ payment_details: paymentDetails })
     })
     .then(response => response.json())
     .then(data => {
