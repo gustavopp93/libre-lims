@@ -1,9 +1,9 @@
 from django.db import models
 
-from apps.core.models import TimeStampedModel
+from apps.core.models import TimeStampedMixin
 
 
-class ExamCategory(TimeStampedModel):
+class ExamCategory(TimeStampedMixin):
     code = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=200)
 
@@ -15,7 +15,7 @@ class ExamCategory(TimeStampedModel):
         return f"[{self.code}] {self.name}"
 
 
-class Provider(TimeStampedModel):
+class Provider(TimeStampedMixin):
     """Proveedor externo (laboratorio de referencia)"""
 
     name = models.CharField(max_length=200, unique=True)
@@ -32,7 +32,7 @@ class Provider(TimeStampedModel):
         return self.name
 
 
-class Exam(TimeStampedModel):
+class Exam(TimeStampedMixin):
     code = models.CharField(max_length=50, unique=True, null=True, blank=True)
     name = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -70,7 +70,7 @@ class Exam(TimeStampedModel):
         return f"{self.name}{panel_indicator} - S/. {self.price}"
 
 
-class ExamComponent(TimeStampedModel):
+class ExamComponent(TimeStampedMixin):
     """Tabla intermedia para componentes de un examen (panel)"""
 
     parent_exam = models.ForeignKey(

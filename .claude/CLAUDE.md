@@ -30,7 +30,7 @@ class MyModelListView(LoginRequiredMixin, ListView):
 - Importar siempre LoginRequiredMixin cuando se requiera autenticación
 
 ## Models
-- Usar TimeStampedModel como base cuando sea apropiado
+- Usar TimeStampedMixin (y AuditMixin) como base cuando sea apropiado
 - Definir __str__ para representación legible
 - Usar verbose_name y verbose_name_plural
 - Constantes de choices en inglés (nombre y valor en DB)

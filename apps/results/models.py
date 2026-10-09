@@ -1,9 +1,9 @@
 from django.db import models
 
-from apps.core.models import TimeStampedModel
+from apps.core.models import TimeStampedMixin
 
 
-class Result(TimeStampedModel):
+class Result(TimeStampedMixin):
     """Resultado general de una orden"""
 
     class ResultStatus(models.TextChoices):
@@ -35,7 +35,7 @@ class Result(TimeStampedModel):
         return f"Resultado {self.order.code} - {self.get_status_display()}"
 
 
-class ResultDetail(TimeStampedModel):
+class ResultDetail(TimeStampedMixin):
     """Detalle de resultado por examen"""
 
     class ExamResultStatus(models.TextChoices):

@@ -2,10 +2,10 @@ from datetime import date
 
 from django.db import models
 
-from apps.core.models import TimeStampedModel
+from apps.core.models import TimeStampedMixin
 
 
-class LeadSource(TimeStampedModel):
+class LeadSource(TimeStampedMixin):
     """Canal por el cual el cliente llegó al laboratorio"""
 
     name = models.CharField(max_length=100, unique=True, verbose_name="Nombre")
@@ -20,7 +20,7 @@ class LeadSource(TimeStampedModel):
         return self.name
 
 
-class Patient(TimeStampedModel):
+class Patient(TimeStampedMixin):
     class DocumentType(models.TextChoices):
         DNI = "DNI", "DNI"
         CE = "CE", "Carnet de Extranjería"

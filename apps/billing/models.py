@@ -1,10 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from apps.core.models import TimeStampedModel
+from apps.core.models import TimeStampedMixin
 
 
-class Company(TimeStampedModel):
+class Company(TimeStampedMixin):
     """Model to store company information. Only one company should exist."""
 
     business_name = models.CharField(max_length=200, verbose_name="Razon Social")

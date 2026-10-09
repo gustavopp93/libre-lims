@@ -1,12 +1,12 @@
 from django.db import models
 from django.utils import timezone
 
-from apps.core.models import TimeStampedModel
+from apps.core.models import AuditMixin, TimeStampedMixin
 from apps.exams.models import Exam
 from apps.patients.models import Patient
 
 
-class Order(TimeStampedModel):
+class Order(TimeStampedMixin):
     class Status(models.TextChoices):
         PENDING = "pending", "Pendiente"
         PAID = "paid", "Pagado"
@@ -90,3 +90,45 @@ class OrderDetail(models.Model):
 
     def __str__(self):
         return f"{self.exam.name} - S/. {self.price}"
+
+
+class PaymentMethod(TimeStampedMixin):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Nombre")
+    is_active = models.BooleanField(default=True, verbose_name="Activo")
+
+    class Meta:
+        verbose_name = "Método de Pago"
+        verbose_name_plural = "Métodos de Pago"
+
+    def __str__(self):
+        return self.name
+
+
+class Payment(TimeStampedMixin, AuditMixin):
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="payments", verbose_name="Orden")
+
+    class Meta:
+        verbose_name = "Pago"
+        verbose_name_plural = "Pagos"
+
+    def __str__(self):
+        return f"Pago {self.pk} - Orden {self.order.code}"
+
+    @property
+    def total(self):
+        return sum(detail.amount for detail in self.details.all())
+
+
+class PaymentDetail(models.Model):
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name="details", verbose_name="Pago")
+    payment_method = models.ForeignKey(
+        PaymentMethod, on_delete=models.PROTECT, related_name="payment_details", verbose_name="Método de Pago"
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monto")
+
+    class Meta:
+        verbose_name = "Detalle de Pago"
+        verbose_name_plural = "Detalles de Pago"
+
+    def __str__(self):
+        return f"{self.payment_method.name} - S/. {self.amount}"
