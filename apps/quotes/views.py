@@ -23,11 +23,6 @@ from apps.quotes.services import QuoteValidationError, convert_quote_to_order, c
 logger = logging.getLogger(__name__)
 
 
-def _render_pdf(template_name, context):
-    html_string = render_to_string(template_name, context)
-    return HTML(string=html_string, encoding="utf-8").write_pdf(presentational_hints=True, optimize_size=("fonts",))
-
-
 class QuoteListView(LoginRequiredMixin, ListView):
     model = Quote
     template_name = "quotes/quote_list.html"
@@ -119,24 +114,11 @@ class QuotePrintView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         quote = get_object_or_404(Quote.objects.prefetch_related("details__exam"), pk=pk)
-        pdf = _render_pdf("quotes/quote_print.html", {"quote": quote, "company": Company.objects.first()})
+        html_string = render_to_string("quotes/quote_print.html", {"quote": quote, "company": Company.objects.first()})
+        pdf = HTML(string=html_string, encoding="utf-8").write_pdf(presentational_hints=True, optimize_size=("fonts",))
 
         response = HttpResponse(pdf, content_type="application/pdf; charset=utf-8")
         response["Content-Disposition"] = f'inline; filename="cotizacion_{quote.code}.pdf"'
-        return response
-
-
-class QuoteFormPrintView(LoginRequiredMixin, View):
-    """Formulario A4 de cotización (sin datos del paciente)"""
-
-    login_url = reverse_lazy("login")
-
-    def get(self, request, pk):
-        quote = get_object_or_404(Quote.objects.prefetch_related("details__exam"), pk=pk)
-        pdf = _render_pdf("quotes/quote_form.html", {"quote": quote, "company": Company.objects.first()})
-
-        response = HttpResponse(pdf, content_type="application/pdf; charset=utf-8")
-        response["Content-Disposition"] = f'inline; filename="cotizacion_a4_{quote.code}.pdf"'
         return response
 
 
