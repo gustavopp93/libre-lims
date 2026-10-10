@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Convertir Cotización - {{ company.business_name }}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    {% include 'includes/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        {% include 'includes/header.html' with page_title="Convertir Cotización "|add:quote.code|add:" a Orden" %}
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            <div class="max-w-4xl mx-auto">
+                <!-- Back Link -->
+                <div class="mb-6">
+                    <a href="{% url 'quote_detail' quote.pk %}" class="flex items-center text-blue-600 hover:text-blue-800">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                        Volver a la cotización
+                    </a>
+                </div>
+
+                <!-- Search Patient Card -->
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i data-lucide="user" class="w-5 h-5 mr-2 text-blue-600"></i>
+                        Paciente
+                    </h3>
+
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Buscar Paciente</label>
+                    <select id="patientSelect" placeholder="Buscar por nombre, apellido o documento..."></select>
+
+                    <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <p class="text-sm text-gray-700 mb-2">¿El paciente no aparece en la búsqueda?</p>
+                        <a href="{% url 'patients_create' %}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded inline-block text-sm">
+                            <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                            Crear Nuevo Paciente
+                        </a>
+                        <p class="text-xs text-gray-600 mt-2">Después de crear el paciente, búsquelo nuevamente aquí.</p>
+                    </div>
+                </div>
+
+                {% include 'quotes/includes/quote_summary.html' %}
+
+                <!-- Acciones -->
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'quote_detail' quote.pk %}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                        Cancelar
+                    </a>
+                    <button id="convertBtn" class="flex items-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline">
+                        <i data-lucide="check" class="w-5 h-5 mr-2"></i>
+                        Aceptar y Generar Orden
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script>
+        let currentPatientId = null;
+
+        new TomSelect('#patientSelect', {
+            valueField: 'id',
+            labelField: 'full_name',
+            searchField: ['first_name', 'last_name', 'document_number'],
+            placeholder: 'Buscar por nombre, apellido o documento...',
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+
+                fetch('/api/patients/search/?query=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(data => {
+                        const patients = (data.patients || []).map(p => ({
+                            ...p,
+                            full_name: `${p.last_name}, ${p.first_name}`
+                        }));
+                        callback(patients);
+                    })
+                    .catch(() => callback());
+            },
+            render: {
+                option: function(item, escape) {
+                    return `<div>
+                        <div class="font-semibold">${escape(item.last_name)}, ${escape(item.first_name)}</div>
+                        <div class="text-sm text-gray-600">${escape(item.document_type)}: ${escape(item.document_number)}</div>
+                    </div>`;
+                },
+                item: function(item, escape) {
+                    return `<div>${escape(item.last_name)}, ${escape(item.first_name)} - ${escape(item.document_type)}: ${escape(item.document_number)}</div>`;
+                }
+            },
+            onChange: function(value) {
+                currentPatientId = value || null;
+            }
+        });
+
+        document.getElementById('convertBtn').addEventListener('click', async function() {
+            if (!currentPatientId) {
+                alert('Debe buscar y seleccionar un paciente');
+                return;
+            }
+
+            const btn = this;
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.textContent = 'Generando...';
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const resetButton = () => {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                lucide.createIcons();
+            };
+
+            try {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                    document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+
+                const response = await fetch('{% url "api_quote_convert" quote.pk %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ patient_id: currentPatientId })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Error: ' + (data.error || 'No se pudo generar la orden'));
+                    resetButton();
+                }
+            } catch (error) {
+                alert('Error al generar la orden: ' + error.message);
+                resetButton();
+            }
+        });
+    </script>
+{% endblock %}

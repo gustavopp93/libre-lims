@@ -12,6 +12,11 @@
             <span>Admisión</span>
         </a>
 
+        <a id="nav-quotes" href="{% url 'quote_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'quote_list' or request.resolver_match.url_name == 'quote_create' or request.resolver_match.url_name == 'quote_detail' or request.resolver_match.url_name == 'quote_convert' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-3"></i>
+            <span>Cotizaciones</span>
+        </a>
+
         <a id="nav-results" href="{% url 'results_list' %}" class="flex items-center px-6 py-3 {% if request.resolver_match.url_name == 'results_list' %}bg-blue-50 text-blue-600 border-r-4 border-blue-600{% else %}text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors{% endif %}">
             <i data-lucide="beaker" class="w-5 h-5 mr-3"></i>
             <span>Resultados</span>

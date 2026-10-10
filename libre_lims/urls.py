@@ -119,4 +119,5 @@ urlpatterns = [
     path("api/referrals/search/", search_referrals_api, name="api_referrals_search"),
     path("company/", include("apps.billing.urls")),
     path("pricing/", include("apps.pricing.urls")),
+    path("quotes/", include("apps.quotes.urls")),
 ]

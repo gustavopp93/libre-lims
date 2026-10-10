@@ -1,0 +1,102 @@
+<!-- Información de la Cotización -->
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+        <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2 text-blue-600"></i>
+        Información de la Cotización
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-gray-600 text-sm font-medium mb-1">Código de Cotización</label>
+            <p class="text-gray-900 font-semibold">{{ quote.code }}</p>
+        </div>
+        <div>
+            <label class="block text-gray-600 text-sm font-medium mb-1">Estado</label>
+            <p class="text-gray-900 font-semibold">
+                {% if quote.status == 'pending' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                        <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
+                        {{ quote.get_status_display }}
+                    </span>
+                {% elif quote.status == 'converted' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
+                        {{ quote.get_status_display }}
+                    </span>
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <label class="block text-gray-600 text-sm font-medium mb-1">Fecha de Registro</label>
+            <p class="text-gray-900 font-semibold">{{ quote.created_at|date:"d/m/Y H:i" }}</p>
+        </div>
+        {% if quote.coupon %}
+        <div>
+            <label class="block text-gray-600 text-sm font-medium mb-1">Cupón</label>
+            <p class="text-gray-900 font-semibold">{{ quote.coupon.code }} ({{ quote.coupon.price_list.name }})</p>
+        </div>
+        {% endif %}
+        {% if quote.order %}
+        <div>
+            <label class="block text-gray-600 text-sm font-medium mb-1">Orden Generada</label>
+            <p class="text-gray-900 font-semibold">
+                <a href="{% url 'order_detail' quote.order.pk %}" class="text-blue-600 hover:text-blue-800 hover:underline">{{ quote.order.code }}</a>
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Exámenes -->
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+        <i data-lucide="clipboard-list" class="w-5 h-5 mr-2 text-blue-600"></i>
+        Exámenes
+    </h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Examen
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio
+                </th>
+            </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+            {% for detail in quote.details.all %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        {{ detail.exam.name }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900 text-right font-semibold">
+                        S/. {{ detail.price }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot class="bg-gray-50">
+            <tr>
+                <td class="px-6 py-4 text-sm font-bold text-gray-900 text-right">
+                    TOTAL
+                </td>
+                <td class="px-6 py-4 text-lg font-bold text-blue-600 text-right">
+                    S/. {{ quote.total }}
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<!-- Observaciones -->
+{% if quote.observations %}
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+        <i data-lucide="message-square" class="w-5 h-5 mr-2 text-blue-600"></i>
+        Observaciones
+    </h3>
+    <p class="text-gray-900 bg-gray-50 p-4 rounded border border-gray-200">{{ quote.observations }}</p>
+</div>
+{% endif %}

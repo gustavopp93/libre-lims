@@ -93,6 +93,14 @@
                                 <label class="block text-gray-600 text-sm font-medium mb-1">Última Actualización</label>
                                 <p class="text-gray-900 font-semibold">{{ order.updated_at|date:"d/m/Y H:i" }}</p>
                             </div>
+                            {% if order.quote %}
+                            <div>
+                                <label class="block text-gray-600 text-sm font-medium mb-1">Cotización de Origen</label>
+                                <p class="text-gray-900 font-semibold">
+                                    <a href="{% url 'quote_detail' order.quote.pk %}" class="text-blue-600 hover:text-blue-800 hover:underline">{{ order.quote.code }}</a>
+                                </p>
+                            </div>
+                            {% endif %}
                             {% if order.payment_method %}
                             <div>
                                 <label class="block text-gray-600 text-sm font-medium mb-1">Método de Pago</label>

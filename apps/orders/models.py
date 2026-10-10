@@ -36,6 +36,14 @@ class Order(TimeStampedMixin):
         blank=True,
         verbose_name="Coupon",
     )
+    quote = models.OneToOneField(
+        "quotes.Quote",
+        on_delete=models.PROTECT,
+        related_name="order",
+        null=True,
+        blank=True,
+        verbose_name="Cotización",
+    )
     payment_method = models.CharField(
         max_length=20, choices=PaymentMethod.choices, null=True, blank=True, verbose_name="Método de Pago"
     )
