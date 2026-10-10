@@ -145,7 +145,7 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Order.objects.select_related("patient").prefetch_related("details__exam")
+        return Order.objects.select_related("patient", "quote").prefetch_related("details__exam")
 
 
 class OrderPrintView(LoginRequiredMixin, View):

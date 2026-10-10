@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotización {{ quote.code }}</title>
+    <style>
+        @page {
+            size: 72mm auto;
+            margin: 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'DejaVu Sans', sans-serif;
+            font-size: 13px;
+            line-height: 1.25;
+            width: 72mm;
+            padding: 1.5mm;
+            color: #000;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 1.5mm;
+        }
+
+        .header h1 {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 0.5mm;
+            letter-spacing: 1.5px;
+        }
+
+        .header p {
+            font-size: 11px;
+            margin: 0.3mm 0;
+            line-height: 1.2;
+        }
+
+        .patient-section {
+            margin: 0.8mm 0;
+        }
+
+        .patient-row {
+            margin: 0.3mm 0;
+            font-size: 13px;
+        }
+
+        .patient-name {
+            font-size: 13px;
+            margin-top: 0.3mm;
+        }
+
+        .datetime {
+            margin: 0.3mm 0;
+            font-size: 13px;
+        }
+
+        .separator-line {
+            border-bottom: 1px dashed #000;
+            margin: 0.8mm 0;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            padding: 0.8mm 0;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            margin-bottom: 0.3mm;
+            margin-top: 0.8mm;
+        }
+
+        .table-header span:first-child {
+            flex: 1;
+        }
+
+        .table-header span:last-child {
+            width: 22mm;
+            text-align: right;
+        }
+
+        .exam-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 0.8mm 0;
+            border-bottom: 1px dashed #000;
+        }
+
+        .exam-description {
+            flex: 1;
+            padding-right: 1mm;
+            word-wrap: break-word;
+        }
+
+        .exam-price {
+            width: 22mm;
+            text-align: right;
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2mm;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+        }
+
+        .label {
+            display: inline-block;
+            min-width: 32mm;
+            font-size: 13px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 1mm 0;
+            margin-top: 0.8mm;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+        }
+
+        .total-label {
+            flex: 1;
+        }
+
+        .total-amount {
+            width: 22mm;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <h1>{{ company.business_name|upper }}</h1>
+    <p>LABORATORIO CLINICO</p>
+    <p>{{ company.legal_address|upper }}</p>
+    <p>RUC: {{ company.document_number }}</p>
+    <p>TELEFONO: {{ company.phone_number }}</p>
+</div>
+
+<!-- Quote Code -->
+<div class="patient-section">
+    <div class="patient-row">
+        <span class="label">COTIZACION:</span>
+        <span>{{ quote.code }}</span>
+    </div>
+</div>
+
+<div class="patient-section">
+    <div class="datetime">
+        <span class="label">FECHA Y HORA:</span>
+        <span>{{ quote.created_at|date:"d/m/Y H:i" }}</span>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-header">
+    <span>DESCRIPCION</span>
+    <span>PRECIO</span>
+</div>
+
+{% for detail in quote.details.all %}
+    <div class="exam-row">
+        <div class="exam-description">{{ detail.exam.name|upper }}</div>
+        <div class="exam-price">S/. {{ detail.price }}</div>
+    </div>
+{% endfor %}
+
+<!-- Total -->
+<div class="total-row">
+    <div class="total-label">TOTAL</div>
+    <div class="total-amount">S/. {{ quote.total }}</div>
+</div>
+
+<div class="separator-line"></div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>COTIZACION REFERENCIAL</p>
+</div>
+</body>
+</html>
