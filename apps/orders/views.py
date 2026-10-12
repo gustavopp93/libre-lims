@@ -666,6 +666,7 @@ class OrdersExcelDownloadView(LoginRequiredMixin, View):
         headers = [
             "Código de Orden",
             "Método de Pago",
+            "Monto",
             "Fecha",
             "Tipo de Documento",
             "Número de Documento",
@@ -685,20 +686,24 @@ class OrdersExcelDownloadView(LoginRequiredMixin, View):
             order = payment_detail.payment.order
             ws.cell(row=row_num, column=1).value = order.code
             ws.cell(row=row_num, column=2).value = payment_detail.payment_method.name
-            ws.cell(row=row_num, column=3).value = timezone.localtime(order.created_at).strftime("%d/%m/%Y %H:%M")
-            ws.cell(row=row_num, column=4).value = order.patient.get_document_type_display()
-            ws.cell(row=row_num, column=5).value = order.patient.document_number
-            ws.cell(row=row_num, column=6).value = order.patient.last_name
-            ws.cell(row=row_num, column=7).value = order.patient.first_name
+            amount_cell = ws.cell(row=row_num, column=3)
+            amount_cell.value = payment_detail.amount
+            amount_cell.number_format = "#,##0.00"
+            ws.cell(row=row_num, column=4).value = timezone.localtime(order.created_at).strftime("%d/%m/%Y %H:%M")
+            ws.cell(row=row_num, column=5).value = order.patient.get_document_type_display()
+            ws.cell(row=row_num, column=6).value = order.patient.document_number
+            ws.cell(row=row_num, column=7).value = order.patient.last_name
+            ws.cell(row=row_num, column=8).value = order.patient.first_name
 
         # Ajustar ancho de columnas
         ws.column_dimensions["A"].width = 18
         ws.column_dimensions["B"].width = 22
-        ws.column_dimensions["C"].width = 18
-        ws.column_dimensions["D"].width = 20
+        ws.column_dimensions["C"].width = 14
+        ws.column_dimensions["D"].width = 18
         ws.column_dimensions["E"].width = 20
-        ws.column_dimensions["F"].width = 25
+        ws.column_dimensions["F"].width = 20
         ws.column_dimensions["G"].width = 25
+        ws.column_dimensions["H"].width = 25
 
         # Generar nombre de archivo con fecha actual
         now = timezone.localtime(timezone.now())
