@@ -147,6 +147,18 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         return Order.objects.select_related("patient", "quote").prefetch_related("details__exam")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order = self.object
+
+        context["payment_details"] = []
+        if order.status == Order.Status.PAID:
+            context["payment_details"] = (
+                PaymentDetail.objects.select_related("payment_method").filter(payment__order=order).order_by("id")
+            )
+
+        return context
+
 
 class OrderPrintView(LoginRequiredMixin, View):
     """Vista para generar e imprimir ticket de orden"""
