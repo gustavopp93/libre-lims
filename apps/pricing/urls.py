@@ -15,15 +15,10 @@ urlpatterns = [
         name="price_list_download_template",
     ),
     path("price-lists/<int:pk>/upload/", views.PriceListUploadView.as_view(), name="price_list_upload"),
-    # Coupon URLs
-    path("coupons/", views.CouponListView.as_view(), name="coupon_list"),
-    path("coupons/create/", views.CouponCreateView.as_view(), name="coupon_create"),
-    path("coupons/<int:pk>/update/", views.CouponUpdateView.as_view(), name="coupon_update"),
     # Referral URLs
     path("referrals/", views.ReferralListView.as_view(), name="referral_list"),
     path("referrals/create/", views.ReferralCreateView.as_view(), name="referral_create"),
     path("referrals/<int:pk>/update/", views.ReferralUpdateView.as_view(), name="referral_update"),
     # API Endpoints
     path("api/exam-price/", views.get_exam_price_api, name="api_get_exam_price"),
-    path("api/validate-coupon/", views.validate_coupon_api, name="api_validate_coupon"),
 ]

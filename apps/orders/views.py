@@ -104,9 +104,7 @@ class EditOrderView(LoginRequiredMixin, DetailView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Order.objects.select_related("patient", "coupon__price_list", "referral").prefetch_related(
-            "details__exam"
-        )
+        return Order.objects.select_related("patient", "referral").prefetch_related("details__exam")
 
     def get(self, request, *args, **kwargs):
         order = self.get_object()
@@ -132,7 +130,6 @@ class EditOrderView(LoginRequiredMixin, DetailView):
         ]
         context["existing_details_json"] = json.dumps(existing_details)
 
-        context["coupon_code"] = order.coupon.code if order.coupon else None
         context["referral_id"] = order.referral_id
 
         return context
@@ -221,7 +218,6 @@ def create_order_api(request):
 
     # Validar datos requeridos
     patient_id = data.get("patient_id")
-    coupon_code = data.get("coupon_code", "").strip()
     observations = data.get("observations", "")
     exam_details = data.get("exam_details", [])
 
@@ -236,21 +232,6 @@ def create_order_api(request):
         patient = Patient.objects.get(id=patient_id)
     except Patient.DoesNotExist:
         return JsonResponse({"error": "Paciente no encontrado"}, status=404)
-
-    # Validar cupón si se proporcionó
-    coupon = None
-    if coupon_code:
-        from apps.pricing.services import PricingService
-
-        validation_result = PricingService.validate_coupon(coupon_code)
-
-        if not validation_result["valid"]:
-            return JsonResponse({"error": validation_result["error"]}, status=400)
-
-        # Si el cupón es válido, obtenerlo de la base de datos
-        from apps.pricing.models import Coupon
-
-        coupon = Coupon.objects.get(code=coupon_code.upper(), is_active=True)
 
     # Validar exam_details
     validated_details = []
@@ -283,7 +264,7 @@ def create_order_api(request):
     # Crear la orden y sus detalles en una transacción
     try:
         with transaction.atomic():
-            order = Order.objects.create(patient=patient, coupon=coupon, observations=observations)
+            order = Order.objects.create(patient=patient, observations=observations)
 
             for detail in validated_details:
                 OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
