@@ -7,11 +7,12 @@ class Result(TimeStampedMixin):
     """Resultado general de una orden"""
 
     class ResultStatus(models.TextChoices):
-        PENDING = "pending", "Pendiente"
-        IN_PROGRESS = "in_progress", "En Proceso"
-        PARTIAL_RESULTS = "partial_results", "Resultados Parciales"
-        COMPLETED = "completed", "Completado"
-        PARTIAL_DELIVERY = "partial_delivery", "Entrega Parcial"
+        PENDING_SAMPLE = "pending_sample", "Pendiente de Muestra"
+        SAMPLE_RECEIVED = "sample_received", "Muestra Recibida"
+        INTERNAL_IN_PROGRESS = "internal_in_progress", "En Proceso Interno"
+        EXTERNAL_IN_PROGRESS = "external_in_progress", "En Proceso Externo"
+        MIXED_IN_PROGRESS = "mixed_in_progress", "En Proceso Mixto"
+        READY_TO_DELIVER = "ready_to_deliver", "Listo para Entregar"
         DELIVERED = "delivered", "Entregado"
 
     order = models.OneToOneField(
@@ -23,7 +24,7 @@ class Result(TimeStampedMixin):
     status = models.CharField(
         max_length=30,
         choices=ResultStatus.choices,
-        default=ResultStatus.PENDING,
+        default=ResultStatus.PENDING_SAMPLE,
         verbose_name="Estado",
     )
 
@@ -34,6 +35,21 @@ class Result(TimeStampedMixin):
     def __str__(self):
         return f"Resultado {self.order.code} - {self.get_status_display()}"
 
+    def get_progress(self):
+        """Cuenta los exámenes por estado. Usa los detalles precargados (prefetch_related)."""
+        exam_status = ResultDetail.ExamResultStatus
+        statuses = [detail.status for detail in self.details.all()]
+        delivered = statuses.count(exam_status.DELIVERED)
+        return {
+            "total": len(statuses),
+            "ready": statuses.count(exam_status.RESULT_READY) + delivered,
+            "delivered": delivered,
+            "internal": statuses.count(exam_status.INTERNAL_ANALYSIS),
+            "external": statuses.count(exam_status.SENT_EXTERNAL),
+            "sample_received": statuses.count(exam_status.SAMPLE_RECEIVED),
+            "pending_sample": statuses.count(exam_status.PENDING_SAMPLE),
+        }
+
 
 class ResultDetail(TimeStampedMixin):
     """Detalle de resultado por examen"""
@@ -43,9 +59,7 @@ class ResultDetail(TimeStampedMixin):
         SAMPLE_RECEIVED = "sample_received", "Muestra Recibida"
         INTERNAL_ANALYSIS = "internal_analysis", "En Análisis Interno"
         SENT_EXTERNAL = "sent_external", "Enviado a Lab Externo"
-        RECEIVED_EXTERNAL = "received_external", "Recibido de Lab Externo"
-        COMPLETED = "completed", "Completado"
-        VALIDATED = "validated", "Validado"
+        RESULT_READY = "result_ready", "Resultado Listo"
         DELIVERED = "delivered", "Entregado"
 
     result = models.ForeignKey(
@@ -83,76 +97,30 @@ class ResultDetail(TimeStampedMixin):
 
     def get_allowed_transitions(self):
         """
-        Retorna las transiciones válidas desde el estado actual.
-        Permite saltar a cualquier estado posterior en el flujo.
+        Retorna los estados válidos desde el estado actual (incluye el actual).
+        Desde Muestra Recibida se elige la ruta: análisis interno o laboratorio externo.
         """
-        # Orden de los estados en el flujo (índice determina si es "posterior")
-        STATUS_ORDER = [
-            self.ExamResultStatus.PENDING_SAMPLE,
-            self.ExamResultStatus.SAMPLE_RECEIVED,
-            self.ExamResultStatus.INTERNAL_ANALYSIS,  # Rama in-house
-            self.ExamResultStatus.SENT_EXTERNAL,  # Rama tercerizado
-            self.ExamResultStatus.RECEIVED_EXTERNAL,  # Rama tercerizado
-            self.ExamResultStatus.COMPLETED,
-            self.ExamResultStatus.VALIDATED,
-            self.ExamResultStatus.DELIVERED,
-        ]
-
-        # Encontrar posición actual
-        try:
-            current_index = STATUS_ORDER.index(self.status)
-        except ValueError:
-            # Si el estado no está en la lista, solo permitir el actual
-            return [(self.status, self.ExamResultStatus(self.status).label)]
-
-        # Casos especiales según el estado actual
-        if self.status == self.ExamResultStatus.PENDING_SAMPLE:
-            # Desde PENDING_SAMPLE puede ir a cualquier estado posterior
-            allowed = STATUS_ORDER[current_index:]
-        elif self.status == self.ExamResultStatus.SAMPLE_RECEIVED:
-            # Puede elegir rama in-house o tercerizado, y cualquier estado posterior
-            allowed = [
-                self.ExamResultStatus.SAMPLE_RECEIVED,
-                self.ExamResultStatus.INTERNAL_ANALYSIS,
-                self.ExamResultStatus.SENT_EXTERNAL,
-                self.ExamResultStatus.COMPLETED,
-                self.ExamResultStatus.VALIDATED,
-                self.ExamResultStatus.DELIVERED,
-            ]
-        elif self.status == self.ExamResultStatus.INTERNAL_ANALYSIS:
-            # Rama in-house: puede saltar directamente a estados finales
-            allowed = [
-                self.ExamResultStatus.INTERNAL_ANALYSIS,
-                self.ExamResultStatus.COMPLETED,
-                self.ExamResultStatus.VALIDATED,
-                self.ExamResultStatus.DELIVERED,
-            ]
-        elif self.status == self.ExamResultStatus.SENT_EXTERNAL:
-            # Rama tercerizado: debe pasar por RECEIVED_EXTERNAL
-            allowed = [
-                self.ExamResultStatus.SENT_EXTERNAL,
-                self.ExamResultStatus.RECEIVED_EXTERNAL,
-                self.ExamResultStatus.COMPLETED,
-                self.ExamResultStatus.VALIDATED,
-                self.ExamResultStatus.DELIVERED,
-            ]
-        elif self.status == self.ExamResultStatus.RECEIVED_EXTERNAL:
-            # Después de recibir externo, cualquier estado final
-            allowed = [
-                self.ExamResultStatus.RECEIVED_EXTERNAL,
-                self.ExamResultStatus.COMPLETED,
-                self.ExamResultStatus.VALIDATED,
-                self.ExamResultStatus.DELIVERED,
-            ]
-        elif self.status in [
-            self.ExamResultStatus.COMPLETED,
-            self.ExamResultStatus.VALIDATED,
-            self.ExamResultStatus.DELIVERED,
-        ]:
-            # Estados finales: solo puede avanzar o mantener
-            allowed = STATUS_ORDER[current_index:]
-        else:
-            # Por defecto: estado actual y posteriores
-            allowed = STATUS_ORDER[current_index:]
-
-        return [(status, self.ExamResultStatus(status).label) for status in allowed]
+        status = self.ExamResultStatus
+        transitions = {
+            status.PENDING_SAMPLE: [
+                status.PENDING_SAMPLE,
+                status.SAMPLE_RECEIVED,
+                status.INTERNAL_ANALYSIS,
+                status.SENT_EXTERNAL,
+                status.RESULT_READY,
+                status.DELIVERED,
+            ],
+            status.SAMPLE_RECEIVED: [
+                status.SAMPLE_RECEIVED,
+                status.INTERNAL_ANALYSIS,
+                status.SENT_EXTERNAL,
+                status.RESULT_READY,
+                status.DELIVERED,
+            ],
+            status.INTERNAL_ANALYSIS: [status.INTERNAL_ANALYSIS, status.RESULT_READY, status.DELIVERED],
+            status.SENT_EXTERNAL: [status.SENT_EXTERNAL, status.RESULT_READY, status.DELIVERED],
+            status.RESULT_READY: [status.RESULT_READY, status.DELIVERED],
+            status.DELIVERED: [status.DELIVERED],
+        }
+        allowed = transitions.get(self.status, [self.status])
+        return [(value, self.ExamResultStatus(value).label) for value in allowed]

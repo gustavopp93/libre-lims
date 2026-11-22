@@ -1,0 +1,14 @@
+{% comment %}
+Resumen del avance de los exámenes de un resultado.
+Uso: {% include "results/includes/result_progress.html" with result=result %}
+{% endcomment %}
+{% with progress=result.get_progress %}
+<div class="text-xs text-gray-600 leading-5">
+    <span class="font-semibold text-gray-800">{{ progress.ready }}/{{ progress.total }} listos</span>
+    {% if progress.internal %} · {{ progress.internal }} interno{{ progress.internal|pluralize }}{% endif %}
+    {% if progress.external %} · {{ progress.external }} externo{{ progress.external|pluralize }}{% endif %}
+    {% if progress.sample_received %} · {{ progress.sample_received }} sin ruta{% endif %}
+    {% if progress.pending_sample %} · {{ progress.pending_sample }} sin muestra{% endif %}
+    {% if progress.delivered and progress.delivered != progress.total %} · {{ progress.delivered }} entregado{{ progress.delivered|pluralize }}{% endif %}
+</div>
+{% endwith %}
