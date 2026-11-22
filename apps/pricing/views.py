@@ -7,11 +7,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.decorators.http import require_GET
 from django.views.generic import CreateView, ListView, UpdateView
 
 from apps.exams.models import Exam
-from apps.pricing.models import Coupon, PriceList, PriceListItem
+from apps.pricing.models import PriceList, PriceListItem
 from apps.pricing.services import PricingService
 from apps.referrals.models import Referral
 
@@ -301,68 +300,6 @@ class PriceListUploadView(LoginRequiredMixin, View):
         return render(self.request, self.template_name, context)
 
 
-# Coupon Views
-class CouponListView(LoginRequiredMixin, ListView):
-    model = Coupon
-    template_name = "pricing/coupon_list.html"
-    context_object_name = "coupons"
-    paginate_by = 10
-    login_url = reverse_lazy("login")
-
-    def get_queryset(self):
-        return Coupon.objects.select_related("price_list").all().order_by("-created_at")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["breadcrumbs"] = [
-            {"name": "Cupones", "url": None},
-        ]
-        return context
-
-
-class CouponCreateView(LoginRequiredMixin, CreateView):
-    model = Coupon
-    template_name = "pricing/coupon_create.html"
-    fields = ["code", "price_list", "expiration_date", "is_active"]
-    success_url = reverse_lazy("coupon_list")
-    login_url = reverse_lazy("login")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["price_lists"] = PriceList.objects.filter(is_active=True).order_by("name")
-        context["breadcrumbs"] = [
-            {"name": "Cupones", "url": reverse_lazy("coupon_list")},
-            {"name": "Crear Cupón", "url": None},
-        ]
-        return context
-
-    def form_valid(self, form):
-        messages.success(self.request, f"Cupón '{form.instance.code}' creado exitosamente")
-        return super().form_valid(form)
-
-
-class CouponUpdateView(LoginRequiredMixin, UpdateView):
-    model = Coupon
-    template_name = "pricing/coupon_update.html"
-    fields = ["code", "price_list", "expiration_date", "is_active"]
-    success_url = reverse_lazy("coupon_list")
-    login_url = reverse_lazy("login")
-    context_object_name = "coupon"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["price_lists"] = PriceList.objects.filter(is_active=True).order_by("name")
-        context["breadcrumbs"] = [
-            {"name": "Cupones", "url": reverse_lazy("coupon_list")},
-            {"name": f"Editar: {self.object.code}", "url": None},
-        ]
-        return context
-
-    def form_valid(self, form):
-        messages.success(self.request, f"Cupón '{form.instance.code}' actualizado exitosamente")
-        return super().form_valid(form)
-
-
 # Referral Views
 class ReferralListView(LoginRequiredMixin, ListView):
     model = Referral
@@ -429,23 +366,20 @@ class ReferralUpdateView(LoginRequiredMixin, UpdateView):
 @login_required
 def get_exam_price_api(request):
     """
-    API endpoint para obtener el precio de un examen considerando cupón, tarifario del referido o precio base.
+    API endpoint para obtener el precio de un examen considerando tarifario del referido o precio base.
 
     Query params:
         - exam_id: ID del examen (requerido)
         - referral_id: ID del referido (opcional)
-        - coupon_code: Código del cupón (opcional)
 
     Returns:
         JSON con:
             - price: precio del examen
-            - source: 'coupon', 'price_list' o 'base'
+            - source: 'price_list' o 'base'
             - price_list_id: ID del tarifario (si aplica)
-            - coupon_code: código del cupón (si aplica)
     """
     exam_id = request.GET.get("exam_id")
     referral_id = request.GET.get("referral_id")
-    coupon_code = request.GET.get("coupon_code", "").strip()
 
     if not exam_id:
         return JsonResponse({"error": "exam_id es requerido"}, status=400)
@@ -456,7 +390,7 @@ def get_exam_price_api(request):
         referral_id = int(referral_id) if referral_id else None
 
         # Usar el servicio para obtener el precio
-        result = PricingService.get_exam_price(exam_id, referral_id, coupon_code or None)
+        result = PricingService.get_exam_price(exam_id, referral_id)
 
         return JsonResponse(result)
 
@@ -469,32 +403,3 @@ def get_exam_price_api(request):
     except Exception as e:
         logger.exception("Error al obtener precio del examen")
         return JsonResponse({"error": f"Error al obtener precio: {str(e)}"}, status=500)
-
-
-@login_required
-@require_GET
-def validate_coupon_api(request):
-    """
-    API endpoint para validar un código de cupón.
-
-    Query params:
-        - coupon_code: Código del cupón (requerido)
-
-    Returns:
-        JSON con:
-            - valid: True/False
-            - coupon: datos del cupón (si es válido)
-            - error: mensaje de error (si no es válido)
-    """
-    coupon_code = request.GET.get("coupon_code", "").strip()
-
-    if not coupon_code:
-        return JsonResponse({"error": "Código de cupón requerido"}, status=400)
-
-    try:
-        result = PricingService.validate_coupon(coupon_code)
-        return JsonResponse(result)
-
-    except Exception as e:
-        logger.exception("Error al validar cupón")
-        return JsonResponse({"error": f"Error al validar cupón: {str(e)}"}, status=500)

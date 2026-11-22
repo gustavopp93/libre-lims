@@ -29,12 +29,6 @@
             <label class="block text-gray-600 text-sm font-medium mb-1">Fecha de Registro</label>
             <p class="text-gray-900 font-semibold">{{ quote.created_at|date:"d/m/Y H:i" }}</p>
         </div>
-        {% if quote.coupon %}
-        <div>
-            <label class="block text-gray-600 text-sm font-medium mb-1">Cupón</label>
-            <p class="text-gray-900 font-semibold">{{ quote.coupon.code }} ({{ quote.coupon.price_list.name }})</p>
-        </div>
-        {% endif %}
         {% if quote.order %}
         <div>
             <label class="block text-gray-600 text-sm font-medium mb-1">Orden Generada</label>

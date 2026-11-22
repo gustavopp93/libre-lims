@@ -15,8 +15,6 @@ from weasyprint import HTML
 
 from apps.billing.models import Company
 from apps.patients.models import Patient
-from apps.pricing.models import Coupon
-from apps.pricing.services import PricingService
 from apps.quotes.models import Quote
 from apps.quotes.services import QuoteValidationError, convert_quote_to_order, create_quote, validate_exam_details
 
@@ -85,9 +83,7 @@ class QuoteDetailView(LoginRequiredMixin, DetailView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Quote.objects.select_related("coupon__price_list", "order", "created_by").prefetch_related(
-            "details__exam"
-        )
+        return Quote.objects.select_related("order", "created_by").prefetch_related("details__exam")
 
 
 class QuoteConvertView(LoginRequiredMixin, DetailView):
@@ -97,7 +93,7 @@ class QuoteConvertView(LoginRequiredMixin, DetailView):
     login_url = reverse_lazy("login")
 
     def get_queryset(self):
-        return Quote.objects.select_related("coupon__price_list").prefetch_related("details__exam")
+        return Quote.objects.prefetch_related("details__exam")
 
     def get(self, request, *args, **kwargs):
         quote = self.get_object()
@@ -134,15 +130,7 @@ class QuoteCreateAPIView(LoginRequiredMixin, View):
         except json.JSONDecodeError:
             return JsonResponse({"error": "JSON inválido"}, status=400)
 
-        coupon_code = data.get("coupon_code", "").strip()
         observations = data.get("observations", "")
-
-        coupon = None
-        if coupon_code:
-            validation_result = PricingService.validate_coupon(coupon_code)
-            if not validation_result["valid"]:
-                return JsonResponse({"error": validation_result["error"]}, status=400)
-            coupon = Coupon.objects.get(code=coupon_code.upper(), is_active=True)
 
         try:
             validated_details = validate_exam_details(data.get("exam_details", []))
@@ -150,9 +138,7 @@ class QuoteCreateAPIView(LoginRequiredMixin, View):
             return JsonResponse({"error": e.message}, status=e.status)
 
         try:
-            quote = create_quote(
-                coupon=coupon, observations=observations, validated_details=validated_details, user=request.user
-            )
+            quote = create_quote(observations=observations, validated_details=validated_details, user=request.user)
         except Exception as e:
             logger.exception("Error al crear la cotización")
             return JsonResponse({"error": f"Error al crear la cotización: {str(e)}"}, status=500)

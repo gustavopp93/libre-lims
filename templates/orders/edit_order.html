@@ -35,23 +35,8 @@
                     </div>
                 </div>
 
-                <!-- Coupon Info (locked) -->
-                {% if order.coupon %}
-                <div class="bg-white rounded-lg shadow p-6 mb-6">
-                    <h4 class="text-lg font-semibold mb-4">Cupón de Descuento</h4>
-                    <div class="bg-green-50 border border-green-200 rounded p-4">
-                        <div class="flex items-center">
-                            <i data-lucide="check-circle" class="w-5 h-5 text-green-600 mr-2"></i>
-                            <div>
-                                <p class="text-sm font-semibold text-green-800">Cupón: {{ order.coupon.code }}</p>
-                                <p class="text-xs text-green-700 mt-1">Tarifario: {{ order.coupon.price_list.name }}</p>
-                            </div>
-                            <span class="ml-auto text-xs text-gray-400 italic">No modificable</span>
-                        </div>
-                    </div>
-                </div>
-                {% elif order.referral %}
                 <!-- Referral Info (locked) -->
+                {% if order.referral %}
                 <div class="bg-white rounded-lg shadow p-6 mb-6">
                     <h4 class="text-lg font-semibold mb-4">Referido</h4>
                     <div class="bg-blue-50 border border-blue-200 rounded p-4">
@@ -103,7 +88,6 @@
     <script>
         const orderId = {{ order.id }};
         const existingDetails = {{ existing_details_json|safe }};
-        const appliedCouponCode = {% if coupon_code %}"{{ coupon_code }}"{% else %}null{% endif %};
         const referralId = {{ referral_id|default:"null" }};
 
         let examRowCount = 0;
@@ -192,9 +176,7 @@
                     if (value) {
                         try {
                             let url = `/pricing/api/exam-price/?exam_id=${value}`;
-                            if (appliedCouponCode) {
-                                url += `&coupon_code=${encodeURIComponent(appliedCouponCode)}`;
-                            } else if (referralId) {
+                            if (referralId) {
                                 url += `&referral_id=${referralId}`;
                             }
                             const response = await fetch(url);
