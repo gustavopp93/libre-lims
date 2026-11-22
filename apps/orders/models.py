@@ -48,6 +48,7 @@ class Order(TimeStampedMixin):
         max_length=20, choices=PaymentMethod.choices, null=True, blank=True, verbose_name="Método de Pago"
     )
     observations = models.TextField(blank=True, default="", verbose_name="Observaciones")
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Descuento")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
 
     class Meta:
@@ -83,8 +84,12 @@ class Order(TimeStampedMixin):
         return f"{date_prefix}-{new_sequence:06d}"
 
     @property
-    def total(self):
+    def subtotal(self):
         return sum(detail.price for detail in self.details.all())
+
+    @property
+    def total(self):
+        return self.subtotal - self.discount
 
 
 class OrderDetail(models.Model):

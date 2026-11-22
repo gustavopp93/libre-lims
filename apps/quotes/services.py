@@ -57,11 +57,12 @@ def validate_exam_details(exam_details):
     return validated_details
 
 
-def create_quote(*, observations, validated_details, user):
+def create_quote(*, observations, discount, validated_details, user):
     with transaction.atomic():
         quote = Quote.objects.create(
             code=generate_quote_code(),
             observations=observations,
+            discount=discount,
             created_by=user,
             updated_by=user,
         )
@@ -82,6 +83,7 @@ def convert_quote_to_order(*, quote_id, patient, user):
         order = Order.objects.create(
             patient=patient,
             observations=quote.observations,
+            discount=quote.discount,
             quote=quote,
         )
         OrderDetail.objects.bulk_create(

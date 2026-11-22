@@ -146,6 +146,16 @@
                                 {% endfor %}
                                 </tbody>
                                 <tfoot class="bg-gray-50">
+                                {% if order.discount %}
+                                <tr>
+                                    <td class="px-6 py-2 text-sm text-gray-700 text-right">Subtotal</td>
+                                    <td class="px-6 py-2 text-sm text-gray-900 text-right font-semibold">S/. {{ order.subtotal }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-2 text-sm text-gray-700 text-right">Descuento</td>
+                                    <td class="px-6 py-2 text-sm text-red-600 text-right font-semibold">- S/. {{ order.discount }}</td>
+                                </tr>
+                                {% endif %}
                                 <tr>
                                     <td class="px-6 py-4 text-sm font-bold text-gray-900 text-right">
                                         TOTAL
