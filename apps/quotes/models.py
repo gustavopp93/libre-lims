@@ -18,6 +18,7 @@ class Quote(TimeStampedMixin, AuditMixin):
         blank=True,
         verbose_name="Cupón",
     )
+    contact_phone = models.CharField(max_length=20, blank=True, default="", verbose_name="Teléfono de Contacto")
     observations = models.TextField(blank=True, default="", verbose_name="Observaciones")
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Descuento")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING, verbose_name="Estado")

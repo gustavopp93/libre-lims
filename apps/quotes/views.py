@@ -17,7 +17,13 @@ from apps.billing.models import Company
 from apps.orders.services import DiscountValidationError, validate_discount
 from apps.patients.models import Patient
 from apps.quotes.models import Quote
-from apps.quotes.services import QuoteValidationError, convert_quote_to_order, create_quote, validate_exam_details
+from apps.quotes.services import (
+    QuoteValidationError,
+    convert_quote_to_order,
+    create_quote,
+    validate_contact_phone,
+    validate_exam_details,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +140,7 @@ class QuoteCreateAPIView(LoginRequiredMixin, View):
         observations = data.get("observations", "")
 
         try:
+            contact_phone = validate_contact_phone(data.get("contact_phone"))
             validated_details = validate_exam_details(data.get("exam_details", []))
         except QuoteValidationError as e:
             return JsonResponse({"error": e.message}, status=e.status)
@@ -146,7 +153,11 @@ class QuoteCreateAPIView(LoginRequiredMixin, View):
 
         try:
             quote = create_quote(
-                observations=observations, discount=discount, validated_details=validated_details, user=request.user
+                contact_phone=contact_phone,
+                observations=observations,
+                discount=discount,
+                validated_details=validated_details,
+                user=request.user,
             )
         except Exception as e:
             logger.exception("Error al crear la cotización")

@@ -22,6 +22,24 @@ def generate_quote_code():
     return f"{new_sequence:07d}"
 
 
+CONTACT_PHONE_MAX_LENGTH = 20
+CONTACT_PHONE_ALLOWED_CHARS = set("0123456789+-() ")
+
+
+def validate_contact_phone(contact_phone):
+    """Normalize and validate an optional contact phone number."""
+    contact_phone = str(contact_phone or "").strip()
+    if not contact_phone:
+        return ""
+
+    if len(contact_phone) > CONTACT_PHONE_MAX_LENGTH:
+        raise QuoteValidationError(f"El teléfono no puede tener más de {CONTACT_PHONE_MAX_LENGTH} caracteres")
+    if not set(contact_phone) <= CONTACT_PHONE_ALLOWED_CHARS or not any(c.isdigit() for c in contact_phone):
+        raise QuoteValidationError("El teléfono solo puede contener números, espacios y los caracteres + - ( )")
+
+    return contact_phone
+
+
 def validate_exam_details(exam_details):
     """Validate a list of {exam_id, price} dicts and return [{exam, price}]."""
     if not exam_details:
@@ -57,10 +75,11 @@ def validate_exam_details(exam_details):
     return validated_details
 
 
-def create_quote(*, observations, discount, validated_details, user):
+def create_quote(*, contact_phone, observations, discount, validated_details, user):
     with transaction.atomic():
         quote = Quote.objects.create(
             code=generate_quote_code(),
+            contact_phone=contact_phone,
             observations=observations,
             discount=discount,
             created_by=user,
