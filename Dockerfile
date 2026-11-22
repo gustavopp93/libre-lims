@@ -1,4 +1,4 @@
-FROM python:3.11.14-slim
+FROM python:3.11.18-slim
 
 # Set environment variables
 # UV_PYTHON_DOWNLOADS=never: use only the Python of the image.
