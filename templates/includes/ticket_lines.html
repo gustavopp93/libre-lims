@@ -1,0 +1,24 @@
+{% for detail in ticket.details.all %}
+    <div class="exam-row">
+        <div class="exam-description">{{ detail.exam.name|upper }}</div>
+        <div class="exam-price">S/. {{ detail.price }}</div>
+    </div>
+{% endfor %}
+
+{% if ticket.discount %}
+<!-- Subtotal and Discount -->
+<div class="exam-row subtotal-row">
+    <div class="exam-description">SUBTOTAL</div>
+    <div class="exam-price">S/. {{ ticket.subtotal }}</div>
+</div>
+<div class="exam-row">
+    <div class="exam-description">DESCUENTO</div>
+    <div class="exam-price">- S/. {{ ticket.discount }}</div>
+</div>
+{% endif %}
+
+<!-- Total -->
+<div class="total-row">
+    <div class="total-label">TOTAL</div>
+    <div class="total-amount">S/. {{ ticket.total }}</div>
+</div>
