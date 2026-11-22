@@ -61,14 +61,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="status_group">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
                         Estado
                     </label>
-                    <select name="status_group" id="status_group" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
+                    <select name="status" id="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500">
                         <option value="">Todos</option>
-                        <option value="pendiente" {% if status_group == 'pendiente' %}selected{% endif %}>Pendiente</option>
-                        <option value="en_progreso" {% if status_group == 'en_progreso' %}selected{% endif %}>En Progreso</option>
-                        <option value="entregado" {% if status_group == 'entregado' %}selected{% endif %}>Entregado</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -101,31 +101,8 @@
                     </td>
                     <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">{{ result.order.patient.document_type }} {{ result.order.patient.document_number }}</td>
                     <td class="px-3 py-4 whitespace-nowrap text-sm">
-                        {% if result.status == 'pending' %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                Pendiente
-                            </span>
-                        {% elif result.status == 'in_progress' %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                En Proceso
-                            </span>
-                        {% elif result.status == 'partial_results' %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                Resultados Parciales
-                            </span>
-                        {% elif result.status == 'completed' %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                Completado
-                            </span>
-                        {% elif result.status == 'partial_delivery' %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                Entrega Parcial
-                            </span>
-                        {% elif result.status == 'delivered' %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                Entregado
-                            </span>
-                        {% endif %}
+                        {% include "results/includes/result_status_badge.html" with result=result %}
+                        {% include "results/includes/result_progress.html" with result=result %}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ result.created_at|date:"d/m/Y" }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

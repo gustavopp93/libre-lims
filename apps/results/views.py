@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, ListView
 
 from apps.results.models import Result, ResultDetail
+from apps.results.services import update_result_status
 
 
 class ResultListView(LoginRequiredMixin, ListView):
@@ -19,22 +20,10 @@ class ResultListView(LoginRequiredMixin, ListView):
 
         queryset = Result.objects.select_related("order", "order__patient").prefetch_related("details")
 
-        # Mapeo de grupos de status por color
-        status_groups = {
-            "pendiente": [Result.ResultStatus.PENDING],
-            "en_progreso": [
-                Result.ResultStatus.IN_PROGRESS,
-                Result.ResultStatus.PARTIAL_RESULTS,
-                Result.ResultStatus.COMPLETED,
-                Result.ResultStatus.PARTIAL_DELIVERY,
-            ],
-            "entregado": [Result.ResultStatus.DELIVERED],
-        }
-
-        # Filtrar por grupo de estado (basado en color)
-        status_group = self.request.GET.get("status_group")
-        if status_group and status_group in status_groups:
-            queryset = queryset.filter(status__in=status_groups[status_group])
+        # Filtrar por estado general
+        status = self.request.GET.get("status")
+        if status in Result.ResultStatus.values:
+            queryset = queryset.filter(status=status)
 
         # Filtrar por número de documento del paciente
         document_number = self.request.GET.get("document_number")
@@ -58,7 +47,8 @@ class ResultListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["status_group"] = self.request.GET.get("status_group", "")
+        context["status"] = self.request.GET.get("status", "")
+        context["status_choices"] = Result.ResultStatus.choices
         context["document_number"] = self.request.GET.get("document_number", "")
         context["patient_name"] = self.request.GET.get("patient_name", "")
         context["order_code"] = self.request.GET.get("order_code", "")
@@ -79,7 +69,7 @@ class ResultDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Verificar si todos los exámenes están entregados
-        result = self.get_object()
+        result = self.object
         all_delivered = all(detail.status == ResultDetail.ExamResultStatus.DELIVERED for detail in result.details.all())
         context["all_delivered"] = all_delivered
         return context
@@ -100,59 +90,7 @@ class ResultDetailView(LoginRequiredMixin, DetailView):
                     detail.save()
 
         # Recalcular estado general del resultado
-        self._update_result_status(result)
+        update_result_status(result)
 
         messages.success(request, "Estados actualizados exitosamente")
         return redirect("result_detail", pk=result.pk)
-
-    def _update_result_status(self, result):
-        """
-        Actualiza el estado general del resultado basado en los estados de los detalles.
-        La prioridad es de los estados más avanzados a los menos avanzados.
-        """
-        details = result.details.all()
-        if not details.exists():
-            return
-
-        statuses = [d.status for d in details]
-
-        # PRIORIDAD 1: Estados de entrega (más avanzados)
-        # Todos entregados -> DELIVERED
-        if all(s == ResultDetail.ExamResultStatus.DELIVERED for s in statuses):
-            result.status = Result.ResultStatus.DELIVERED
-        # Al menos uno entregado pero no todos -> PARTIAL_DELIVERY
-        elif any(s == ResultDetail.ExamResultStatus.DELIVERED for s in statuses):
-            result.status = Result.ResultStatus.PARTIAL_DELIVERY
-
-        # PRIORIDAD 2: Estados de completado
-        # Todos completados o validados (ninguno entregado) -> COMPLETED
-        elif all(
-            s in [ResultDetail.ExamResultStatus.COMPLETED, ResultDetail.ExamResultStatus.VALIDATED] for s in statuses
-        ):
-            result.status = Result.ResultStatus.COMPLETED
-        # Algunos completados/validados pero no todos -> PARTIAL_RESULTS
-        elif any(
-            s in [ResultDetail.ExamResultStatus.COMPLETED, ResultDetail.ExamResultStatus.VALIDATED] for s in statuses
-        ):
-            result.status = Result.ResultStatus.PARTIAL_RESULTS
-
-        # PRIORIDAD 3: Estados intermedios
-        # Al menos uno en proceso -> IN_PROGRESS
-        elif any(
-            s
-            in [
-                ResultDetail.ExamResultStatus.SAMPLE_RECEIVED,
-                ResultDetail.ExamResultStatus.INTERNAL_ANALYSIS,
-                ResultDetail.ExamResultStatus.SENT_EXTERNAL,
-                ResultDetail.ExamResultStatus.RECEIVED_EXTERNAL,
-            ]
-            for s in statuses
-        ):
-            result.status = Result.ResultStatus.IN_PROGRESS
-
-        # PRIORIDAD 4: Estado inicial
-        # Todos pendiente muestra -> PENDING
-        elif all(s == ResultDetail.ExamResultStatus.PENDING_SAMPLE for s in statuses):
-            result.status = Result.ResultStatus.PENDING
-
-        result.save()

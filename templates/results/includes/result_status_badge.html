@@ -1,0 +1,15 @@
+{% comment %}
+Badge del estado general de un resultado.
+Uso: {% include "results/includes/result_status_badge.html" with result=result size="sm" %}
+{% endcomment %}
+<span class="{% if size == 'lg' %}px-3 py-1 text-sm{% else %}px-2 text-xs{% endif %} inline-flex leading-5 font-semibold rounded-full whitespace-nowrap
+    {% if result.status == 'pending_sample' %}bg-gray-100 text-gray-800
+    {% elif result.status == 'sample_received' %}bg-slate-200 text-slate-800
+    {% elif result.status == 'internal_in_progress' %}bg-sky-100 text-sky-800
+    {% elif result.status == 'external_in_progress' %}bg-pink-100 text-pink-800
+    {% elif result.status == 'mixed_in_progress' %}bg-yellow-100 text-yellow-800
+    {% elif result.status == 'ready_to_deliver' %}bg-purple-100 text-purple-800
+    {% elif result.status == 'delivered' %}bg-green-100 text-green-800
+    {% endif %}">
+    {{ result.get_status_display }}
+</span>
