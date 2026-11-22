@@ -1,11 +1,14 @@
-FROM python:3.11.18-slim
+FROM python:3.11.14-slim
 
 # Set environment variables
+# UV_PYTHON_DOWNLOADS=never: use only the Python of the image.
+# The build fails if it does not match the version in .python-version / pyproject.toml.
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_SYSTEM_PYTHON=1 \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never
 
 # Install build dependencies and system libraries
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -26,7 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv in a separate location to avoid conflicts with .venv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.13.9 /uv /usr/local/bin/uv
 
 # Set working directory
 WORKDIR /app
