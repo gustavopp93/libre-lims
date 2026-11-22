@@ -122,6 +122,11 @@
             font-size: 13px;
         }
 
+        .subtotal-row {
+            border-top: 1px solid #000;
+            margin-top: 0.8mm;
+        }
+
         .total-row {
             display: flex;
             justify-content: space-between;
@@ -182,7 +187,11 @@
 {% endfor %}
 
 {% if quote.discount %}
-<!-- Discount -->
+<!-- Subtotal and Discount -->
+<div class="exam-row subtotal-row">
+    <div class="exam-description">SUBTOTAL</div>
+    <div class="exam-price">S/. {{ quote.subtotal }}</div>
+</div>
 <div class="exam-row">
     <div class="exam-description">DESCUENTO</div>
     <div class="exam-price">- S/. {{ quote.discount }}</div>
