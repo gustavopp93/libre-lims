@@ -181,6 +181,14 @@
     </div>
 {% endfor %}
 
+{% if quote.discount %}
+<!-- Discount -->
+<div class="exam-row">
+    <div class="exam-description">DESCUENTO</div>
+    <div class="exam-price">- S/. {{ quote.discount }}</div>
+</div>
+{% endif %}
+
 <!-- Total -->
 <div class="total-row">
     <div class="total-label">TOTAL</div>

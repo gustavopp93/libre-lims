@@ -19,6 +19,7 @@ class Quote(TimeStampedMixin, AuditMixin):
         verbose_name="Cupón",
     )
     observations = models.TextField(blank=True, default="", verbose_name="Observaciones")
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Descuento")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING, verbose_name="Estado")
 
     class Meta:
@@ -29,8 +30,12 @@ class Quote(TimeStampedMixin, AuditMixin):
         return f"Cotización {self.code}"
 
     @property
-    def total(self):
+    def subtotal(self):
         return sum(detail.price for detail in self.details.all())
+
+    @property
+    def total(self):
+        return self.subtotal - self.discount
 
 
 class QuoteDetail(models.Model):

@@ -14,6 +14,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from weasyprint import HTML
 
 from apps.billing.models import Company
+from apps.orders.services import DiscountValidationError, validate_discount
 from apps.patients.models import Patient
 from apps.quotes.models import Quote
 from apps.quotes.services import QuoteValidationError, convert_quote_to_order, create_quote, validate_exam_details
@@ -137,8 +138,16 @@ class QuoteCreateAPIView(LoginRequiredMixin, View):
         except QuoteValidationError as e:
             return JsonResponse({"error": e.message}, status=e.status)
 
+        subtotal = sum(detail["price"] for detail in validated_details)
         try:
-            quote = create_quote(observations=observations, validated_details=validated_details, user=request.user)
+            discount = validate_discount(data.get("discount"), subtotal)
+        except DiscountValidationError as e:
+            return JsonResponse({"error": e.message}, status=400)
+
+        try:
+            quote = create_quote(
+                observations=observations, discount=discount, validated_details=validated_details, user=request.user
+            )
         except Exception as e:
             logger.exception("Error al crear la cotización")
             return JsonResponse({"error": f"Error al crear la cotización: {str(e)}"}, status=500)

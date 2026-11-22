@@ -23,21 +23,44 @@
 
                 <!-- Search Patient Card -->
                 <div class="bg-white rounded-lg shadow p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <i data-lucide="user" class="w-5 h-5 mr-2 text-blue-600"></i>
-                        Paciente
-                    </h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i data-lucide="user" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            Paciente
+                        </h3>
+                        <button id="changePatientBtn" class="hidden bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm flex items-center">
+                            <i data-lucide="search" class="w-4 h-4 mr-2"></i>
+                            Cambiar Paciente
+                        </button>
+                    </div>
 
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Buscar Paciente</label>
-                    <select id="patientSelect" placeholder="Buscar por nombre, apellido o documento..."></select>
+                    <div id="patientSearchSection">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Buscar Paciente</label>
+                        <select id="patientSelect" placeholder="Buscar por nombre, apellido o documento..."></select>
 
-                    <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <p class="text-sm text-gray-700 mb-2">¿El paciente no aparece en la búsqueda?</p>
-                        <a href="{% url 'patients_create' %}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded inline-block text-sm">
-                            <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
-                            Crear Nuevo Paciente
-                        </a>
-                        <p class="text-xs text-gray-600 mt-2">Después de crear el paciente, búsquelo nuevamente aquí.</p>
+                        <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <p class="text-sm text-gray-700 mb-2">¿El paciente no aparece en la búsqueda?</p>
+                            <a href="{% url 'patients_create' %}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded inline-block text-sm">
+                                <i data-lucide="plus" class="w-4 h-4 inline mr-1"></i>
+                                Crear Nuevo Paciente
+                            </a>
+                            <p class="text-xs text-gray-600 mt-2">Después de crear el paciente, búsquelo nuevamente aquí.</p>
+                        </div>
+                    </div>
+
+                    <!-- Patient Selected Info -->
+                    <div id="patientSelectedInfo" class="hidden">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-green-600 mr-2"></i>
+                                <div>
+                                    <p class="text-sm font-semibold text-green-800">Paciente seleccionado</p>
+                                    <p class="text-xs text-green-700 mt-1">
+                                        <span id="selectedPatientName"></span> - <span id="selectedPatientDoc"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -64,7 +87,7 @@
     <script>
         let currentPatientId = null;
 
-        new TomSelect('#patientSelect', {
+        const patientTomSelect = new TomSelect('#patientSelect', {
             valueField: 'id',
             labelField: 'full_name',
             searchField: ['first_name', 'last_name', 'document_number'],
@@ -95,8 +118,29 @@
                 }
             },
             onChange: function(value) {
-                currentPatientId = value || null;
+                const selectedOption = value ? this.options[value] : null;
+                if (!selectedOption) {
+                    currentPatientId = null;
+                    return;
+                }
+
+                currentPatientId = value;
+                document.getElementById('selectedPatientName').textContent = `${selectedOption.last_name}, ${selectedOption.first_name}`;
+                document.getElementById('selectedPatientDoc').textContent = `${selectedOption.document_type}: ${selectedOption.document_number}`;
+                document.getElementById('patientSearchSection').classList.add('hidden');
+                document.getElementById('patientSelectedInfo').classList.remove('hidden');
+                document.getElementById('changePatientBtn').classList.remove('hidden');
+                lucide.createIcons();
             }
+        });
+
+        document.getElementById('changePatientBtn').addEventListener('click', function() {
+            document.getElementById('patientSearchSection').classList.remove('hidden');
+            document.getElementById('patientSelectedInfo').classList.add('hidden');
+            document.getElementById('changePatientBtn').classList.add('hidden');
+            patientTomSelect.clear();
+            currentPatientId = null;
+            lucide.createIcons();
         });
 
         document.getElementById('convertBtn').addEventListener('click', async function() {

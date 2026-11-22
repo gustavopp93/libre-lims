@@ -23,6 +23,7 @@ from apps.billing.models import Company
 from apps.exams.models import Exam
 from apps.orders.forms import PaymentMethodForm
 from apps.orders.models import Order, OrderDetail, Payment, PaymentDetail, PaymentMethod
+from apps.orders.services import DiscountValidationError, validate_discount
 from apps.patients.models import Patient
 from apps.referrals.models import Referral
 
@@ -131,6 +132,7 @@ class EditOrderView(LoginRequiredMixin, DetailView):
         context["existing_details_json"] = json.dumps(existing_details)
 
         context["referral_id"] = order.referral_id
+        context["discount"] = str(order.discount)
 
         return context
 
@@ -261,10 +263,16 @@ def create_order_api(request):
 
         validated_details.append({"exam": exam, "price": price_decimal})
 
+    subtotal = sum(detail["price"] for detail in validated_details)
+    try:
+        discount = validate_discount(data.get("discount"), subtotal)
+    except DiscountValidationError as e:
+        return JsonResponse({"error": e.message}, status=400)
+
     # Crear la orden y sus detalles en una transacción
     try:
         with transaction.atomic():
-            order = Order.objects.create(patient=patient, observations=observations)
+            order = Order.objects.create(patient=patient, observations=observations, discount=discount)
 
             for detail in validated_details:
                 OrderDetail.objects.create(order=order, exam=detail["exam"], price=detail["price"])
@@ -451,6 +459,12 @@ def update_order_api(request, order_id):
 
         validated_details.append({"exam": exam, "price": price_decimal})
 
+    subtotal = sum(detail["price"] for detail in validated_details)
+    try:
+        discount = validate_discount(data.get("discount", order.discount), subtotal)
+    except DiscountValidationError as e:
+        return JsonResponse({"error": e.message}, status=400)
+
     try:
         with transaction.atomic():
             existing_details = {d.exam_id: d for d in order.details.select_related("exam").all()}
@@ -470,6 +484,7 @@ def update_order_api(request, order_id):
                     OrderDetail.objects.create(order=order, exam=exam, price=detail["price"])
 
             order.observations = observations
+            order.discount = discount
             order.save()
 
         messages.success(request, f"Orden {order.code} actualizada exitosamente")
